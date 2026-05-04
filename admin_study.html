@@ -1,29 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#0b1120] p-6 text-white font-sans pb-20">
-    <div class="bg-[#16213e] p-6 rounded-3xl border border-blue-500/20 mb-8 shadow-2xl">
-        <h2 id="formTitle" class="text-blue-400 text-[10px] font-black uppercase mb-6 tracking-[0.3em] text-center italic">Upload / Edit Study Content</h2>
+<body class="bg-[#0b1120] p-6 text-white font-sans pb-32">
+
+    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-blue-500/20 shadow-2xl mb-10">
+        <h2 id="formTitle" class="text-blue-400 text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">Upload Study Content</h2>
         
         <input type="hidden" id="editId">
         
-        <label class="text-[9px] text-gray-500 font-bold ml-1 uppercase">Select Course</label>
-        <select id="courseSelect" class="w-full bg-[#1e293b] p-4 rounded-xl mb-4 border border-gray-700 outline-none text-sm text-white appearance-none focus:border-blue-500">
-            <option value="">Loading Courses...</option>
+        <label class="text-[9px] text-gray-500 font-black uppercase ml-1">Mapping Subject</label>
+        <select id="courseSelect" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-4 border border-gray-700 outline-none text-sm text-white appearance-none focus:border-blue-500 mt-1">
+            <option value="">Loading Subjects...</option>
         </select>
 
-        <input type="text" id="chapName" placeholder="Chapter Name (e.g. Thermodynamics)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none text-sm focus:border-blue-500">
-        <input type="text" id="vidId" placeholder="YouTube Video ID (e.g. dQw4w9WgXcQ)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none text-sm focus:border-blue-500">
-        <input type="text" id="pdfUrl" placeholder="Notes PDF Link" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none text-sm focus:border-blue-500">
-        <input type="text" id="dppUrl" placeholder="DPP Link" class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 outline-none text-sm focus:border-blue-500">
+        <input type="text" id="chapName" placeholder="Chapter Name (e.g. Genetics)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none text-sm focus:border-blue-500">
         
-        <button onclick="saveStudy()" id="saveBtn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Add to Library</button>
+        <input type="text" id="vidId" placeholder="YouTube Video ID (Optional)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none text-sm">
+        <input type="text" id="pdfUrl" placeholder="Notes/JPEG Link (Direct Photo Link)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none text-sm">
+        <input type="text" id="quizId" placeholder="Quiz ID/Link for this Chapter" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-8 border border-gray-700 outline-none text-sm">
+        
+        <button onclick="saveStudy()" id="saveBtn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all tracking-widest">Add to Library</button>
     </div>
 
-    <h3 class="text-[10px] text-gray-500 uppercase font-black mb-6 ml-2 tracking-widest">Existing Materials</h3>
+    <h3 class="text-[10px] text-gray-500 uppercase font-black mb-6 ml-2 tracking-widest italic">Manage Existing Materials</h3>
     <div id="studyList" class="space-y-4"></div>
 
     <script type="module">
@@ -31,87 +34,70 @@
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
-        // 1. Load Courses into Dropdown
+        // 1. Load Courses for Dropdown (Modular Sync)
         onSnapshot(collection(db, "courses"), (snap) => {
             const select = document.getElementById('courseSelect');
-            select.innerHTML = '<option value="">-- Choose Course --</option>';
-            snap.forEach(d => {
-                const c = d.data();
-                select.innerHTML += `<option value="${d.id}">${c.title}</option>`;
-            });
+            select.innerHTML = '<option value="">-- Choose Target Subject --</option>';
+            snap.forEach(d => select.innerHTML += `<option value="${d.id}">${d.data().title}</option>`);
         });
 
-        // 2. Save or Update Study Material
+        // 2. Save or Update Logic
         window.saveStudy = async () => {
             const courseId = document.getElementById('courseSelect').value;
             const chapter = document.getElementById('chapName').value;
             const video = document.getElementById('vidId').value;
             const pdf = document.getElementById('pdfUrl').value;
-            const dpp = document.getElementById('dppUrl').value;
+            const quiz = document.getElementById('quizId').value;
             const editId = document.getElementById('editId').value;
 
-            if(!courseId || !chapter) return alert("Select Course and enter Chapter Name!");
+            if(!courseId || !chapter) return alert("Select Subject & Chapter Name!");
 
-            const studyData = { courseId, chapter, video, pdf, dpp, updatedAt: new Date() };
+            const studyData = { courseId, chapter, video, pdf, quiz, updatedAt: new Date() };
 
             try {
                 if(editId) {
                     await updateDoc(doc(db, "study_material", editId), studyData);
-                    alert("Content Updated!");
+                    alert("Content Updated Successfully! ✨");
                 } else {
                     await addDoc(collection(db, "study_material"), studyData);
-                    alert("Content Added!");
+                    alert("New Chapter Added! 📚");
                 }
-                resetForm();
+                location.reload();
             } catch(e) { alert(e.message); }
         };
 
-        // 3. Load Study Materials List
+        // 3. Load Materials with Mapping Display
         onSnapshot(collection(db, "study_material"), (snap) => {
             const list = document.getElementById('studyList');
             list.innerHTML = "";
             snap.forEach(d => {
                 const s = d.data();
                 list.innerHTML += `
-                <div class="bg-[#16213e] p-5 rounded-2xl border border-gray-800 flex justify-between items-center shadow-xl">
+                <div class="bg-[#16213e] p-5 rounded-3xl border border-gray-800 flex justify-between items-center shadow-xl">
                     <div class="flex-1">
-                        <p class="text-[8px] text-blue-400 font-bold uppercase tracking-tighter">CID: ${s.courseId}</p>
-                        <p class="font-bold text-sm text-white">${s.chapter}</p>
+                        <p class="text-[7px] text-blue-400 font-black uppercase tracking-tighter mb-1">MAP: ${s.courseId.substring(0,8)}...</p>
+                        <p class="font-bold text-sm text-white italic">${s.chapter}</p>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="editStudy('${d.id}', '${s.courseId}', '${s.chapter}', '${s.video}', '${s.pdf}', '${s.dpp}')" class="text-blue-400 p-2 text-[10px] font-bold"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteStudy('${d.id}')" class="text-red-500 p-2 text-[10px] font-bold"><i class="fa-solid fa-trash"></i></button>
+                    <div class="flex gap-4">
+                        <button onclick="editStudy('${d.id}', '${s.courseId}', '${s.chapter}', '${s.video}', '${s.pdf}', '${s.quiz}')" class="text-blue-400 opacity-70"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteDoc(doc(db, 'study_material', '${d.id}'))" class="text-red-500 opacity-70"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>`;
             });
         });
 
-        window.editStudy = (id, cid, ch, v, p, dpp) => {
+        window.editStudy = (id, cid, ch, v, p, q) => {
             document.getElementById('editId').value = id;
             document.getElementById('courseSelect').value = cid;
             document.getElementById('chapName').value = ch;
             document.getElementById('vidId').value = v;
             document.getElementById('pdfUrl').value = p;
-            document.getElementById('dppUrl').value = dpp;
+            document.getElementById('quizId').value = q;
             document.getElementById('saveBtn').innerText = "Update Content";
             window.scrollTo(0,0);
         };
-
-        window.deleteStudy = async (id) => {
-            if(confirm("Delete this content?")) await deleteDoc(doc(db, "study_material", id));
-        };
-
-        function resetForm() {
-            document.getElementById('editId').value = "";
-            document.getElementById('chapName').value = "";
-            document.getElementById('vidId').value = "";
-            document.getElementById('pdfUrl').value = "";
-            document.getElementById('dppUrl').value = "";
-            document.getElementById('saveBtn').innerText = "Add to Library";
-        }
     </script>
 </body>
 </html>
