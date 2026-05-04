@@ -2,90 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNeet Admin</title>
+    <title>mNeet Admin - Expert Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0b1120; color: white; font-family: sans-serif; }
-        .card-navy { background-color: #16213e; border: 1px solid #1f2937; }
-        .input-navy { background-color: #1e293b; border: 1px solid #334155; color: white; }
-        .btn-gold { background-color: #eab308; color: #0b1120; font-weight: 800; }
+        body { background-color: #0b1120; color: white; }
+        .tab-btn { padding: 10px 20px; border-radius: 10px; font-weight: bold; }
+        .active-tab { background-color: #eab308; color: #0b1120; }
     </style>
 </head>
-<body>
-    <nav class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#0b1120]">
-        <h1 class="text-3xl font-black text-[#eab308] italic tracking-tighter">mNeet Admin</h1>
+<body class="p-4">
+    <nav class="flex justify-between items-center mb-8 bg-[#16213e] p-6 rounded-3xl">
+        <h1 class="text-2xl font-black text-[#eab308] italic">ADMIN CONTROL</h1>
+        <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded-xl font-bold">LOGOUT</button>
     </nav>
 
-    <div class="p-6 max-w-lg mx-auto">
-        <div class="card-navy p-8 rounded-[2.5rem] mb-10 shadow-2xl">
-            <h2 class="text-xl font-bold mb-6 text-[#eab308] uppercase text-center">New Course</h2>
-            <input type="text" id="cTitle" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="Course Name">
-            <input type="number" id="cPrice" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="Price (₹)">
-            <input type="text" id="cVideo" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="YouTube Link (e.g. https://youtu.be/xyz)">
-            <textarea id="cDesc" class="w-full input-navy p-4 rounded-2xl mb-6 outline-none h-32" placeholder="Course Features..."></textarea>
-            <button onclick="saveCourse()" class="w-full btn-gold py-4 rounded-2xl font-bold uppercase shadow-lg">Publish Course</button>
-        </div>
+    <div class="flex gap-4 mb-8">
+        <button onclick="showTab('courses')" id="tabCourses" class="tab-btn active-tab">COURSES</button>
+        <button onclick="showTab('students')" id="tabStudents" class="tab-btn bg-gray-800">STUDENTS</button>
+    </div>
 
-        <h3 class="text-xs font-bold text-gray-500 uppercase mb-4 ml-2">Active Courses</h3>
-        <div id="adminCourseList" class="space-y-4"></div>
+    <div id="sectionCourses">
+        <div class="bg-[#16213e] p-6 rounded-3xl mb-8">
+            <h2 class="text-[#eab308] font-bold mb-4">ADD/EDIT COURSE</h2>
+            <input type="hidden" id="editId">
+            <input type="text" id="cTitle" class="w-full bg-[#0f172a] p-4 rounded-xl mb-4" placeholder="Course Name">
+            <button onclick="saveCourse()" class="w-full bg-[#eab308] text-[#0b1120] py-4 rounded-xl font-bold">SAVE COURSE</button>
+        </div>
+        <div id="courseList" class="space-y-4"></div>
+    </div>
+
+    <div id="sectionStudents" class="hidden">
+        <div id="studentList" class="space-y-4"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
-            authDomain: "mneet-7699.firebaseapp.com",
-            projectId: "mneet-7699",
-            storageBucket: "mneet-7699.firebasestorage.app",
-            messagingSenderId: "801664280357",
-            appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
-        };
-
+        // Firebase Config (Same as before)
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        window.saveCourse = async () => {
-            const title = document.getElementById('cTitle').value;
-            const price = document.getElementById('cPrice').value;
-            const videoLink = document.getElementById('cVideo').value;
-            const desc = document.getElementById('cDesc').value;
+        window.logout = () => signOut(auth).then(() => window.location.href = "index.html");
 
-            let videoId = "";
-            if (videoLink.includes("v=")) videoId = videoLink.split("v=")[1].split("&")[0];
-            else if (videoLink.includes("youtu.be/")) videoId = videoLink.split("youtu.be/")[1].split("?")[0];
-
-            if(!title || !price) return alert("Title and Price are mandatory!");
-            
-            await addDoc(collection(db, "courses"), { 
-                title, 
-                price, 
-                video: videoId, 
-                desc, 
-                timestamp: new Date() 
-            });
-            alert("Published!");
-            location.reload();
-        };
-
-        window.delCourse = async (id) => {
-            if(confirm("Delete this?")) await deleteDoc(doc(db, "courses", id));
-        };
-
-        onSnapshot(collection(db, "courses"), (snap) => {
-            const container = document.getElementById('adminCourseList');
-            container.innerHTML = "";
+        // Load Students
+        onSnapshot(collection(db, "users"), (snap) => {
+            const list = document.getElementById('studentList');
+            list.innerHTML = "";
             snap.forEach(d => {
-                const data = d.data();
-                container.innerHTML += `
-                    <div class="card-navy p-4 rounded-2xl flex justify-between items-center shadow-md">
-                        <span class="font-bold">${data.title}</span>
-                        <button onclick="delCourse('${d.id}')" class="text-red-500 font-bold">DEL</button>
+                const s = d.data();
+                if(s.role === 'admin') return;
+                list.innerHTML += `
+                    <div class="bg-[#16213e] p-6 rounded-3xl flex justify-between items-center border-l-4 ${s.isBlocked ? 'border-red-600' : 'border-green-600'}">
+                        <div>
+                            <p class="font-bold text-lg">${s.name} (${s.city})</p>
+                            <p class="text-xs text-gray-500">${s.email} | Coins: ${s.coins || 0}</p>
+                        </div>
+                        <button onclick="toggleBlock('${d.id}', ${s.isBlocked})" class="px-4 py-2 rounded-lg font-bold ${s.isBlocked ? 'bg-green-600' : 'bg-red-600'}">
+                            ${s.isBlocked ? 'UNBLOCK' : 'BLOCK'}
+                        </button>
                     </div>`;
             });
         });
+
+        window.toggleBlock = async (id, currentStatus) => {
+            await updateDoc(doc(db, "users", id), { isBlocked: !currentStatus });
+        };
+
+        // Course Edit/Delete Logic...
+        window.showTab = (tab) => {
+            document.getElementById('sectionCourses').classList.toggle('hidden', tab !== 'courses');
+            document.getElementById('sectionStudents').classList.toggle('hidden', tab !== 'students');
+            // Tab active class logic
+        };
     </script>
 </body>
 </html>
