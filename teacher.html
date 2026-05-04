@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mNEET Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-[#0a1128] text-white font-sans">
+
+    <nav class="p-5 border-b border-gray-800 flex justify-between items-center bg-[#0a1128] sticky top-0 z-50">
+        <h1 class="text-2xl font-bold text-[#d97706]">mNEET <span class="text-xs text-white">ADMIN</span></h1>
+        <div class="bg-gray-800 px-3 py-1 rounded text-sm">Courses: <span id="courseCount">0</span></div>
+    </nav>
+
+    <div class="p-5 max-w-lg mx-auto">
+        <button onclick="document.getElementById('modal').classList.remove('hidden')" class="w-full bg-[#d97706] text-[#0a1128] font-bold py-4 rounded-xl mb-8 shadow-lg">
+            <i class="fas fa-plus-circle mr-2"></i> CREATE NEW COURSE
+        </button>
+
+        <h2 class="text-gray-400 uppercase text-xs font-bold mb-4 tracking-widest">Active Courses</h2>
+        
+        <div id="courseContainer" class="space-y-4 text-center py-10">
+            <p class="text-gray-600 italic">No courses found. Create your first one!</p>
+        </div>
+    </div>
+
+    <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-6 z-[100]">
+        <div class="bg-[#16213e] w-full max-w-md p-8 rounded-3xl border border-gray-700">
+            <h2 class="text-xl font-bold mb-6 text-[#d97706]">Course Information</h2>
+            
+            <input type="text" id="cTitle" placeholder="Course Name (e.g. Physics)" class="w-full bg-[#0f172a] border border-gray-700 p-4 rounded-xl mb-4 text-white">
+            <input type="number" id="cPrice" placeholder="Price in ₹" class="w-full bg-[#0f172a] border border-gray-700 p-4 rounded-xl mb-4 text-white">
+            <textarea id="cDesc" placeholder="Small Description" class="w-full bg-[#0f172a] border border-gray-700 p-4 rounded-xl mb-6 text-white"></textarea>
+
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('modal').classList.add('hidden')" class="flex-1 bg-gray-700 py-4 rounded-xl font-bold">CANCEL</button>
+                <button onclick="saveCourse()" class="flex-1 bg-[#d97706] text-[#0a1128] py-4 rounded-xl font-bold">PUBLISH</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBisQytTeFhjMdlkTUNwcmCelPy7C9iI1Y",
+            authDomain: "mneet-7699.firebaseapp.com",
+            projectId: "mneet-7699",
+            storageBucket: "mneet-7699.firebasestorage.app",
+            messagingSenderId: "801664280357",
+            appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- Save Course to Firebase ---
+        window.saveCourse = async () => {
+            const title = document.getElementById('cTitle').value;
+            const price = document.getElementById('cPrice').value;
+            const desc = document.getElementById('cDesc').value;
+
+            if(!title || !price) return alert("Title and Price are required!");
+
+            try {
+                const snapshot = await getDocs(collection(db, "courses"));
+                const nextNum = snapshot.size + 1;
+
+                await addDoc(collection(db, "courses"), {
+                    courseId: "Course " + nextNum,
+                    title: title,
+                    price: price,
+                    description: desc,
+                    timestamp: new Date()
+                });
+
+                alert("Success! Course " + nextNum + " has been added.");
+                document.getElementById('modal').classList.add('hidden');
+                document.getElementById('cTitle').value = "";
+                document.getElementById('cPrice').value = "";
+                document.getElementById('cDesc').value = "";
+            } catch (e) { alert("Error: " + e.message); }
+        };
+
+        // --- Live Update Course List ---
+        const q = query(collection(db, "courses"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const container = document.getElementById('courseContainer');
+            document.getElementById('courseCount').innerText = snapshot.size;
+            container.innerHTML = "";
+
+            if(snapshot.empty) {
+                container.innerHTML = `<p class="text-gray-600 italic">No courses found.</p>`;
+                return;
+            }
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                container.innerHTML += `
+                    <div class="bg-[#16213e] p-5 rounded-2xl border border-gray-800 text-left relative overflow-hidden shadow-lg">
+                        <div class="absolute top-0 right-0 bg-[#d97706] text-[#0a1128] px-3 py-1 text-[10px] font-black rounded-bl-xl uppercase">${data.courseId}</div>
+                        <h3 class="text-xl font-bold mb-1">${data.title}</h3>
+                        <p class="text-yellow-500 font-mono font-bold text-lg">₹${data.price}</p>
+                        <p class="text-gray-400 text-xs mt-2 line-clamp-1">${data.description || 'No description'}</p>
+                        <div class="flex gap-4 mt-5">
+                            <button class="text-blue-400 text-sm font-bold uppercase tracking-widest"><i class="fas fa-edit mr-1"></i> Edit</button>
+                            <button class="text-red-500 text-sm font-bold uppercase tracking-widest"><i class="fas fa-trash mr-1"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+  </html>
+
