@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-[#0b1120] p-6 text-white font-sans pb-20">
+    <div class="bg-[#16213e] p-6 rounded-3xl border border-green-500/20 mb-8 shadow-2xl">
+        <h2 class="text-green-500 text-[10px] font-black uppercase mb-6 tracking-[0.3em] text-center italic">Manage mStore</h2>
+        
+        <input type="hidden" id="editId">
+        <select id="courseSelect" class="w-full bg-[#1e293b] p-4 rounded-xl mb-4 border border-gray-700 outline-none text-sm text-white focus:border-green-500">
+            <option value="">Loading Subjects...</option>
+        </select>
+
+        <input type="text" id="pName" placeholder="Product Name (e.g. Bio NCERT Extract)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none text-sm focus:border-green-500">
+        <input type="number" id="pPrice" placeholder="Selling Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none text-sm focus:border-green-500">
+        <input type="text" id="pImg" placeholder="Product Image URL (Optional)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 outline-none text-sm focus:border-green-500">
+        
+        <button onclick="saveProduct()" id="saveBtn" class="w-full bg-green-500 text-black py-4 rounded-xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">List on Store</button>
+    </div>
+
+    <h3 class="text-[10px] text-gray-500 uppercase font-black mb-6 ml-2 tracking-widest">Active Products</h3>
+    <div id="productList" class="space-y-4"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Load courses
+        onSnapshot(collection(db, "courses"), (snap) => {
+            const select = document.getElementById('courseSelect');
+            select.innerHTML = '<option value="">-- Select Category --</option>';
+            snap.forEach(d => select.innerHTML += `<option value="${d.id}">${d.data().title}</option>`);
+        });
+
+        // Save Product
+        window.saveProduct = async () => {
+            const cid = document.getElementById('courseSelect').value;
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const img = document.getElementById('pImg').value;
+            if(!cid || !name || !price) return alert("All fields required!");
+
+            await addDoc(collection(db, "products"), { cid, name, price, img, timestamp: new Date() });
+            alert("Product Listed! 🛍️");
+            location.reload();
+        };
+
+        // List Products
+        onSnapshot(collection(db, "products"), (snap) => {
+            const list = document.getElementById('productList');
+            list.innerHTML = "";
+            snap.forEach(d => {
+                const p = d.data();
+                list.innerHTML += `<div class="bg-[#16213e] p-4 rounded-2xl flex justify-between items-center border border-gray-800">
+                    <div><p class="font-bold text-xs text-white">${p.name}</p><p class="text-[10px] text-green-400">₹${p.price}</p></div>
+                    <button onclick="deleteDoc(doc(db, 'products', '${d.id}'))" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
+            });
+        });
+    </script>
+</body>
+</html>
+
