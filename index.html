@@ -4,47 +4,30 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mNEET - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #0b1120; color: white; font-family: sans-serif; }
-        .card-navy { background-color: #16213e; border: 1px solid #1f2937; }
-        .input-navy { background-color: #1e293b; border: 1px solid #334155; color: white; width: 100%; padding: 15px; border-radius: 15px; margin-bottom: 12px; outline: none; }
-        .btn-gold { background-color: #eab308; color: #0b1120; font-weight: 900; width: 100%; padding: 15px; border-radius: 15px; }
-    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6">
-    <div class="w-full max-w-md card-navy p-10 rounded-[2.5rem] shadow-2xl text-center">
+<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6">
+    <div class="w-full max-w-md bg-[#16213e] p-10 rounded-[2.5rem] shadow-2xl border border-gray-800 text-center">
         <h1 class="text-4xl font-black text-[#eab308] mb-10 italic">mNEET</h1>
         <div id="regFields" class="hidden">
-            <input type="text" id="userName" class="input-navy" placeholder="Full Name">
-            <input type="text" id="userCity" class="input-navy" placeholder="City">
+            <input type="text" id="userName" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none" placeholder="Full Name">
+            <input type="text" id="userCity" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none" placeholder="City">
         </div>
-        <input type="email" id="email" class="input-navy" placeholder="Email Address">
-        <input type="password" id="password" class="input-navy" placeholder="Password">
-        <button onclick="handleAuth()" id="authBtn" class="btn-gold uppercase tracking-widest">Login Now</button>
+        <input type="email" id="email" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none" placeholder="Email">
+        <input type="password" id="password" class="w-full bg-[#1e293b] p-4 rounded-xl mb-4 border border-gray-700 text-white outline-none" placeholder="Password">
+        <button onclick="handleAuth()" id="authBtn" class="w-full bg-[#eab308] text-[#0b1120] py-4 rounded-xl font-black uppercase">Login Now</button>
         <button onclick="toggleAuth()" id="toggleBtn" class="mt-6 block w-full text-[#eab308] text-[10px] font-bold uppercase tracking-widest">Create Account</button>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-        const firebaseConfig = { /* APNAR CONFIG */ };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.appspot.com", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
+        const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
         let isLogin = true;
-
-        window.toggleAuth = () => {
-            isLogin = !isLogin;
-            document.getElementById('regFields').classList.toggle('hidden');
-            document.getElementById('authBtn').innerText = isLogin ? "Login Now" : "Sign Up Now";
-            document.getElementById('toggleBtn').innerText = isLogin ? "Create Account" : "Login Here";
-        };
-
+        window.toggleAuth = () => { isLogin = !isLogin; document.getElementById('regFields').classList.toggle('hidden'); document.getElementById('authBtn').innerText = isLogin ? "Login Now" : "Sign Up Now"; };
         window.handleAuth = async () => {
-            const email = document.getElementById('email').value.trim();
-            const pass = document.getElementById('password').value;
+            const email = document.getElementById('email').value; const pass = document.getElementById('password').value;
             try {
                 if(isLogin) {
                     const res = await signInWithEmailAndPassword(auth, email, pass);
@@ -53,14 +36,10 @@
                     else window.location.href = "dashboard.html";
                 } else {
                     const res = await createUserWithEmailAndPassword(auth, email, pass);
-                    await setDoc(doc(db, "users", res.user.uid), {
-                        name: document.getElementById('userName').value,
-                        city: document.getElementById('userCity').value,
-                        email: email, coins: 0, progress: 0, isBlocked: false, role: 'student'
-                    });
-                    location.reload();
+                    await setDoc(doc(db, "users", res.user.uid), { name: document.getElementById('userName').value, city: document.getElementById('userCity').value, email, role: 'student', coins: 0, progress: 0 });
+                    alert("Success! Login now."); location.reload();
                 }
-            } catch (e) { alert(e.code); }
+            } catch (e) { alert("Error: " + e.message); }
         };
     </script>
 </body>
