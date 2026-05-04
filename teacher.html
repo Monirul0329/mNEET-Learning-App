@@ -2,80 +2,73 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>mNeet Admin - Expert Control</title>
+    <title>mNeet Admin - Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0b1120; color: white; }
-        .tab-btn { padding: 10px 20px; border-radius: 10px; font-weight: bold; }
-        .active-tab { background-color: #eab308; color: #0b1120; }
+        .card { background-color: #16213e; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
     </style>
 </head>
-<body class="p-4">
-    <nav class="flex justify-between items-center mb-8 bg-[#16213e] p-6 rounded-3xl">
-        <h1 class="text-2xl font-black text-[#eab308] italic">ADMIN CONTROL</h1>
-        <button onclick="logout()" class="bg-red-600 px-4 py-2 rounded-xl font-bold">LOGOUT</button>
-    </nav>
-
-    <div class="flex gap-4 mb-8">
-        <button onclick="showTab('courses')" id="tabCourses" class="tab-btn active-tab">COURSES</button>
-        <button onclick="showTab('students')" id="tabStudents" class="tab-btn bg-gray-800">STUDENTS</button>
+<body class="p-6">
+    <div class="flex justify-between items-center mb-10">
+        <h1 class="text-2xl font-bold text-[#eab308]">ADMIN PANEL</h1>
+        <button onclick="signOut(auth).then(()=>window.location.href='index.html')" class="bg-red-600 px-4 py-2 rounded-xl text-xs">LOGOUT</button>
     </div>
 
-    <div id="sectionCourses">
-        <div class="bg-[#16213e] p-6 rounded-3xl mb-8">
-            <h2 class="text-[#eab308] font-bold mb-4">ADD/EDIT COURSE</h2>
-            <input type="hidden" id="editId">
-            <input type="text" id="cTitle" class="w-full bg-[#0f172a] p-4 rounded-xl mb-4" placeholder="Course Name">
-            <button onclick="saveCourse()" class="w-full bg-[#eab308] text-[#0b1120] py-4 rounded-xl font-bold">SAVE COURSE</button>
-        </div>
-        <div id="courseList" class="space-y-4"></div>
-    </div>
+    <h2 class="text-gold font-bold mb-4">PAYMENT REQUESTS (TRX ID)</h2>
+    <div id="reqList"></div>
 
-    <div id="sectionStudents" class="hidden">
-        <div id="studentList" class="space-y-4"></div>
-    </div>
+    <h2 class="text-gold font-bold mt-10 mb-4">ALL STUDENTS</h2>
+    <div id="studentList"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-        // Firebase Config (Same as before)
+        const firebaseConfig = { /* Sames as above */ };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        window.logout = () => signOut(auth).then(() => window.location.href = "index.html");
+        // Load Requests
+        onSnapshot(collection(db, "requests"), (snap) => {
+            const container = document.getElementById('reqList');
+            container.innerHTML = "";
+            snap.forEach(d => {
+                const r = d.data();
+                if(r.status === 'pending') {
+                    container.innerHTML += `<div class="card border-l-4 border-yellow-500">
+                        <p>${r.email} paid for ${r.courseTitle}</p>
+                        <p class="text-gold font-bold">TRX ID: ${r.trxId}</p>
+                        <button onclick="approve('${d.id}', '${r.uid}')" class="bg-green-600 px-3 py-1 rounded mt-2">APPROVE</button>
+                    </div>`;
+                }
+            });
+        });
 
-        // Load Students
+        window.approve = async (rid, uid) => {
+            await updateDoc(doc(db, "requests", rid), { status: 'approved' });
+            await updateDoc(doc(db, "users", uid), { hasAccess: true });
+            alert("Approved!");
+        };
+
+        // Load Students (Block/Unblock)
         onSnapshot(collection(db, "users"), (snap) => {
             const list = document.getElementById('studentList');
             list.innerHTML = "";
             snap.forEach(d => {
                 const s = d.data();
                 if(s.role === 'admin') return;
-                list.innerHTML += `
-                    <div class="bg-[#16213e] p-6 rounded-3xl flex justify-between items-center border-l-4 ${s.isBlocked ? 'border-red-600' : 'border-green-600'}">
-                        <div>
-                            <p class="font-bold text-lg">${s.name} (${s.city})</p>
-                            <p class="text-xs text-gray-500">${s.email} | Coins: ${s.coins || 0}</p>
-                        </div>
-                        <button onclick="toggleBlock('${d.id}', ${s.isBlocked})" class="px-4 py-2 rounded-lg font-bold ${s.isBlocked ? 'bg-green-600' : 'bg-red-600'}">
-                            ${s.isBlocked ? 'UNBLOCK' : 'BLOCK'}
-                        </button>
-                    </div>`;
+                list.innerHTML += `<div class="card flex justify-between items-center">
+                    <div><b>${s.name}</b> (${s.city})</div>
+                    <button onclick="toggleBlock('${d.id}', ${s.isBlocked})" class="bg-red-500 p-2 rounded text-xs">${s.isBlocked ? 'UNBLOCK' : 'BLOCK'}</button>
+                </div>`;
             });
         });
 
-        window.toggleBlock = async (id, currentStatus) => {
-            await updateDoc(doc(db, "users", id), { isBlocked: !currentStatus });
-        };
-
-        // Course Edit/Delete Logic...
-        window.showTab = (tab) => {
-            document.getElementById('sectionCourses').classList.toggle('hidden', tab !== 'courses');
-            document.getElementById('sectionStudents').classList.toggle('hidden', tab !== 'students');
-            // Tab active class logic
+        window.toggleBlock = async (id, status) => {
+            await updateDoc(doc(db, "users", id), { isBlocked: !status });
         };
     </script>
 </body>
