@@ -9,7 +9,7 @@
         body { background-color: #0b1120; color: white; font-family: sans-serif; }
         .card-navy { background-color: #16213e; border: 1px solid #1f2937; }
         .btn-gold { background-color: #eab308; color: #0b1120; font-weight: 800; }
-        .modal-bg { background-color: rgba(0, 0, 0, 0.95); display: none; }
+        .modal-bg { background-color: rgba(0, 0, 0, 0.9); display: none; }
     </style>
 </head>
 <body>
@@ -30,11 +30,11 @@
 
     <div id="payModal" class="modal-bg fixed inset-0 z-[100] flex items-center justify-center p-6">
         <div class="card-navy w-full max-w-md p-8 rounded-[2.5rem] text-center border-2 border-[#eab308]">
-            <h2 class="text-2xl font-bold text-[#eab308] mb-4">Confirm Payment</h2>
+            <h2 class="text-2xl font-bold text-[#eab308] mb-4">Enroll Now</h2>
             <div class="bg-white p-4 rounded-2xl mb-6 inline-block shadow-lg">
                 <img id="qrImg" src="" alt="QR">
             </div>
-            <input type="text" id="trxId" class="w-full bg-[#0b1120] border border-gray-700 p-4 rounded-xl mb-6 text-white outline-none focus:border-[#eab308]" placeholder="Enter Transaction ID">
+            <input type="text" id="trxId" class="w-full bg-[#0b1120] border border-gray-700 p-4 rounded-xl mb-4 text-white outline-none focus:border-[#eab308]" placeholder="Enter Transaction ID">
             <button onclick="submitRequest()" class="w-full btn-gold py-4 rounded-2xl uppercase">Submit Request</button>
             <button onclick="closePay()" class="text-gray-500 text-[10px] mt-6 uppercase font-bold tracking-widest">Cancel</button>
         </div>
@@ -45,7 +45,14 @@
         import { getFirestore, collection, onSnapshot, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-        const firebaseConfig = { /* Same as index.html */ };
+        const firebaseConfig = {
+          apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
+          authDomain: "mneet-7699.firebaseapp.com",
+          projectId: "mneet-7699",
+          storageBucket: "mneet-7699.firebasestorage.app",
+          messagingSenderId: "801664280357",
+          appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
+        };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -81,7 +88,7 @@
                 uid: auth.currentUser.uid, email: auth.currentUser.email,
                 trxId: trx, courseTitle: selectedCourse, status: 'pending', timestamp: new Date()
             });
-            alert("Sent for approval!"); closePay();
+            alert("Sent! Wait for approval."); closePay();
         };
 
         onSnapshot(collection(db, "courses"), (snap) => {
@@ -89,8 +96,9 @@
             container.innerHTML = "";
             snap.forEach(d => {
                 const data = d.data();
-                const videoHTML = data.video ? `<div class="aspect-video w-full rounded-t-[2rem] overflow-hidden"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.video}?modestbranding=1&rel=0" frameborder="0" allowfullscreen></iframe></div>` : "";
-                container.innerHTML += `<div class="card-navy rounded-[2rem] overflow-hidden shadow-2xl">${videoHTML}<div class="p-6 text-left"><h3 class="text-2xl font-bold mb-1">${data.title}</h3><p class="text-gray-400 text-sm mb-6">${data.desc || 'Best Course.'}</p><div class="flex justify-between items-center"><span class="text-2xl font-black text-[#eab308]">₹${data.price}</span><button onclick="openPay('${data.price}', '${data.title}')" class="btn-gold px-8 py-3 rounded-xl text-xs uppercase font-black">Enroll Now</button></div></div></div>`;
+                const vId = data.video;
+                const videoHTML = vId ? `<div class="aspect-video w-full rounded-t-[2rem] overflow-hidden"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vId}?modestbranding=1&rel=0" frameborder="0" allowfullscreen></iframe></div>` : "";
+                container.innerHTML += `<div class="card-navy rounded-[2rem] overflow-hidden shadow-2xl">${videoHTML}<div class="p-6 text-left"><h3 class="text-2xl font-bold mb-1">${data.title}</h3><p class="text-gray-400 text-sm mb-6">${data.desc || 'Quality NEET Material.'}</p><div class="flex justify-between items-center"><span class="text-2xl font-black text-[#eab308]">₹${data.price}</span><button onclick="openPay('${data.price}', '${data.title}')" class="btn-gold px-8 py-3 rounded-xl text-xs font-black uppercase">Enroll Now</button></div></div></div>`;
             });
         });
     </script>
