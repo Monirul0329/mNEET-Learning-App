@@ -1,44 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><script src="https://cdn.tailwindcss.com"></script></head>
-<body class="bg-[#0b1120] p-6 text-white font-sans pb-20">
+<body class="bg-[#0b1120] p-6 text-white pb-20">
     <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6 text-center italic">Available Courses</h2>
-    <div id="courseList" class="space-y-6"></div>
+    <div id="courseContainer" class="space-y-8"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, updateDoc, arrayUnion, getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, arrayUnion, getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
 
         onSnapshot(collection(db, "courses"), (snap) => {
-            const list = document.getElementById('courseList');
-            list.innerHTML = "";
+            const container = document.getElementById('courseContainer'); container.innerHTML = "";
             snap.forEach(d => {
                 const c = d.data();
-                list.innerHTML += `
-                <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800">
-                    <h3 class="text-xl font-black italic text-[#eab308]">${c.title}</h3>
-                    <p class="text-gray-400 text-xs mt-2">${c.desc || "Learn with top-tier materials and expert guidance."}</p>
-                    <div class="mt-6 flex justify-between items-center">
-                        <span class="text-2xl font-black italic text-white">₹${c.price}</span>
-                        <button onclick="enroll('${d.id}')" class="bg-[#eab308] text-black px-6 py-2 rounded-xl font-black uppercase text-[10px]">Enroll Now</button>
+                container.innerHTML += `
+                <div class="bg-[#16213e] rounded-[2.5rem] overflow-hidden border border-gray-800 shadow-2xl">
+                    <img src="${c.img || 'https://via.placeholder.com/400x200'}" class="w-full h-44 object-cover opacity-80">
+                    <div class="p-8">
+                        <h3 class="text-2xl font-black italic text-white uppercase tracking-tighter">${c.title}</h3>
+                        <p class="text-gray-500 text-[11px] mt-4 leading-relaxed">${c.desc || "Learn NEET concepts with expert visual aids and doubt solving sessions."}</p>
+                        <div class="mt-8 flex justify-between items-center">
+                            <span class="text-3xl font-black text-[#eab308] italic">₹${c.price}</span>
+                            <button onclick="enroll('${d.id}')" class="bg-[#eab308] text-[#0b1120] px-8 py-3 rounded-2xl font-black uppercase text-[10px]">Enroll Now</button>
+                        </div>
                     </div>
                 </div>`;
             });
         });
 
-        window.enroll = async (cid) => {
+        window.enroll = async (id) => {
             if(!auth.currentUser) return alert("Login first!");
-            try {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    enrolled: arrayUnion(cid)
-                });
-                alert("Course Enrolled! Check Study Section.");
-            } catch(e) { alert("Error: " + e.message); }
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { enrolled: arrayUnion(id) });
+            alert("Enrollment Successful! Check Study Section.");
         };
     </script>
 </body>
