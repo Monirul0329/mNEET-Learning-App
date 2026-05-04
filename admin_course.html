@@ -1,9 +1,23 @@
-<body style="background:#0b1120;color:white;padding:20px;font-family:sans-serif;">
-    <div style="background:#16213e;padding:20px;border-radius:20px;">
-        <h2 style="color:#eab308;font-size:12px;">ADD NEW COURSE</h2>
-        <input id="t" type="text" placeholder="Title" style="width:100%;padding:10px;margin-top:10px;border-radius:10px;background:#1e293b;border:none;color:white;">
-        <input id="p" type="number" placeholder="Price" style="width:100%;padding:10px;margin-top:10px;border-radius:10px;background:#1e293b;border:none;color:white;">
-        <button style="width:100%;background:#eab308;padding:12px;margin-top:15px;border:none;border-radius:10px;font-weight:bold;">PUBLISH</button>
+<!DOCTYPE html>
+<html lang="en">
+<head><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-[#0b1120] p-6 text-white font-sans">
+    <div class="bg-[#16213e] p-6 rounded-3xl border border-[#eab308]/20">
+        <h2 class="text-[#eab308] text-xs font-bold mb-6 uppercase text-center tracking-widest">Create New Course</h2>
+        <input type="text" id="cTitle" placeholder="Course Name" class="w-full bg-[#1e293b] p-4 rounded-xl mb-4 border border-gray-700 outline-none">
+        <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-4 border border-gray-700 outline-none">
+        <button onclick="saveC()" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs">Publish Now</button>
     </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+        window.saveC = async () => {
+            const title = document.getElementById('cTitle').value; const price = document.getElementById('cPrice').value;
+            if(!title || !price) return alert("Fill all fields");
+            try { await addDoc(collection(db, "courses"), { title, price, timestamp: new Date() }); alert("Success!"); location.reload(); } catch(e) { alert(e.message); }
+        }
+    </script>
 </body>
-
+</html>
