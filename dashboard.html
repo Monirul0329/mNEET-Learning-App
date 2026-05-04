@@ -2,26 +2,169 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET Hub</title>
+    <title>mNEET Student Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style> body { background-color: #0b1120; color: white; padding-bottom: 90px; } .nav-btn { color: #6b7280; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; } .nav-active { color: #eab308 !important; } </style>
+    <style>
+        body { background-color: #0b1120; color: white; padding-bottom: 90px; font-family: sans-serif; overflow-x: hidden; }
+        .nav-btn { color: #6b7280; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; }
+        .nav-active { color: #eab308 !important; }
+        .glass { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(10px); }
+        ::-webkit-scrollbar { display: none; }
+    </style>
 </head>
 <body>
-    <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] shadow-2xl border-b border-gray-800 flex justify-between items-center">
-        <h1 class="text-2xl font-black text-[#eab308] italic">mNEET</h1>
-        <div class="flex items-center gap-3">
-            <div class="bg-[#eab308] text-black px-3 py-1 rounded-full text-xs font-bold shadow-lg"><span id="userCoins">0</span> BP</div>
-            <button onclick="window.location.href='index.html'" class="text-red-500 text-xl"><i class="fa-solid fa-power-off"></i></button>
+
+    <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] shadow-2xl border-b border-gray-800">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-2xl font-black text-[#eab308] italic">mNEET</h1>
+                <p id="userRankDisplay" class="text-[9px] font-black uppercase text-gray-500 tracking-widest mt-1">Tier: Bronze</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="bg-[#eab308] text-black px-4 py-1.5 rounded-full text-xs font-black shadow-lg shadow-gold/10">
+                    <span id="userCoins">0</span> BP
+                </div>
+                <button onclick="logout()" class="text-red-500 text-xl"><i class="fa-solid fa-power-off"></i></button>
+            </div>
+        </div>
+
+        <div class="bg-[#0b1120] p-5 rounded-3xl border border-gray-700 shadow-inner">
+            <div class="flex justify-between text-[10px] font-black uppercase mb-3">
+                <span class="text-gray-500">Academic Progress</span>
+                <span class="text-[#eab308]"><span id="progressText">0</span>%</span>
+            </div>
+            <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                <div id="progressBar" class="bg-[#eab308] h-full transition-all duration-700" style="width: 0%"></div>
+            </div>
         </div>
     </div>
-    <iframe id="appFrame" src="course.html" class="w-full h-[75vh] border-none"></iframe>
-    <div class="fixed bottom-0 left-0 right-0 bg-[#16213e]/95 backdrop-blur border-t border-gray-800 flex h-20 z-50">
-        <button onclick="nav('course.html', 'course')" id="tab-course" class="nav-btn nav-active"><i class="fa-solid fa-circle-play text-xl"></i><span class="text-[9px] uppercase mt-1">Course</span></button>
-        <button onclick="nav('study.html', 'study')" id="tab-study" class="nav-btn"><i class="fa-solid fa-book-open-reader text-xl"></i><span class="text-[9px] uppercase mt-1">Study</span></button>
-        <button onclick="nav('test.html', 'test')" id="tab-test" class="nav-btn"><i class="fa-solid fa-flask-vial text-xl"></i><span class="text-[9px] uppercase mt-1">Test</span></button>
-        <button onclick="nav('mstore.html', 'mstore')" id="tab-mstore" class="nav-btn"><i class="fa-solid fa-shop text-xl"></i><span class="text-[9px] uppercase mt-1">mStore</span></button>
+
+    <div id="mainSection">
+        <iframe id="appFrame" src="course.html" class="w-full h-[65vh] border-none"></iframe>
     </div>
-    <script> function nav(f, id) { document.getElementById('appFrame').src = f; document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active')); document.getElementById('tab-'+id).classList.add('nav-active'); } </script>
+
+    <div id="leaderboardArea" class="hidden p-6 animate-fade-in">
+        <h2 class="text-xs font-black text-gray-500 uppercase tracking-[0.2em] mb-6 text-center">Global Ranking</h2>
+        <div id="leaderboardList" class="space-y-3">
+            <p class="text-center text-xs text-gray-700 italic">Calculating ranks...</p>
+        </div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 flex h-20 z-50">
+        <button onclick="nav('course.html', 'course')" id="tab-course" class="nav-btn nav-active">
+            <i class="fa-solid fa-circle-play text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Course</span>
+        </button>
+        <button onclick="nav('study.html', 'study')" id="tab-study" class="nav-btn">
+            <i class="fa-solid fa-book-open-reader text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Study</span>
+        </button>
+        <button onclick="nav('test.html', 'test')" id="tab-test" class="nav-btn">
+            <i class="fa-solid fa-flask-vial text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Test</span>
+        </button>
+        <button onclick="openRanks()" id="tab-ranks" class="nav-btn">
+            <i class="fa-solid fa-trophy text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Ranks</span>
+        </button>
+        <button onclick="nav('mstore.html', 'mstore')" id="tab-mstore" class="nav-btn">
+            <i class="fa-solid fa-shop text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">mStore</span>
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, query, orderBy, limit, collection, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", 
+            authDomain: "mneet-7699.firebaseapp.com", 
+            projectId: "mneet-7699", 
+            storageBucket: "mneet-7699.firebasestorage.app", 
+            messagingSenderId: "801664280357", 
+            appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // --- 1. User Sync (Coins & Progress) ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
+                    const d = snap.data();
+                    if(d) {
+                        document.getElementById('userCoins').innerText = d.coins || 0;
+                        document.getElementById('progressText').innerText = d.progress || 0;
+                        document.getElementById('progressBar').style.width = (d.progress || 0) + '%';
+                        document.getElementById('userRankDisplay').innerText = `Tier: ${d.rank || 'Bronze'}`;
+                        checkPromotion(user.uid, d.coins, d.rank);
+                    }
+                });
+            } else { window.location.href = "index.html"; }
+        });
+
+        // --- 2. Rank Promotion Logic ---
+        async function checkPromotion(uid, coins, currentRank) {
+            let newRank = "Bronze";
+            if(coins >= 1000) newRank = "Silver";
+            if(coins >= 5000) newRank = "Gold";
+            if(coins >= 10000) newRank = "Diamond";
+            if(coins >= 25000) newRank = "Legend";
+
+            if(newRank !== currentRank) {
+                await updateDoc(doc(db, "users", uid), { rank: newRank });
+            }
+        }
+
+        // --- 3. Navigation Controls ---
+        window.nav = (file, id) => {
+            document.getElementById('leaderboardArea').classList.add('hidden');
+            document.getElementById('mainSection').classList.remove('hidden');
+            document.getElementById('appFrame').src = file;
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('tab-' + id).classList.add('nav-active');
+        };
+
+        window.openRanks = () => {
+            document.getElementById('mainSection').classList.add('hidden');
+            document.getElementById('leaderboardArea').classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('tab-ranks').classList.add('nav-active');
+            
+            // Sync Leaderboard Data
+            const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(20));
+            onSnapshot(q, (snap) => {
+                const list = document.getElementById('leaderboardList');
+                list.innerHTML = "";
+                let rankNum = 1;
+                snap.forEach(d => {
+                    const u = d.data();
+                    const isMe = auth.currentUser.uid === d.id ? "border-[#eab308] bg-[#1e293b]" : "border-gray-800 bg-[#16213e]";
+                    list.innerHTML += `
+                    <div class="p-4 rounded-2xl flex justify-between items-center border ${isMe}">
+                        <div class="flex items-center gap-4">
+                            <span class="font-black italic ${rankNum <= 3 ? 'text-[#eab308]' : 'text-gray-600'}">#${rankNum}</span>
+                            <div>
+                                <p class="text-sm font-bold">${u.name}</p>
+                                <p class="text-[8px] uppercase font-black text-gray-500">${u.rank || 'Bronze'}</p>
+                            </div>
+                        </div>
+                        <p class="text-xs font-black text-[#eab308]">${u.coins} BP</p>
+                    </div>`;
+                    rankNum++;
+                });
+            });
+        };
+
+        window.logout = () => signOut(auth).then(() => window.location.href="index.html");
+    </script>
 </body>
-</html>
+    </html>
+    
