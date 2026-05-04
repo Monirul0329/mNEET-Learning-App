@@ -1,97 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-[#0b1120] p-6 text-white font-sans pb-20">
-    <div class="bg-[#16213e] p-6 rounded-3xl border border-[#eab308]/20 mb-8 shadow-2xl">
-        <h2 id="formTitle" class="text-[#eab308] text-[10px] font-black uppercase mb-6 tracking-[0.3em] text-center italic">Create / Edit Course</h2>
-        
-        <input type="hidden" id="editId">
-        <input type="text" id="cTitle" placeholder="Course Name (e.g. Physics Pro)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-4 border border-gray-700 outline-none text-sm focus:border-[#eab308]">
-        <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-4 border border-gray-700 outline-none text-sm focus:border-[#eab308]">
-        <textarea id="cDesc" placeholder="Course Description (Write what student will get)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 outline-none text-sm h-24 focus:border-[#eab308]"></textarea>
-        
-        <button onclick="saveCourse()" id="saveBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Publish Course</button>
+<head><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-[#0b1120] p-6 text-white">
+    <div class="bg-[#16213e] p-6 rounded-3xl border border-gray-800">
+        <h2 class="text-gold text-[10px] font-black uppercase mb-6 tracking-widest text-center">Course Management</h2>
+        <input type="text" id="cTitle" placeholder="Course Name" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none">
+        <input type="text" id="cImg" placeholder="Course Image URL (Thumbnail)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none">
+        <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none">
+        <textarea id="cDesc" placeholder="Course Description..." class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 text-white outline-none h-24"></textarea>
+        <button onclick="saveC()" class="w-full bg-gold text-black py-4 rounded-xl font-black uppercase text-xs">Publish Course</button>
     </div>
 
-    <h3 class="text-[10px] text-gray-500 uppercase font-black mb-6 ml-2 tracking-widest">Live Courses Management</h3>
-    <div id="courseList" class="space-y-4"></div>
+    <div id="courseList" class="mt-10 space-y-4"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
-        // Save or Update Course
-        window.saveCourse = async () => {
+        window.saveC = async () => {
             const title = document.getElementById('cTitle').value;
+            const img = document.getElementById('cImg').value;
             const price = document.getElementById('cPrice').value;
             const desc = document.getElementById('cDesc').value;
-            const editId = document.getElementById('editId').value;
-
-            if(!title || !price) return alert("Title and Price are mandatory!");
-
-            try {
-                if(editId) {
-                    await updateDoc(doc(db, "courses", editId), { title, price, desc, updatedAt: new Date() });
-                    alert("Course Updated! ✨");
-                } else {
-                    await addDoc(collection(db, "courses"), { title, price, desc, timestamp: new Date() });
-                    alert("New Course Published! 🚀");
-                }
-                resetForm();
-            } catch (e) { alert("Error: " + e.message); }
+            if(!title || !price) return alert("Fields Required!");
+            await addDoc(collection(db, "courses"), { title, img, price, desc, timestamp: new Date() });
+            alert("Published!"); location.reload();
         };
 
-        // Load Courses Real-time
         onSnapshot(collection(db, "courses"), (snap) => {
-            const list = document.getElementById('courseList');
-            list.innerHTML = "";
+            const list = document.getElementById('courseList'); list.innerHTML = "";
             snap.forEach(d => {
                 const c = d.data();
-                list.innerHTML += `
-                <div class="bg-[#16213e] p-5 rounded-2xl border border-gray-800 flex justify-between items-center shadow-lg">
-                    <div class="flex-1 pr-4">
-                        <p class="font-bold text-sm text-white">${c.title}</p>
-                        <p class="text-[10px] text-gold font-black italic">₹${c.price}</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="editCourse('${d.id}', '${c.title}', '${c.price}', '${c.desc || ""}')" class="bg-blue-600/20 text-blue-400 p-2 rounded-lg text-[10px] font-bold border border-blue-900/30">EDIT</button>
-                        <button onclick="deleteCourse('${d.id}')" class="bg-red-600/20 text-red-500 p-2 rounded-lg text-[10px] font-bold border border-red-900/30">DEL</button>
-                    </div>
+                list.innerHTML += `<div class="bg-[#16213e] p-4 rounded-2xl flex justify-between items-center border border-gray-800">
+                    <img src="${c.img || 'https://via.placeholder.com/100'}" class="w-12 h-12 rounded-lg object-cover">
+                    <div class="flex-1 ml-4"><p class="font-bold text-sm">${c.title}</p><p class="text-gold text-xs">₹${c.price}</p></div>
+                    <button onclick="deleteDoc(doc(db, 'courses', '${d.id}'))" class="text-red-500 font-bold text-xs">DELETE</button>
                 </div>`;
             });
         });
-
-        window.editCourse = (id, t, p, d) => {
-            document.getElementById('editId').value = id;
-            document.getElementById('cTitle').value = t;
-            document.getElementById('cPrice').value = p;
-            document.getElementById('cDesc').value = d;
-            document.getElementById('saveBtn').innerText = "Update Course";
-            document.getElementById('formTitle').innerText = "Edit Mode Active";
-            window.scrollTo(0,0);
-        };
-
-        window.deleteCourse = async (id) => {
-            if(confirm("Are you sure you want to delete this course? This cannot be undone.")) {
-                await deleteDoc(doc(db, "courses", id));
-            }
-        };
-
-        function resetForm() {
-            document.getElementById('editId').value = "";
-            document.getElementById('cTitle').value = "";
-            document.getElementById('cPrice').value = "";
-            document.getElementById('cDesc').value = "";
-            document.getElementById('saveBtn').innerText = "Publish Course";
-            document.getElementById('formTitle').innerText = "Create / Edit Course";
-        }
     </script>
 </body>
 </html>
