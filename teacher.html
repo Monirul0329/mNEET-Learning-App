@@ -2,149 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>mNeet - Admin Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mNEET Admin - Control Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0b1120; color: white; font-family: sans-serif; }
-        .card-navy { background-color: #16213e; border: 1px solid #1f2937; padding: 25px; border-radius: 25px; margin-bottom: 20px; }
-        .input-navy { background-color: #1e293b; border: 1px solid #334155; color: white; width: 100%; padding: 12px; border-radius: 12px; margin-bottom: 12px; outline: none; }
-        .tab-btn { flex: 1; padding: 15px; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 2px solid #1f2937; }
-        .active-tab { border-color: #eab308; color: #eab308; }
+        body { background-color: #0b1120; color: white; padding-bottom: 80px; }
+        .card-navy { background-color: #16213e; }
+        .text-gold { color: #eab308; }
+        .nav-active { color: #eab308; border-top: 2px solid #eab308; }
     </style>
 </head>
-<body class="p-4 md:p-10">
-    <div class="flex justify-between items-center mb-10 max-w-4xl mx-auto">
-        <h1 class="text-2xl font-black text-[#eab308] italic">ADMIN CONTROL</h1>
-        <button onclick="logout()" class="bg-red-900/40 text-red-500 border border-red-900 px-4 py-2 rounded-xl text-xs font-bold">LOGOUT</button>
-    </div>
-
-    <div class="flex mb-10 max-w-4xl mx-auto">
-        <button onclick="switchTab('courses')" id="t-courses" class="tab-btn active-tab uppercase tracking-widest">Manage Courses</button>
-        <button onclick="switchTab('payments')" id="t-payments" class="tab-btn uppercase tracking-widest">Payments</button>
-        <button onclick="switchTab('students')" id="t-students" class="tab-btn uppercase tracking-widest">Students</button>
-    </div>
-
-    <div id="sec-courses" class="max-w-2xl mx-auto">
-        <div class="card-navy border border-[#eab308]/30">
-            <h2 id="formTitle" class="text-[#eab308] font-bold mb-6 uppercase text-sm tracking-widest text-center">Add / Edit Course</h2>
-            <input type="hidden" id="editId">
-            <input type="text" id="cTitle" class="input-navy" placeholder="Course Name">
-            <input type="number" id="cPrice" class="input-navy" placeholder="Price (₹)">
-            <input type="text" id="cVideo" class="input-navy" placeholder="YouTube Video ID (shudhu ID-ta)">
-            <textarea id="cDesc" class="input-navy h-24" placeholder="Course Features & Description"></textarea>
-            <button onclick="saveCourse()" id="saveBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-bold uppercase text-sm shadow-xl">Publish Now</button>
+<body>
+    <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] border-b border-gray-800">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-black text-gold italic">mNEET <span class="text-xs text-white not-italic uppercase ml-1">Admin</span></h1>
+            <button onclick="logout()" class="text-red-500 font-bold text-xs uppercase border border-red-900 px-3 py-1 rounded">Logout</button>
         </div>
-        <div id="courseList" class="space-y-4"></div>
+
+        <div class="flex gap-4 mb-4 text-center">
+            <div class="flex-1 bg-[#0b1120] p-4 rounded-2xl border border-gray-700">
+                <p class="text-[10px] text-gray-500 uppercase font-bold">Total Students</p>
+                <p id="totalStudents" class="text-2xl font-black text-gold">0</p>
+            </div>
+            <div class="flex-1 bg-[#0b1120] p-4 rounded-2xl border border-gray-700">
+                <p class="text-[10px] text-gray-500 uppercase font-bold">Active Sales</p>
+                <p id="totalSales" class="text-2xl font-black text-white">₹0</p>
+            </div>
+        </div>
     </div>
 
-    <div id="sec-payments" class="max-w-2xl mx-auto hidden">
-        <h2 class="text-gray-500 uppercase text-xs font-bold mb-6 text-center tracking-widest">Pending Payment Approvals</h2>
-        <div id="reqList" class="space-y-4"></div>
+    <div class="p-6">
+        <div id="adminPanelContent" class="space-y-4">
+            <div class="card-navy p-6 rounded-3xl border border-gray-800 text-center">
+                <i class="fa-solid fa-plus-circle text-4xl text-gold mb-2"></i>
+                <h3 class="font-bold">Add New Content</h3>
+                <p class="text-xs text-gray-500">Tap below to manage your mNEET store</p>
+            </div>
+        </div>
     </div>
 
-    <div id="sec-students" class="max-w-2xl mx-auto hidden">
-        <h2 class="text-gray-500 uppercase text-xs font-bold mb-6 text-center tracking-widest">Manage Student Access</h2>
-        <div id="studentList" class="space-y-4"></div>
+    <div class="fixed bottom-0 left-0 right-0 bg-[#16213e] border-t border-gray-800 flex justify-around p-3 z-50">
+        <button onclick="setTab('store')" class="flex flex-col items-center nav-active" id="admin-store">
+            <i class="fa-solid fa-bag-shopping text-lg"></i>
+            <span class="text-[9px] uppercase font-bold mt-1">Manage Store</span>
+        </button>
+        <button onclick="setTab('study')" class="flex flex-col items-center text-gray-500" id="admin-study">
+            <i class="fa-solid fa-book-medical text-lg"></i>
+            <span class="text-[9px] uppercase font-bold mt-1">Study Material</span>
+        </button>
+        <button onclick="setTab('test')" class="flex flex-col items-center text-gray-500" id="admin-test">
+            <i class="fa-solid fa-vial text-lg"></i>
+            <span class="text-[9px] uppercase font-bold mt-1">Test Center</span>
+        </button>
+        <button onclick="setTab('mstore')" class="flex flex-col items-center text-gray-500" id="admin-mstore">
+            <i class="fa-solid fa-boxes-stacked text-lg"></i>
+            <span class="text-[9px] uppercase font-bold mt-1">Admin Store</span>
+        </button>
     </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-        const firebaseConfig = {
-          apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
-          authDomain: "mneet-7699.firebaseapp.com",
-          projectId: "mneet-7699",
-          storageBucket: "mneet-7699.firebasestorage.app",
-          messagingSenderId: "801664280357",
-          appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        window.logout = () => signOut(auth).then(() => window.location.href="index.html");
-
-        window.switchTab = (tab) => {
-            ['courses', 'payments', 'students'].forEach(t => {
-                document.getElementById('sec-'+t).classList.toggle('hidden', t !== tab);
-                document.getElementById('t-'+t).classList.toggle('active-tab', t === tab);
-            });
-        };
-
-        // --- MANAGE COURSES ---
-        window.saveCourse = async () => {
-            const title = document.getElementById('cTitle').value;
-            const price = document.getElementById('cPrice').value;
-            const video = document.getElementById('cVideo').value;
-            const desc = document.getElementById('cDesc').value;
-            const eid = document.getElementById('editId').value;
-
-            if(!title || !price) return alert("Fill mandatory fields");
-
-            if(eid) { 
-                await updateDoc(doc(db, "courses", eid), {title, price, video, desc}); 
-                alert("Updated!"); 
-            } else { 
-                await addDoc(collection(db, "courses"), {title, price, video, desc, timestamp: new Date()}); 
-                alert("Added!"); 
-            }
-            location.reload();
-        };
-
-        onSnapshot(collection(db, "courses"), (snap) => {
-            const list = document.getElementById('courseList');
-            list.innerHTML = "";
-            snap.forEach(d => {
-                const c = d.data();
-                list.innerHTML += `<div class="card-navy flex justify-between items-center border-l-4 border-yellow-600">
-                    <div><b>${c.title}</b><p class="text-xs text-gold">₹${c.price}</p></div>
-                    <div class="flex gap-4">
-                        <button onclick="editC('${d.id}','${c.title}','${c.price}','${c.video||''}','${c.desc||''}')" class="text-blue-400 text-xs font-bold uppercase">Edit</button>
-                        <button onclick="delC('${d.id}')" class="text-red-500 text-xs font-bold uppercase">Delete</button>
-                    </div>
-                </div>`;
-            });
-        });
-
-        window.editC = (id,t,p,v,d) => {
-            document.getElementById('editId').value=id; document.getElementById('cTitle').value=t;
-            document.getElementById('cPrice').value=p; document.getElementById('cVideo').value=v;
-            document.getElementById('cDesc').value=d; document.getElementById('formTitle').innerText="Edit Course Mode";
-            document.getElementById('saveBtn').innerText="Update Course"; window.scrollTo(0,0);
-        };
-        window.delC = async (id) => { if(confirm("Permanently delete?")) await deleteDoc(doc(db, "courses", id)); };
-
-        // --- MANAGE PAYMENTS ---
-        onSnapshot(collection(db, "requests"), (snap) => {
-            const list = document.getElementById('reqList'); list.innerHTML = "";
-            snap.forEach(d => { const r = d.data(); if(r.status==='pending') {
-                list.innerHTML += `<div class="card-navy border-2 border-yellow-600/30">
-                    <p class="text-xs text-gray-500 font-bold uppercase mb-1">${r.email}</p>
-                    <p class="font-bold text-lg">${r.courseTitle}</p>
-                    <p class="text-gold font-mono text-sm mt-3 bg-black/40 p-2 rounded">TRX: ${r.trxId}</p>
-                    <div class="flex gap-2 mt-6">
-                        <button onclick="approve('${d.id}','${r.uid}')" class="flex-1 bg-green-600 py-3 rounded-xl font-bold text-xs uppercase shadow-lg">Approve</button>
-                        <button onclick="reject('${d.id}')" class="flex-1 bg-red-600/20 text-red-500 py-3 rounded-xl font-bold text-xs uppercase">Reject</button>
-                    </div>
-                </div>`;
-            }});
-        });
-        window.approve = async (rid, uid) => { await updateDoc(doc(db, "requests", rid), {status:'approved'}); alert("Access Approved!"); };
-        window.reject = async (rid) => { if(confirm("Reject?")) await deleteDoc(doc(db, "requests", rid)); };
-
-        // --- MANAGE STUDENTS ---
-        onSnapshot(collection(db, "users"), (snap) => {
-            const list = document.getElementById('studentList'); list.innerHTML = "";
-            snap.forEach(d => { const s = d.data(); if(s.role !== 'admin') {
-                list.innerHTML += `<div class="card-navy flex justify-between items-center">
-                    <div><b>${s.name}</b><p class="text-xs text-gray-500 uppercase tracking-widest">${s.city}</p></div>
-                    <button onclick="toggleB('${d.id}',${s.isBlocked})" class="px-4 py-2 rounded-xl text-xs font-bold uppercase ${s.isBlocked ? 'bg-green-600':'bg-red-900/40 text-red-500 border border-red-900'}">${s.isBlocked ? 'Unblock':'Block Student'}</button>
-                </div>`;
-            }});
-        });
-        window.toggleB = async (id, status) => { await updateDoc(doc(db, "users", id), {isBlocked: !status}); };
-    </script>
 </body>
 </html>
+
