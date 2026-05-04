@@ -1,23 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><script src="https://cdn.tailwindcss.com"></script></head>
-<body class="bg-[#0b1120] p-6 text-white font-sans">
-    <div class="bg-[#16213e] p-6 rounded-3xl border border-gray-800 shadow-2xl">
-        <h2 class="text-green-500 text-[10px] font-black uppercase mb-6 tracking-widest text-center">Product Hub</h2>
+<body class="bg-[#0b1120] p-6 text-white pb-32">
+    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800">
+        <h2 class="text-green-500 text-[10px] font-black uppercase text-center mb-6">M-Store Manager</h2>
         <input type="text" id="pName" placeholder="Product Title" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none">
-        <input type="text" id="pImg" placeholder="Image URL" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none">
+        <input type="text" id="pImgs" placeholder="Images (Comma separated: url1, url2...)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none">
         <input type="number" id="pPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 text-white outline-none">
-        <textarea id="pDesc" placeholder="Product Description..." class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 text-white outline-none h-20"></textarea>
-        <button onclick="saveP()" class="w-full bg-green-600 text-white py-4 rounded-xl font-black uppercase text-xs">List Product</button>
+        <textarea id="pDesc" placeholder="Full Specifications / Details..." class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 text-white h-32 outline-none"></textarea>
+        <button onclick="saveP()" class="w-full bg-green-600 py-4 rounded-2xl font-black uppercase shadow-lg">List Product</button>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
         const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+
         window.saveP = async () => {
-            await addDoc(collection(db, "products"), { name: document.getElementById('pName').value, img: document.getElementById('pImg').value, price: document.getElementById('pPrice').value, desc: document.getElementById('pDesc').value });
-            alert("Added!"); location.reload();
+            const images = document.getElementById('pImgs').value.split(',').map(u => u.trim());
+            await addDoc(collection(db, "products"), { 
+                name: document.getElementById('pName').value, 
+                images: images, 
+                price: document.getElementById('pPrice').value, 
+                desc: document.getElementById('pDesc').value 
+            });
+            alert("Listed Successfully! 🛍️"); location.reload();
         };
     </script>
 </body>
