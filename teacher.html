@@ -37,8 +37,7 @@
         </div>
     </div>
 
-    <div id="adminMain" class="p-6 max-w-xl mx-auto">
-        </div>
+    <div id="adminMain" class="p-6 max-w-xl mx-auto"></div>
 
     <div class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 flex justify-around p-4 z-50">
         <button onclick="setTab('course')" id="btn-course" class="nav-btn nav-active flex flex-col items-center">
@@ -61,127 +60,101 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-        const firebaseConfig = { /* Apnar Config */ };
+        const firebaseConfig = { /* APNAR CONFIG EKHANE BOSHAN */ };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // NAVIGATION LOGIC
         window.setTab = (tab) => {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById('btn-' + tab).classList.add('nav-active');
+            const activeBtn = document.getElementById('btn-' + tab);
+            if(activeBtn) activeBtn.classList.add('nav-active');
             
             const area = document.getElementById('adminMain');
+            area.innerHTML = `<p class="text-center mt-10 animate-pulse text-xs text-gray-500 uppercase">Loading ${tab}...</p>`;
+
             if(tab === 'course') renderCourseTab(area);
             if(tab === 'study') renderStudyTab(area);
             if(tab === 'test') renderTestTab(area);
             if(tab === 'mstore') renderMStoreTab(area);
         };
 
-        // --- COURSE MANAGEMENT ---
+        // RENDER FUNCTIONS
         function renderCourseTab(el) {
             el.innerHTML = `
                 <div class="card-navy mb-6">
                     <h2 class="text-gold font-black uppercase text-xs mb-4 tracking-widest">Add New Course</h2>
                     <input type="text" id="cTitle" class="input-navy" placeholder="Course Name">
                     <input type="number" id="cPrice" class="input-navy" placeholder="Price (₹)">
-                    <button onclick="addCourse()" class="w-full bg-gold text-black py-3 rounded-xl font-black uppercase text-xs shadow-lg">Publish Course</button>
-                </div>
-                <div id="list"></div>`;
-        }
-
-        // --- Study Material Save Logic ---
-window.addStudy = async () => {
-    const chapter = document.getElementById('chapterName').value;
-    const video = document.getElementById('vidId').value;
-    const notes = document.getElementById('notesUrl').value;
-    const dpp = document.getElementById('dppUrl').value;
-
-    if(!chapter || !video) return alert("Chapter Name and Video ID are required!");
-
-    try {
-        await addDoc(collection(db, "study_material"), {
-            chapterName: chapter,
-            videoId: video,
-            notesUrl: notes,
-            dppUrl: dpp,
-            timestamp: new Date()
-        });
-        alert("Study Material Added Successfully! 🎉");
-        // Input faka kora
-        document.getElementById('chapterName').value = "";
-        document.getElementById('vidId').value = "";
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
-};
-
-// --- mStore Product Save Logic ---
-window.addProduct = async () => {
-    const name = document.getElementById('pName').value;
-    const price = document.getElementById('pPrice').value;
-    const img = document.getElementById('pImg').value;
-
-    if(!name || !price) return alert("Name and Price required!");
-
-    await addDoc(collection(db, "mstore_products"), {
-        name, price, img, timestamp: new Date()
-    });
-    alert("Product Listed in mStore! 🛒");
-};
-        
-        // --- TEST CENTER ---
-        function renderTestTab(el) {
-            el.innerHTML = `
-                <div class="card-navy text-center p-10">
-                    <i class="fa-solid fa-microscope text-4xl text-gray-700 mb-4"></i>
-                    <h2 class="font-bold">Test Management</h2>
-                    <p class="text-xs text-gray-500 mt-2 italic">Ekhane apni 8-10 types-er Topic wise & Full Tests create korte parben.</p>
-                    <button class="mt-6 bg-gold text-black px-6 py-2 rounded-lg font-black text-[10px] uppercase">Create New Test</button>
+                    <button onclick="addCourse()" class="w-full bg-gold text-black py-3 rounded-xl font-black uppercase text-xs">Publish Course</button>
                 </div>`;
         }
 
-        // --- mSTORE (Flipkart Style Sale) ---
+        function renderStudyTab(el) {
+            el.innerHTML = `
+                <div class="card-navy mb-6">
+                    <h2 class="text-gold font-black uppercase text-xs mb-4 tracking-widest">Upload Study Material</h2>
+                    <input type="text" id="chapterName" class="input-navy" placeholder="Chapter Name">
+                    <input type="text" id="vidId" class="input-navy" placeholder="YouTube Video ID">
+                    <input type="text" id="notesUrl" class="input-navy" placeholder="Notes PDF URL">
+                    <input type="text" id="dppUrl" class="input-navy" placeholder="DPP / Quiz Link">
+                    <button onclick="addStudy()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase text-xs">Add to Library</button>
+                </div>`;
+        }
+
+        function renderTestTab(el) {
+            el.innerHTML = `<div class="card-navy text-center p-10"><i class="fa-solid fa-microscope text-4xl text-gray-700 mb-4"></i><h2 class="font-bold">Test Management</h2><button class="mt-6 bg-gold text-black px-6 py-2 rounded-lg font-black text-[10px] uppercase">Create New Test</button></div>`;
+        }
+
         function renderMStoreTab(el) {
             el.innerHTML = `
                 <div class="card-navy mb-6">
                     <h2 class="text-gold font-black uppercase text-xs mb-4 tracking-widest">Add Product to mStore</h2>
-                    <input type="text" id="pName" class="input-navy" placeholder="Product Name (e.g. Formula Book)">
-                    <input type="number" id="pPrice" class="input-navy" placeholder="Selling Price">
-                    <input type="text" id="pImg" class="input-navy" placeholder="Product Image URL">
+                    <input type="text" id="pName" class="input-navy" placeholder="Product Name">
+                    <input type="number" id="pPrice" class="input-navy" placeholder="Price">
+                    <input type="text" id="pImg" class="input-navy" placeholder="Image URL">
                     <button onclick="addProduct()" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-xs">List Product</button>
                 </div>`;
         }
 
+        // DATA SAVE FUNCTIONS
+        window.addCourse = async () => {
+            const title = document.getElementById('cTitle').value;
+            const price = document.getElementById('cPrice').value;
+            if(!title || !price) return alert("Fill all fields");
+            await addDoc(collection(db, "courses"), { title, price, timestamp: new Date() });
+            alert("Course Added!");
+        };
+
+        window.addStudy = async () => {
+            const chapter = document.getElementById('chapterName').value;
+            const video = document.getElementById('vidId').value;
+            if(!chapter || !video) return alert("Fields required!");
+            await addDoc(collection(db, "study_material"), { 
+                chapterName: chapter, videoId: video, 
+                notesUrl: document.getElementById('notesUrl').value,
+                dppUrl: document.getElementById('dppUrl').value,
+                timestamp: new Date() 
+            });
+            alert("Study Material Added!");
+        };
+
+        window.addProduct = async () => {
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            if(!name || !price) return alert("Fields required!");
+            await addDoc(collection(db, "mstore_products"), { name, price, img: document.getElementById('pImg').value });
+            alert("Product Added!");
+        };
+
         window.logout = () => signOut(auth).then(() => window.location.href="index.html");
-        
-        // Initial Tab Load
+
+        // Initial Load
         setTab('course');
-// teacher.html er script er bhitor eita thaka dorkar
-window.setTab = (tab) => {
-    // Shob button theke active class sorano
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-    // Shudhu click kora button-e active class deya
-    const activeBtn = document.getElementById('btn-' + tab);
-    if(activeBtn) activeBtn.classList.add('nav-active');
-    
-    const area = document.getElementById('adminMain');
-    if(!area) return; // Jodi area na thake
-
-    area.innerHTML = `<p class="text-center mt-10 animate-pulse text-xs text-gray-500">LOADING ${tab.toUpperCase()}...</p>`;
-
-    // Content Load kora
-    if(tab === 'course') renderCourseTab(area);
-    if(tab === 'study') renderStudyTab(area);
-    if(tab === 'test') renderTestTab(area);
-    if(tab === 'mstore') renderMStoreTab(area);
-};
-
-// Page load houar por auto prothom tab khula
-document.addEventListener('DOMContentLoaded', () => setTab('course'));
-        
     </script>
 </body>
 </html>
