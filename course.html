@@ -1,47 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-[#0b1120] p-6 text-white font-sans">
-    <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-6 text-center">Available Courses</h2>
-    
-    <div id="courseContainer" class="space-y-6">
-        <p class="text-center text-xs text-gray-600 animate-pulse">Checking for courses...</p>
-    </div>
+<head><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-[#0b1120] p-6 text-white font-sans pb-20">
+    <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6 text-center italic">Available Courses</h2>
+    <div id="courseList" class="space-y-6"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, arrayUnion, getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         onSnapshot(collection(db, "courses"), (snap) => {
-            const container = document.getElementById('courseContainer');
-            container.innerHTML = "";
-            if(snap.empty) container.innerHTML = `<p class="text-center text-xs text-gray-700 mt-10 uppercase font-bold italic">No courses published yet.</p>`;
-            
+            const list = document.getElementById('courseList');
+            list.innerHTML = "";
             snap.forEach(d => {
                 const c = d.data();
-                container.innerHTML += `
-                <div class="bg-[#16213e] rounded-[2.5rem] overflow-hidden border border-gray-800 shadow-2xl transition-all active:scale-95">
-                    <div class="p-8">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-2xl font-black italic text-white">${c.title}</h3>
-                            <span class="bg-gold/10 text-[#eab308] px-3 py-1 rounded-full text-[9px] font-black border border-[#eab308]/20">NEET 2026</span>
-                        </div>
-                        <p class="text-gray-500 text-xs leading-relaxed">Full syllabus coverage with expert hand-picked questions and live doubt solving.</p>
-                        <div class="mt-8 flex justify-between items-center">
-                            <span class="text-3xl font-black text-[#eab308] italic">₹${c.price}</span>
-                            <button class="bg-[#eab308] text-black px-8 py-3 rounded-2xl font-black uppercase text-[10px] shadow-lg shadow-[#eab308]/20">Enroll Now</button>
-                        </div>
+                list.innerHTML += `
+                <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800">
+                    <h3 class="text-xl font-black italic text-[#eab308]">${c.title}</h3>
+                    <p class="text-gray-400 text-xs mt-2">${c.desc || "Learn with top-tier materials and expert guidance."}</p>
+                    <div class="mt-6 flex justify-between items-center">
+                        <span class="text-2xl font-black italic text-white">₹${c.price}</span>
+                        <button onclick="enroll('${d.id}')" class="bg-[#eab308] text-black px-6 py-2 rounded-xl font-black uppercase text-[10px]">Enroll Now</button>
                     </div>
                 </div>`;
             });
         });
+
+        window.enroll = async (cid) => {
+            if(!auth.currentUser) return alert("Login first!");
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    enrolled: arrayUnion(cid)
+                });
+                alert("Course Enrolled! Check Study Section.");
+            } catch(e) { alert("Error: " + e.message); }
+        };
     </script>
 </body>
 </html>
