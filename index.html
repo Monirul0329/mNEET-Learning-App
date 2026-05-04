@@ -6,27 +6,24 @@
     <title>mNEET - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="background-color: #0a1128; color: white; font-family: sans-serif;" class="flex items-center justify-center min-h-screen p-6">
-    <div style="background-color: #16213e; border: 1px solid #1f2937;" class="w-full max-w-md p-8 rounded-[2rem] shadow-2xl text-center">
-        <h1 style="color: #d97706;" class="text-5xl font-black mb-2 italic">mNEET</h1>
-        <p class="text-gray-500 text-xs mb-10 tracking-widest uppercase">Future Doctors' Hub</p>
-        <h2 id="authTitle" class="text-xl font-bold mb-6">Login</h2>
+<body class="bg-[#0a1128] text-white flex items-center justify-center min-h-screen p-6">
+
+    <div class="w-full max-w-md bg-[#16213e] p-8 rounded-[2rem] border border-gray-800 shadow-2xl text-center">
+        <h1 class="text-[#d97706] text-4xl font-black mb-10 italic">mNEET</h1>
         
-        <input type="email" id="email" style="background-color: #0f172a; border: 1px solid #334155;" class="w-full p-4 rounded-xl mb-4 text-white outline-none" placeholder="Email Address">
-        <input type="password" id="password" style="background-color: #0f172a; border: 1px solid #334155;" class="w-full p-4 rounded-xl mb-6 text-white outline-none" placeholder="Password">
+        <input type="email" id="email" class="w-full bg-[#0f172a] border border-gray-700 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Email">
+        <input type="password" id="password" class="w-full bg-[#0f172a] border border-gray-700 p-4 rounded-xl mb-6 text-white outline-none" placeholder="Password">
         
-        <button onclick="handleAuth()" id="authBtn" style="background-color: #d97706; color: #0a1128;" class="w-full py-4 rounded-xl font-bold uppercase">Login Now</button>
+        <button onclick="handleAuth()" id="authBtn" class="w-full bg-[#d97706] text-[#0a1128] py-4 rounded-xl font-bold uppercase">Login/Signup</button>
         
-        <p class="mt-8 text-sm text-gray-400">
-            <span id="toggleText">Don't have an account?</span>
-            <button onclick="toggleAuth()" id="toggleBtn" style="color: #d97706;" class="font-bold ml-1">Create Account</button>
-        </p>
+        <p class="mt-6 text-xs text-gray-500">Please make sure Email/Password is enabled in Firebase Console.</p>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+        // Apnar deya original config
         const firebaseConfig = {
           apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
           authDomain: "mneet-7699.firebaseapp.com",
@@ -39,30 +36,30 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        let isLogin = true;
-
-        window.toggleAuth = () => {
-            isLogin = !isLogin;
-            document.getElementById('authTitle').innerText = isLogin ? "Login" : "Create Account";
-            document.getElementById('authBtn').innerText = isLogin ? "Login Now" : "Sign Up Free";
-            document.getElementById('toggleBtn').innerText = isLogin ? "Create Account" : "Login Here";
-        };
 
         window.handleAuth = async () => {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
-            if(!email || !pass) return alert("Fill all fields");
+            const btn = document.getElementById('authBtn');
+
+            if(!email || pass.length < 6) return alert("Email and 6-digit password required!");
+            btn.innerText = "PROCESSING...";
 
             try {
-                if(isLogin) {
+                // Prothome Signup cheshtha korbe, account thakle Login korbe
+                try {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                    alert("Account Created!");
+                    window.location.href = "dashboard.html";
+                } catch (e) {
                     await signInWithEmailAndPassword(auth, email, pass);
                     window.location.href = "dashboard.html";
-                } else {
-                    await createUserWithEmailAndPassword(auth, email, pass);
-                    alert("Account Created! Now Please Login.");
-                    toggleAuth();
                 }
-            } catch (err) { alert("Error: " + err.code); }
+            } catch (err) { 
+                alert("Firebase Error: " + err.code); 
+                console.log(err);
+            }
+            btn.innerText = "Login/Signup";
         };
     </script>
 </body>
