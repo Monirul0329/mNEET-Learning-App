@@ -104,16 +104,26 @@
             } else { window.location.href = "index.html"; }
         });
 
-        window.changeTab = (tab) => {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById('tab-' + tab).classList.add('nav-active');
-            
-            const display = document.getElementById('mainDisplay');
-            if(tab === 'course') loadCourse(display);
-            if(tab === 'study') loadStudy(display);
-            if(tab === 'test') loadTest(display);
-            if(tab === 'mstore') loadMStore(display);
-        };
+       window.changeTab = (tab) => {
+    // Nav button highlight logic
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+    const currentBtn = document.getElementById('tab-' + tab);
+    if(currentBtn) currentBtn.classList.add('nav-active');
+    
+    const display = document.getElementById('mainDisplay');
+    if(!display) return;
+
+    display.innerHTML = `<p class="text-center mt-10 text-xs text-gray-600 uppercase tracking-widest">Fetching ${tab}...</p>`;
+
+    // Content trigger
+    if(tab === 'course') loadCourse(display);
+    if(tab === 'study') loadStudy(display);
+    if(tab === 'test') loadTest(display);
+    if(tab === 'mstore') loadMStore(display);
+};
+
+// Initial Load
+document.addEventListener('DOMContentLoaded', () => changeTab('course'));
 
         function loadCourse(el) {
             el.innerHTML = `<h2 class="text-xs font-black uppercase text-gray-500 mb-6 tracking-[0.2em]">Purchase Courses</h2>`;
