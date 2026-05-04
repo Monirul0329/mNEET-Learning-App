@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET - Pro Quiz</title>
+    <title>mNEET - Pro Quiz System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0b1120; color: white; font-family: sans-serif; }
-        .card-navy { background-color: #16213e; border: 1px solid #1f2937; border-radius: 2rem; }
-        .option-btn { background: #1e293b; border: 1px solid #334155; width: 100%; text-align: left; padding: 15px; border-radius: 15px; margin-bottom: 10px; transition: 0.3s; }
-        .option-active { border-color: #eab308; background: rgba(234, 179, 8, 0.1); }
-        .glass { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(10px); }
+        body { background-color: #0b1120; color: white; font-family: sans-serif; overflow-x: hidden; }
+        .card-navy { background-color: #16213e; border: 1px solid #1f2937; border-radius: 2.5rem; }
+        .option-btn { background: #1e293b; border: 1px solid #334155; width: 100%; text-align: left; padding: 18px; border-radius: 20px; margin-bottom: 12px; transition: 0.3s; font-size: 14px; font-weight: 600; }
+        .option-active { border-color: #eab308; background: rgba(234, 179, 8, 0.1); color: #eab308; }
+        .glass { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(15px); border-bottom: 1px solid #1f2937; }
     </style>
 </head>
 <body class="p-4">
 
-    <div class="fixed top-0 left-0 right-0 glass p-4 z-50 border-b border-gray-800">
-        <div class="flex justify-between items-center max-w-lg mx-auto">
-            <div>
+    <div class="fixed top-0 left-0 right-0 glass p-5 z-50">
+        <div class="max-w-lg mx-auto flex justify-between items-center">
+            <div class="text-left">
                 <p class="text-[8px] text-gray-500 uppercase font-black tracking-widest">Total Time</p>
                 <span id="totalTimer" class="text-lg font-black text-white">10:00</span>
             </div>
@@ -26,45 +26,51 @@
                 <span id="qTimer" class="text-2xl font-black text-[#eab308]">60s</span>
             </div>
             <div class="text-right">
-                <p id="qCount" class="text-[10px] font-bold text-gray-500 uppercase">1/10</p>
-                <div class="w-16 bg-gray-800 h-1 rounded-full mt-1"><div id="progBar" class="bg-gold h-full" style="width: 10%"></div></div>
+                <p id="qCount" class="text-[10px] font-bold text-gray-500 uppercase">Q 1/10</p>
+                <div class="w-16 bg-gray-800 h-1 rounded-full mt-1"><div id="progBar" class="bg-gold h-full transition-all" style="width: 10%"></div></div>
             </div>
         </div>
     </div>
 
-    <div id="quizBox" class="mt-28 max-w-lg mx-auto pb-24">
-        <div class="card-navy p-8 mb-6 shadow-2xl min-h-[180px] flex items-center border-l-4 border-gold">
+    <div id="quizBox" class="mt-32 max-w-lg mx-auto pb-24">
+        <div class="card-navy p-10 mb-8 shadow-2xl border-l-4 border-gold min-h-[160px] flex items-center">
             <h2 id="questionText" class="text-lg font-bold leading-relaxed italic">Loading Question...</h2>
         </div>
         
-        <div id="optionsBox" class="space-y-2"></div>
+        <div id="optionsBox" class="space-y-1"></div>
 
-        <div class="grid grid-cols-2 gap-4 mt-8">
-            <button onclick="prevQ()" id="prevBtn" class="bg-gray-800 py-4 rounded-2xl font-bold text-[10px] uppercase opacity-50">Previous</button>
-            <button onclick="submitAns()" id="ansBtn" class="bg-gold text-black py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-gold/10">Submit Ans</button>
+        <div class="grid grid-cols-2 gap-4 mt-10">
+            <button onclick="prevQ()" class="bg-gray-800 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest">Previous</button>
+            <button onclick="submitAns()" id="ansBtn" class="bg-gold text-black py-4 rounded-2xl font-black text-[10px] uppercase shadow-lg shadow-gold/20">Submit Ans</button>
         </div>
-        <button onclick="nextQ()" id="nextBtn" class="w-full mt-4 bg-gray-700/30 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest text-gray-400">Skip / Next Question</button>
+        <button onclick="nextQ()" class="w-full mt-4 bg-white/5 py-4 rounded-2xl font-bold text-[10px] uppercase text-gray-400 tracking-[0.2em]">Skip / Next Question</button>
     </div>
 
-    <div id="resultBox" class="hidden mt-28 max-w-lg mx-auto pb-20">
-        <div class="card-navy p-8 text-center border-gold/20 shadow-2xl">
-            <h2 class="text-2xl font-black italic text-gold">RESULT SUMMARY</h2>
-            <div class="grid grid-cols-2 gap-4 mt-8">
-                <div class="bg-[#0b1120] p-4 rounded-2xl border border-gray-800">
-                    <p class="text-[8px] text-gray-500 uppercase font-black">BP Coins</p>
-                    <p id="resCoins" class="text-xl font-black text-gold">+0</p>
+    <div id="resultBox" class="hidden mt-32 max-w-lg mx-auto pb-20">
+        <div class="card-navy p-10 text-center border-gold/20 shadow-2xl">
+            <h2 class="text-2xl font-black italic text-gold mb-8 uppercase tracking-tighter underline underline-offset-8">Report Card</h2>
+            
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="bg-[#0b1120] p-5 rounded-3xl border border-gray-800">
+                    <p class="text-[8px] text-gray-500 uppercase font-black">BP Earned</p>
+                    <p id="resCoins" class="text-2xl font-black text-gold">+0</p>
                 </div>
-                <div class="bg-[#0b1120] p-4 rounded-2xl border border-gray-800">
-                    <p class="text-[8px] text-gray-500 uppercase font-black">Score</p>
-                    <p id="resScore" class="text-xl font-black text-white">0</p>
+                <div class="bg-[#0b1120] p-5 rounded-3xl border border-gray-800">
+                    <p class="text-[8px] text-gray-500 uppercase font-black">Accuracy</p>
+                    <p id="resAcc" class="text-2xl font-black text-white">0%</p>
                 </div>
             </div>
-            <div class="mt-8 grid grid-cols-3 gap-2 text-[10px] font-black">
-                <div class="text-green-500 uppercase">Correct<br><span id="resCorrect" class="text-lg text-white">0</span></div>
-                <div class="text-red-500 uppercase">Wrong<br><span id="resWrong" class="text-lg text-white">0</span></div>
-                <div class="text-gray-500 uppercase">Missed<br><span id="resMissed" class="text-lg text-white">0</span></div>
+
+            <div class="space-y-3 text-left bg-[#0b1120] p-6 rounded-3xl border border-gray-800">
+                <div class="flex justify-between text-xs"><span class="text-gray-400">✅ Correct:</span><span id="resCorrect" class="font-black text-green-500">0</span></div>
+                <div class="flex justify-between text-xs"><span class="text-gray-400">❌ Wrong:</span><span id="resWrong" class="font-black text-red-500">0</span></div>
+                <div class="flex justify-between text-xs"><span class="text-gray-400">🏆 Topper Avg:</span><span class="font-black text-white">94%</span></div>
             </div>
-            <button onclick="location.reload()" class="w-full bg-white text-black py-4 rounded-xl font-black text-[10px] uppercase mt-10">Reattempt Quiz</button>
+
+            <div class="mt-10 flex gap-4">
+                <button onclick="location.reload()" class="flex-1 bg-white text-black py-4 rounded-2xl font-black text-[10px] uppercase">Reattempt</button>
+                <button onclick="window.history.back()" class="flex-1 bg-gray-800 text-white py-4 rounded-2xl font-black text-[10px] uppercase">Exit Quiz</button>
+            </div>
         </div>
     </div>
 
@@ -76,21 +82,21 @@
         const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
         const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
 
-        // Dummy Questions
+        // Dummy Logic - In production, fetch these from Firestore based on URL ID
         const questions = [
-            { q: "Powerhouse of the Cell?", o: ["Nucleus", "Mitochondria", "Ribosome", "Golgi"], a: 1 },
-            { q: "NEET is for which career?", o: ["Engineering", "Medical", "Law", "Arts"], a: 1 }
+            { q: "Which organelle is known as the suicide bag of the cell?", o: ["Ribosome", "Lysosome", "Vacuole", "Centrosome"], a: 1 },
+            { q: "What is the SI unit of electric current?", o: ["Volt", "Ohm", "Ampere", "Watt"], a: 2 }
         ];
 
         let currentIdx = 0; let correct = 0; let wrong = 0; let score = 0; let coins = 0;
         let selected = null; let qTimer; let totalTimer;
-        let qTimeLimit = 60; let totalSeconds = 600; // 10 Minutes Total
+        let qTimeLimit = 60; let totalSeconds = 600; 
 
         onAuthStateChanged(auth, async (user) => {
             if(user) {
                 const snap = await getDoc(doc(db, "users", user.uid));
                 const attempts = snap.data().quiz_attempts || 0;
-                qTimeLimit = Math.max(10, 60 - (attempts * 10)); // Reattempt e 10s kome
+                qTimeLimit = Math.max(10, 60 - (attempts * 10)); // Reattempt e time kome
                 startTotalTimer();
                 loadQuestion();
             }
@@ -118,16 +124,17 @@
                 document.getElementById('qTimer').innerText = timeLeft + "s";
                 if(timeLeft <= 0) {
                     clearInterval(qTimer);
-                    document.getElementById('qTimer').innerText = "0s";
-                    document.getElementById('ansBtn').disabled = true; // Timer shesh hole ans deya jabe na
+                    document.getElementById('ansBtn').disabled = true;
                     document.getElementById('ansBtn').style.opacity = "0.3";
-                    alert("Time up for this question! Go to Next.");
+                    alert("Time's up! You can't submit now. Move to Next.");
                 }
             }, 1000);
 
             const q = questions[currentIdx];
-            document.getElementById('qCount').innerText = `${currentIdx + 1}/${questions.length}`;
+            document.getElementById('qCount').innerText = `Q ${currentIdx + 1}/${questions.length}`;
             document.getElementById('questionText').innerText = q.q;
+            document.getElementById('progBar').style.width = ((currentIdx + 1) / questions.length * 100) + "%";
+            
             const optBox = document.getElementById('optionsBox');
             optBox.innerHTML = "";
             q.o.forEach((o, i) => {
@@ -143,16 +150,18 @@
         };
 
         window.submitAns = () => {
-            if(selected === null) return alert("Please select an option!");
-            clearInterval(qTimer); // Ans submit korle Q-Timer bondho hobe
+            if(selected === null) return alert("Select an answer!");
+            clearInterval(qTimer);
             
             if(selected === questions[currentIdx].a) {
                 score += 4; coins += 4; correct++;
+                alert("Correct! +4 BP Earned.");
             } else {
                 score -= 1; coins -= 2; wrong++;
+                alert("Incorrect! -2 BP deducted.");
             }
-            alert("Answer Recorded! Click Next.");
-            document.getElementById('ansBtn').disabled = true; 
+            document.getElementById('ansBtn').disabled = true;
+            document.getElementById('ansBtn').style.opacity = "0.3";
         };
 
         window.nextQ = () => {
@@ -166,19 +175,17 @@
         };
 
         window.finishQuiz = async () => {
-            clearInterval(totalTimer);
-            clearInterval(qTimer);
+            clearInterval(totalTimer); clearInterval(qTimer);
             document.getElementById('quizBox').classList.add('hidden');
             document.getElementById('resultBox').classList.remove('hidden');
             
-            document.getElementById('resScore').innerText = score;
             document.getElementById('resCoins').innerText = (coins >= 0 ? '+' : '') + coins;
             document.getElementById('resCorrect').innerText = correct;
             document.getElementById('resWrong').innerText = wrong;
-            document.getElementById('resMissed').innerText = questions.length - (correct + wrong);
+            document.getElementById('resAcc').innerText = Math.round((correct / questions.length) * 100) + "%";
 
-            const userRef = doc(db, "users", auth.currentUser.uid);
-            await updateDoc(userRef, { 
+            // Update Firebase
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { 
                 coins: increment(coins),
                 quiz_attempts: increment(1)
             });
