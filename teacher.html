@@ -3,63 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET Admin - Control Panel</title>
+    <title>mNEET Admin - Control Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0b1120; color: white; padding-bottom: 80px; }
-        .card-navy { background-color: #16213e; }
+        body { background-color: #0b1120; color: white; font-family: 'Inter', sans-serif; padding-bottom: 90px; }
+        .card-navy { background-color: #16213e; border: 1px solid #1f2937; padding: 20px; border-radius: 20px; }
+        .input-navy { background-color: #1e293b; border: 1px solid #334155; color: white; width: 100%; padding: 12px; border-radius: 12px; margin-bottom: 10px; outline: none; font-size: 14px; }
         .text-gold { color: #eab308; }
-        .nav-active { color: #eab308; border-top: 2px solid #eab308; }
+        .bg-gold { background-color: #eab308; }
+        .nav-btn { color: #6b7280; transition: 0.3s; }
+        .nav-active { color: #eab308 !important; }
+        .glass { background: rgba(22, 33, 62, 0.9); backdrop-filter: blur(10px); }
     </style>
 </head>
 <body>
-    <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] border-b border-gray-800">
+
+    <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] border-b border-gray-800 shadow-2xl">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-black text-gold italic">mNEET <span class="text-xs text-white not-italic uppercase ml-1">Admin</span></h1>
-            <button onclick="logout()" class="text-red-500 font-bold text-xs uppercase border border-red-900 px-3 py-1 rounded">Logout</button>
+            <h1 class="text-2xl font-black text-gold italic">mNEET <span class="text-xs text-white not-italic uppercase font-bold ml-1 tracking-tighter">Admin Control</span></h1>
+            <button onclick="logout()" class="text-red-500 font-bold text-xs border border-red-900 px-3 py-1 rounded-lg uppercase">Logout</button>
         </div>
 
-        <div class="flex gap-4 mb-4 text-center">
-            <div class="flex-1 bg-[#0b1120] p-4 rounded-2xl border border-gray-700">
-                <p class="text-[10px] text-gray-500 uppercase font-bold">Total Students</p>
-                <p id="totalStudents" class="text-2xl font-black text-gold">0</p>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-center">
+                <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Total Users</p>
+                <p id="statUsers" class="text-xl font-black text-gold">0</p>
             </div>
-            <div class="flex-1 bg-[#0b1120] p-4 rounded-2xl border border-gray-700">
-                <p class="text-[10px] text-gray-500 uppercase font-bold">Active Sales</p>
-                <p id="totalSales" class="text-2xl font-black text-white">₹0</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="p-6">
-        <div id="adminPanelContent" class="space-y-4">
-            <div class="card-navy p-6 rounded-3xl border border-gray-800 text-center">
-                <i class="fa-solid fa-plus-circle text-4xl text-gold mb-2"></i>
-                <h3 class="font-bold">Add New Content</h3>
-                <p class="text-xs text-gray-500">Tap below to manage your mNEET store</p>
+            <div class="bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-center">
+                <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Pending Pay</p>
+                <p id="statPay" class="text-xl font-black text-white">0</p>
             </div>
         </div>
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-[#16213e] border-t border-gray-800 flex justify-around p-3 z-50">
-        <button onclick="setTab('store')" class="flex flex-col items-center nav-active" id="admin-store">
-            <i class="fa-solid fa-bag-shopping text-lg"></i>
-            <span class="text-[9px] uppercase font-bold mt-1">Manage Store</span>
+    <div id="adminMain" class="p-6 max-w-xl mx-auto">
+        </div>
+
+    <div class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 flex justify-around p-4 z-50">
+        <button onclick="setTab('course')" id="btn-course" class="nav-btn nav-active flex flex-col items-center">
+            <i class="fa-solid fa-layer-group text-lg"></i>
+            <span class="text-[9px] font-black uppercase mt-1">Course</span>
         </button>
-        <button onclick="setTab('study')" class="flex flex-col items-center text-gray-500" id="admin-study">
+        <button onclick="setTab('study')" id="btn-study" class="nav-btn flex flex-col items-center">
             <i class="fa-solid fa-book-medical text-lg"></i>
-            <span class="text-[9px] uppercase font-bold mt-1">Study Material</span>
+            <span class="text-[9px] font-black uppercase mt-1">Study</span>
         </button>
-        <button onclick="setTab('test')" class="flex flex-col items-center text-gray-500" id="admin-test">
-            <i class="fa-solid fa-vial text-lg"></i>
-            <span class="text-[9px] uppercase font-bold mt-1">Test Center</span>
+        <button onclick="setTab('test')" id="btn-test" class="nav-btn flex flex-col items-center">
+            <i class="fa-solid fa-vial-circle-check text-lg"></i>
+            <span class="text-[9px] font-black uppercase mt-1">Test</span>
         </button>
-        <button onclick="setTab('mstore')" class="flex flex-col items-center text-gray-500" id="admin-mstore">
-            <i class="fa-solid fa-boxes-stacked text-lg"></i>
-            <span class="text-[9px] uppercase font-bold mt-1">Admin Store</span>
+        <button onclick="setTab('mstore')" id="btn-mstore" class="nav-btn flex flex-col items-center">
+            <i class="fa-solid fa-boxes-packing text-lg"></i>
+            <span class="text-[9px] font-black uppercase mt-1">mStore</span>
         </button>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+        const firebaseConfig = { /* Apnar Config */ };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        window.setTab = (tab) => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('btn-' + tab).classList.add('nav-active');
+            
+            const area = document.getElementById('adminMain');
+            if(tab === 'course') renderCourseTab(area);
+            if(tab === 'study') renderStudyTab(area);
+            if(tab === 'test') renderTestTab(area);
+            if(tab === 'mstore') renderMStoreTab(area);
+        };
+
+        // --- COURSE MANAGEMENT ---
+        function renderCourseTab(el) {
+            el.innerHTML = `
+                <div class="card-navy mb-6">
+                    <h2 class="text-gold font-black uppercase text-xs mb-4 tracking-widest">Add New Course</h2>
+                    <input type="text" id="cTitle" class="input-navy" placeholder="Course Name">
+                    <input type="number" id="cPrice" class="input-navy" placeholder="Price (₹)">
+                    <button onclick="addCourse()" class="w-full bg-gold text-black py-3 rounded-xl font-black uppercase text-xs shadow-lg">Publish Course</button>
+                </div>
+                <div id="list"></div>`;
+        }
+
+        // --- STUDY MATERIAL (Chapter, Video, Notes, DPP) ---
+        function renderStudyTab(el) {
+            el.innerHTML = `
+                <div class="card-navy mb-6">
+                    <h2 class="text-gold font-black uppercase text-xs mb-4 tracking-widest">Upload Study Material</h2>
+                    <input type="text" id="chapterName" class="input-navy" placeholder="Chapter Name (e.g. Unit of Life)">
+                    <input type="text" id="vidId" class="input-navy" placeholder="YouTube Video ID">
+                    <input type="text" id="notesUrl" class="input-navy" placeholder="Class Notes PDF Link">
+                    <input type="text" id="dppUrl" class="input-navy" placeholder="DPP / Quiz Link">
+                    <button onclick="addStudy()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-black uppercase text-xs">Add to Library</button>
+                </div>`;
+        }
+
+        // --- TEST CENTER ---
+        function renderTestTab(el) {
+            el.innerHTML = `
+                <div class="card-navy text-center p-10">
+                    <i class="fa-solid fa-microscope text-4xl text-gray-700 mb-4"></i>
+                    <h2 class="font-bold">Test Management</h2>
+                    <p class="text-xs text-gray-500 mt-2 italic">Ekhane apni 8-10 types-er Topic wise & Full Tests create korte parben.</p>
+                    <button class="mt-6 bg-gold text-black px-6 py-2 rounded-lg font-black text-[10px] uppercase">Create New Test</button>
+                </div>`;
+        }
+
+        // --- mSTORE (Flipkart Style Sale) ---
+        function renderMStoreTab(el) {
+            el.innerHTML = `
+                <div class="card-navy mb-6">
+                    <h2 class="text-gold font-black uppercase text-xs mb-4 tracking-widest">Add Product to mStore</h2>
+                    <input type="text" id="pName" class="input-navy" placeholder="Product Name (e.g. Formula Book)">
+                    <input type="number" id="pPrice" class="input-navy" placeholder="Selling Price">
+                    <input type="text" id="pImg" class="input-navy" placeholder="Product Image URL">
+                    <button onclick="addProduct()" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-xs">List Product</button>
+                </div>`;
+        }
+
+        window.logout = () => signOut(auth).then(() => window.location.href="index.html");
+        
+        // Initial Tab Load
+        setTab('course');
+
+    </script>
 </body>
 </html>
-
