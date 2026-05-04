@@ -1,7 +1,71 @@
-<div class="fixed bottom-0 left-0 right-0 bg-[#16213e]/95 border-t border-gray-800 flex h-20 z-50">
-    <button onclick="nav('admin_course.html', 'c')" id="btn-c" class="nav-btn nav-active"><i class="fa-solid fa-layer-group text-xl"></i><span class="text-[9px] uppercase mt-1">Course</span></button>
-    <button onclick="nav('admin_study.html', 's')" id="btn-s" class="nav-btn"><i class="fa-solid fa-book-medical text-xl"></i><span class="text-[9px] uppercase mt-1">Study</span></button>
-    <button onclick="nav('admin_test.html', 't')" id="btn-t" class="nav-btn"><i class="fa-solid fa-vial-circle-check text-xl"></i><span class="text-[9px] uppercase mt-1">Test</span></button>
-    <button onclick="nav('admin_users.html', 'u')" id="btn-u" class="nav-btn"><i class="fa-solid fa-users-gear text-xl"></i><span class="text-[9px] uppercase mt-1">Users</span></button>
-    <button onclick="nav('admin_mstore.html', 'm')" id="btn-m" class="nav-btn"><i class="fa-solid fa-boxes-packing text-xl"></i><span class="text-[9px] uppercase mt-1">mStore</span></button>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mNEET Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #0b1120; color: white; padding-bottom: 90px; font-family: sans-serif; overflow: hidden; }
+        .nav-btn { color: #6b7280; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; }
+        .nav-active { color: #eab308 !important; }
+        .glass { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(10px); }
+        iframe { width: 100%; height: calc(100vh - 160px); border: none; }
+    </style>
+</head>
+<body>
+
+    <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] shadow-2xl border-b border-gray-800 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-black text-[#eab308] italic">Admin Panel</h1>
+            <p class="text-[8px] uppercase font-black text-gray-500 tracking-[0.2em]">mNEET Control Center</p>
+        </div>
+        <button onclick="window.location.href='index.html'" class="text-red-500 text-2xl active:scale-90 transition-all">
+            <i class="fa-solid fa-power-off"></i>
+        </button>
+    </div>
+
+    <div id="adminContent">
+        <iframe id="adminFrame" src="admin_course.html"></iframe>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 flex h-20 z-50">
+        <button onclick="nav('admin_course.html', 'c')" id="btn-c" class="nav-btn nav-active">
+            <i class="fa-solid fa-layer-group text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Course</span>
+        </button>
+        <button onclick="nav('admin_study.html', 's')" id="btn-s" class="nav-btn">
+            <i class="fa-solid fa-book-medical text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Study</span>
+        </button>
+        <button onclick="nav('admin_test.html', 't')" id="btn-t" class="nav-btn">
+            <i class="fa-solid fa-vial-circle-check text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Test</span>
+        </button>
+        <button onclick="nav('admin_users.html', 'u')" id="btn-u" class="nav-btn">
+            <i class="fa-solid fa-users-gear text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Users</span>
+        </button>
+        <button onclick="nav('admin_mstore.html', 'm')" id="btn-m" class="nav-btn">
+            <i class="fa-solid fa-boxes-packing text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">mStore</span>
+        </button>
+    </div>
+
+    <script>
+        function nav(file, id) {
+            // Iframe change
+            document.getElementById('adminFrame').src = file;
+            
+            // UI Active state change
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-active'));
+            document.getElementById('btn-' + id).classList.add('nav-active');
+        }
+
+        // Handle iframe errors
+        document.getElementById('adminFrame').onerror = function() {
+            alert("File not found! Make sure " + this.src + " exists in GitHub.");
+        };
+    </script>
+</body>
+</html>
