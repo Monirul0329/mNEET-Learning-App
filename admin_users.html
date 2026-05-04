@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0b1120] p-6 text-white font-sans pb-20">
+
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-[#eab308] text-xs font-black uppercase tracking-[0.2em]">User Control Center</h2>
+            <p class="text-[10px] text-gray-500 mt-1 uppercase">Manage Ranks, Coins & Access</p>
+        </div>
+        <div class="bg-[#16213e] px-4 py-2 rounded-2xl border border-gray-800">
+            <span id="totalStudents" class="text-lg font-black text-white">0</span>
+            <span class="text-[8px] text-gray-500 uppercase ml-1">Total</span>
+        </div>
+    </div>
+
+    <div class="relative mb-6">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-500 text-sm"></i>
+        <input type="text" id="userSearch" onkeyup="searchUser()" placeholder="Search by name or email..." class="w-full bg-[#16213e] p-4 pl-12 rounded-2xl border border-gray-800 outline-none text-sm focus:border-[#eab308]">
+    </div>
+
+    <div id="userContainer" class="space-y-4">
+        <p class="text-center py-20 text-gray-700 animate-pulse uppercase text-[10px] font-black">Fetching Students Data...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", 
+            authDomain: "mneet-7699.firebaseapp.com", 
+            projectId: "mneet-7699", 
+            storageBucket: "mneet-7699.firebasestorage.app", 
+            messagingSenderId: "801664280357", 
+            appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- 1. Load All Students ---
+        const q = query(collection(db, "users"), where("role", "==", "student"));
+        onSnapshot(q, (snap) => {
+            document.getElementById('totalStudents').innerText = snap.size;
+            const container = document.getElementById('userContainer');
+            container.innerHTML = "";
+
+            snap.forEach(d => {
+                const u = d.data();
+                const isBlocked = u.isBlocked ? "bg-red-500/10 border-red-900/50" : "bg-[#16213e] border-gray-800";
+                
+                container.innerHTML += `
+                <div class="user-card p-5 rounded-[2rem] border ${isBlocked} transition-all shadow-xl">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-white text-sm">${u.name}</h3>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-tighter">${u.email}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-black text-[#eab308] italic">${u.rank || 'Bronze'}</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <div class="bg-[#0b1120] p-3 rounded-xl border border-gray-800">
+                            <p class="text-[8px] text-gray-500 uppercase font-bold mb-1">BP Coins</p>
+                            <div class="flex items-center gap-2">
+                                <input type="number" value="${u.coins || 0}" onchange="updateCoins('${d.id}', this.value)" class="bg-transparent w-full text-sm font-black text-white outline-none">
+                                <i class="fa-solid fa-pen text-[8px] text-[#eab308]"></i>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="toggleBlock('${d.id}', ${u.isBlocked || false})" class="flex-1 ${u.isBlocked ? 'bg-green-600' : 'bg-red-600'} text-white rounded-xl text-[9px] font-black uppercase">
+                                ${u.isBlocked ? 'Unblock' : 'Block'}
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        });
+
+        // --- 2. Update Coins Manually ---
+        window.updateCoins = async (uid, newVal) => {
+            try {
+                await updateDoc(doc(db, "users", uid), {
+                    coins: parseInt(newVal)
+                });
+                alert("Coins updated!");
+            } catch(e) { alert(e.message); }
+        };
+
+        // --- 3. Toggle Block Student ---
+        window.toggleBlock = async (uid, currentStatus) => {
+            const msg = currentStatus ? "Unblock this student?" : "Block this student? They won't be able to access the app.";
+            if(confirm(msg)) {
+                await updateDoc(doc(db, "users", uid), {
+                    isBlocked: !currentStatus
+                });
+            }
+        };
+
+        // --- 4. Search Filter ---
+        window.searchUser = () => {
+            let input = document.getElementById('userSearch').value.toLowerCase();
+            let cards = document.getElementsByClassName('user-card');
+            for (let i = 0; i < cards.length; i++) {
+                if (!cards[i].innerText.toLowerCase().includes(input)) {
+                    cards[i].style.display = "none";
+                } else {
+                    cards[i].style.display = "block";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
