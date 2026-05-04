@@ -1,56 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET - Student Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background-color: #0a1128; color: white; font-family: 'Inter', sans-serif; }
-        .input-box { background-color: #16213e; border: 1px solid #1f2937; color: white; }
-        .btn-gold { background-color: #d97706; color: #0a1128; font-weight: bold; }
-    </style>
-</head>
-<body class="flex items-center justify-center min-h-screen p-6">
-
-    <div class="w-full max-w-md">
-        <div class="text-center mb-10">
-            <h1 class="text-5xl font-black text-[#d97706] tracking-tighter italic">mNEET</h1>
-            <p class="text-gray-400 text-sm mt-2 font-medium">Future Doctors' Learning Hub</p>
-        </div>
-
-        <div id="loginCard" class="bg-[#16213e]/50 p-8 rounded-[2rem] border border-gray-800 shadow-2xl backdrop-blur-sm">
-            <h2 id="authTitle" class="text-2xl font-bold mb-6 text-center">Login</h2>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="text-xs text-gray-500 ml-1 uppercase font-bold tracking-widest">Email Address</label>
-                    <input type="email" id="email" class="w-full input-box p-4 rounded-2xl mt-1 focus:outline-none focus:border-[#d97706]" placeholder="example@mail.com">
-                </div>
-
-                <div>
-                    <label class="text-xs text-gray-500 ml-1 uppercase font-bold tracking-widest">Password</label>
-                    <input type="password" id="password" class="w-full input-box p-4 rounded-2xl mt-1 focus:outline-none focus:border-[#d97706]" placeholder="••••••••">
-                </div>
-
-                <button onclick="handleAuth()" id="authBtn" class="w-full btn-gold py-4 rounded-2xl mt-4 text-lg shadow-lg active:scale-95 transition-transform uppercase tracking-widest">
-                    Login Now
-                </button>
-            </div>
-
-            <div class="mt-8 text-center text-sm">
-                <span id="toggleText" class="text-gray-400">Don't have an account?</span>
-                <button onclick="toggleAuth()" id="toggleBtn" class="text-[#d97706] font-bold ml-1 hover:underline">Create Account</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-                const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyBisQytTeFhjMdlkTUNwcmCelPy7C9iI1Y",
             authDomain: "mneet-7699.firebaseapp.com",
             projectId: "mneet-7699",
@@ -58,49 +6,29 @@
             messagingSenderId: "801664280357",
             appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
         };
-        
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-
-        let isLogin = true;
-
-        window.toggleAuth = () => {
-            isLogin = !isLogin;
-            document.getElementById('authTitle').innerText = isLogin ? "Login" : "Create Account";
-            document.getElementById('authBtn').innerText = isLogin ? "Login Now" : "Sign Up Free";
-            document.getElementById('toggleText').innerText = isLogin ? "Don't have an account?" : "Already have an account?";
-            document.getElementById('toggleBtn').innerText = isLogin ? "Create Account" : "Login Here";
-        };
 
         window.handleAuth = async () => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
-            const btn = document.getElementById('authBtn');
-
-            if(!email || !pass) return alert("Fill all fields!");
-            
-            btn.innerText = "Processing...";
-            btn.disabled = true;
+            if(!email || !pass) return alert("Please fill all fields");
 
             try {
                 if(isLogin) {
                     await signInWithEmailAndPassword(auth, email, pass);
-                    alert("Login Successful!");
-                    // Login hoye gele Student Dashboard-e niye jabe
+                    alert("Login Success!");
                     window.location.href = "dashboard.html";
                 } else {
                     await createUserWithEmailAndPassword(auth, email, pass);
-                    alert("Account Created! You can login now.");
-                    toggleAuth();
+                    alert("Account Created! Now please Login.");
+                    location.reload(); 
                 }
             } catch (err) {
-                alert(err.message);
+                console.error(err);
+                alert("Error: " + err.code); // Eita dekhle amra vul-ta dhorte parbo
             }
-            btn.disabled = false;
-            btn.innerText = isLogin ? "Login Now" : "Sign Up Free";
         };
-    </script>
-</body>
-</html>
-
+        
