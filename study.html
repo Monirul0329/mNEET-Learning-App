@@ -1,4 +1,43 @@
-<body style="background:#0b1120;color:white;padding:20px;font-family:sans-serif;">
-    <h2 style="color:#eab308;text-transform:uppercase;font-size:12px;">Chapter wise Material</h2>
-    <p style="color:#6b7280;margin-top:20px;">Enrolled courses will appear here.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0b1120] p-6 text-white font-sans">
+    <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-6 text-center">Your Learning Library</h2>
+    
+    <div id="studyContainer" class="space-y-4">
+        <p class="text-center text-xs text-gray-600 animate-pulse">Syncing materials...</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        onSnapshot(collection(db, "study_material"), (snap) => {
+            const container = document.getElementById('studyContainer');
+            container.innerHTML = "";
+            if(snap.empty) container.innerHTML = `<p class="text-center text-xs text-gray-700 mt-10 font-bold uppercase italic">Enroll in a course to unlock content.</p>`;
+
+            snap.forEach(d => {
+                const s = d.data();
+                container.innerHTML += `
+                <div class="bg-[#16213e] p-6 rounded-[2rem] border-l-4 border-[#eab308] shadow-xl">
+                    <p class="text-[9px] text-[#eab308] font-black uppercase mb-1 tracking-widest italic">Chapter Analysis</p>
+                    <h3 class="font-bold text-lg text-white mb-6 leading-tight">${s.chapterName || s.chapter}</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button class="bg-[#0b1120] p-3 rounded-2xl text-[9px] font-black uppercase border border-gray-800 active:bg-gray-800"><i class="fa-solid fa-play text-[#eab308] mr-1"></i> Video</button>
+                        <button class="bg-[#0b1120] p-3 rounded-2xl text-[9px] font-black uppercase border border-gray-800 active:bg-gray-800"><i class="fa-solid fa-file-pdf text-[#eab308] mr-1"></i> Notes</button>
+                        <button class="bg-[#0b1120] p-3 rounded-2xl text-[9px] font-black uppercase border border-gray-800 active:bg-gray-800"><i class="fa-solid fa-bolt text-[#eab308] mr-1"></i> DPP</button>
+                    </div>
+                </div>`;
+            });
+        });
+    </script>
 </body>
+</html>
