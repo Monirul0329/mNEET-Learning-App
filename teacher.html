@@ -10,40 +10,40 @@
         .card-navy { background-color: #16213e; border: 1px solid #1f2937; }
         .input-navy { background-color: #1e293b; border: 1px solid #334155; color: white; }
         .btn-gold { background-color: #eab308; color: #0b1120; font-weight: 800; }
-        .text-gold { color: #eab308; }
     </style>
 </head>
 <body>
     <nav class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#0b1120]">
-        <h1 class="text-3xl font-black text-gold italic tracking-tighter">mNeet <span class="text-xs text-white uppercase not-italic ml-2">Admin</span></h1>
+        <h1 class="text-3xl font-black text-[#eab308] italic tracking-tighter">mNeet Admin</h1>
     </nav>
 
     <div class="p-6 max-w-lg mx-auto">
         <div class="card-navy p-8 rounded-[2.5rem] mb-10 shadow-2xl">
-            <h2 class="text-xl font-bold mb-6 text-gold uppercase tracking-widest">New Course</h2>
-            <input type="text" id="cTitle" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none focus:border-gold" placeholder="Course Name">
-            <input type="number" id="cPrice" class="w-full input-navy p-4 rounded-2xl mb-6 outline-none focus:border-gold" placeholder="Price (₹)">
-            <button onclick="saveCourse()" class="w-full btn-gold py-4 rounded-2xl font-bold uppercase tracking-widest shadow-lg">
-                PUBLISH COURSE
-            </button>
+            <h2 class="text-xl font-bold mb-6 text-[#eab308] uppercase tracking-widest text-center">Create Course</h2>
+            <input type="text" id="cTitle" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="Course Name">
+            <input type="number" id="cPrice" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="Price (₹)">
+            
+            <input type="text" id="cVideo" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="YouTube Link (e.g. https://youtu.be/...)">
+            
+            <textarea id="cDesc" class="w-full input-navy p-4 rounded-2xl mb-6 outline-none h-32" placeholder="Course Description..."></textarea>
+            <button onclick="saveCourse()" class="w-full btn-gold py-4 rounded-2xl font-bold uppercase tracking-widest shadow-lg">Publish Course</button>
         </div>
 
-        <h3 class="text-xs font-bold text-gray-500 uppercase mb-4 tracking-[0.2em] ml-2">Current Courses</h3>
+        <h3 class="text-xs font-bold text-gray-500 uppercase mb-4 ml-2">Live Courses</h3>
         <div id="adminCourseList" class="space-y-4"></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = {
-          apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
-          authDomain: "mneet-7699.firebaseapp.com",
-          projectId: "mneet-7699",
-          storageBucket: "mneet-7699.firebasestorage.app",
-          messagingSenderId: "801664280357",
-          appId: "1:801664280357:web:03da6173f29bedfeaa9ccc",
-          measurementId: "G-EFNE8HTGZ3"
+            apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
+            authDomain: "mneet-7699.firebaseapp.com",
+            projectId: "mneet-7699",
+            storageBucket: "mneet-7699.firebasestorage.app",
+            messagingSenderId: "801664280357",
+            appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -52,14 +52,28 @@
         window.saveCourse = async () => {
             const title = document.getElementById('cTitle').value;
             const price = document.getElementById('cPrice').value;
-            if(!title || !price) return alert("Fill all fields");
+            const videoLink = document.getElementById('cVideo').value;
+            const desc = document.getElementById('cDesc').value;
+
+            let videoId = "";
+            if(videoLink.includes("v=")) videoId = videoLink.split("v=")[1].split("&")[0];
+            else if(videoLink.includes("youtu.be/")) videoId = videoLink.split("youtu.be/")[1];
+
+            if(!title || !price) return alert("Title and Price are mandatory!");
             
-            try {
-                await addDoc(collection(db, "courses"), { title, price, timestamp: new Date() });
-                document.getElementById('cTitle').value = "";
-                document.getElementById('cPrice').value = "";
-                alert("Published Successfully!");
-            } catch (err) { alert(err.message); }
+            await addDoc(collection(db, "courses"), { 
+                title, 
+                price, 
+                video: videoId, 
+                desc, 
+                timestamp: new Date() 
+            });
+            alert("Course Published!");
+            location.reload();
+        };
+
+        window.delCourse = async (id) => {
+            if(confirm("Delete this course?")) await deleteDoc(doc(db, "courses", id));
         };
 
         onSnapshot(collection(db, "courses"), (snap) => {
@@ -68,9 +82,9 @@
             snap.forEach(d => {
                 const data = d.data();
                 container.innerHTML += `
-                    <div class="card-navy p-5 rounded-2xl flex justify-between items-center shadow-md border-l-4 border-gold">
-                        <span class="font-bold text-lg">${data.title}</span>
-                        <span class="text-gold font-black font-mono">₹${data.price}</span>
+                    <div class="card-navy p-4 rounded-2xl flex justify-between items-center shadow-md">
+                        <span class="font-bold">${data.title}</span>
+                        <button onclick="delCourse('${d.id}')" class="text-red-500 text-xs font-bold uppercase">Delete</button>
                     </div>`;
             });
         });
