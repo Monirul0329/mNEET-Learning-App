@@ -8,43 +8,54 @@
 </head>
 <body style="background-color: #0a1128; color: white; font-family: sans-serif;">
     <nav class="p-5 border-b border-gray-800 flex justify-between items-center bg-[#0a1128]">
-        <h1 style="color: #d97706;" class="text-2xl font-bold uppercase">Admin Panel</h1>
+        <h1 style="color: #d97706;" class="text-2xl font-bold italic">mNEET <span class="text-xs text-white uppercase not-italic">Admin</span></h1>
     </nav>
+
     <div class="p-6 max-w-lg mx-auto">
-        <div style="background-color: #16213e;" class="p-6 rounded-2xl mb-8">
-            <h2 class="text-lg font-bold mb-4">Create New Course</h2>
+        <div style="background-color: #16213e; border: 1px solid #1f2937;" class="p-6 rounded-2xl mb-8">
+            <h2 class="text-lg font-bold mb-4">Add New Course</h2>
             <input type="text" id="cTitle" style="background-color: #0f172a; border: 1px solid #334155;" class="w-full p-4 rounded-xl mb-4 text-white outline-none" placeholder="Course Name">
             <input type="number" id="cPrice" style="background-color: #0f172a; border: 1px solid #334155;" class="w-full p-4 rounded-xl mb-4 text-white outline-none" placeholder="Price">
-            <button onclick="saveCourse()" style="background-color: #d97706; color: #0a1128;" class="w-full py-4 rounded-xl font-bold">PUBLISH COURSE</button>
+            <button onclick="saveCourse()" style="background-color: #d97706; color: #0a1128;" class="w-full py-4 rounded-xl font-bold uppercase">Publish</button>
         </div>
+
+        <h3 class="text-gray-500 uppercase text-xs font-bold mb-4">Active Courses</h3>
         <div id="adminCourseList" class="space-y-4"></div>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
         const firebaseConfig = {
-            apiKey: "AIzaSyBisQytTeFhjMdlkTUNwcmCelPy7C9iI1Y",
-            authDomain: "mneet-7699.firebaseapp.com",
-            projectId: "mneet-7699",
-            storageBucket: "mneet-7699.firebasestorage.app",
-            messagingSenderId: "801664280357",
-            appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
+          apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
+          authDomain: "mneet-7699.firebaseapp.com",
+          projectId: "mneet-7699",
+          storageBucket: "mneet-7699.firebasestorage.app",
+          messagingSenderId: "801664280357",
+          appId: "1:801664280357:web:03da6173f29bedfeaa9ccc",
+          measurementId: "G-EFNE8HTGZ3"
         };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
         window.saveCourse = async () => {
             const title = document.getElementById('cTitle').value;
             const price = document.getElementById('cPrice').value;
-            if(!title || !price) return alert("Fill all fields");
+            if(!title || !price) return alert("Please fill all fields");
             await addDoc(collection(db, "courses"), { title, price, timestamp: new Date() });
+            document.getElementById('cTitle').value = "";
+            document.getElementById('cPrice').value = "";
             alert("Published!");
         };
+
         onSnapshot(collection(db, "courses"), (snap) => {
             const container = document.getElementById('adminCourseList');
             container.innerHTML = "";
             snap.forEach(d => {
                 const data = d.data();
-                container.innerHTML += `<div class="p-4 bg-gray-800 rounded-xl flex justify-between"><span>${data.title}</span><span style="color: #d97706;">₹${data.price}</span></div>`;
+                container.innerHTML += `<div style="background-color: #16213e; border: 1px solid #1f2937;" class="p-4 rounded-xl flex justify-between"><span>${data.title}</span><span style="color: #d97706; font-bold">₹${data.price}</span></div>`;
             });
         });
     </script>
