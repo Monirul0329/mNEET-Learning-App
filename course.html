@@ -1,9 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script src="https://cdn.tailwindcss.com"></script></head>
-<body class="bg-[#0b1120] p-6 text-white pb-20">
-    <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-6 text-center italic">Available Courses</h2>
-    <div id="courseContainer" class="space-y-8"></div>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0b1120] p-6 text-white pb-32">
+    <div id="courseContainer" class="space-y-8">
+        <p class="text-center text-xs text-gray-700 animate-pulse uppercase font-black py-20">Syncing Courses...</p>
+    </div>
+
+    <div id="payModal" class="hidden fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-6">
+        <div class="bg-[#16213e] w-full max-w-sm p-8 rounded-[3rem] border border-gray-800 text-center">
+            <div class="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 class="text-xl font-black italic mb-2">Secure Checkout</h2>
+            <p id="payTitle" class="text-xs text-gray-500 uppercase font-bold mb-8">Course Name</p>
+            <div class="bg-[#0b1120] p-6 rounded-3xl border border-gray-800 mb-8">
+                <p class="text-[10px] text-gray-500 uppercase font-black mb-1">Total Payable</p>
+                <p id="payAmount" class="text-3xl font-black text-[#eab308]">₹0</p>
+            </div>
+            <button onclick="processPayment()" class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase shadow-xl mb-4">Pay & Enroll Now</button>
+            <button onclick="closePay()" class="text-gray-500 text-[10px] font-black uppercase tracking-widest">Cancel Transaction</button>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -11,29 +31,43 @@
         const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
         const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
 
+        let selectedCid = null;
+
         onSnapshot(collection(db, "courses"), (snap) => {
             const container = document.getElementById('courseContainer'); container.innerHTML = "";
             snap.forEach(d => {
                 const c = d.data();
                 container.innerHTML += `
                 <div class="bg-[#16213e] rounded-[2.5rem] overflow-hidden border border-gray-800 shadow-2xl">
-                    <img src="${c.img || 'https://via.placeholder.com/400x200'}" class="w-full h-44 object-cover opacity-80">
-                    <div class="p-8">
-                        <h3 class="text-2xl font-black italic text-white uppercase tracking-tighter">${c.title}</h3>
-                        <p class="text-gray-500 text-[11px] mt-4 leading-relaxed">${c.desc || "Learn NEET concepts with expert visual aids and doubt solving sessions."}</p>
+                    <img src="${c.img || 'https://via.placeholder.com/400x200'}" class="w-full h-44 object-cover">
+                    <div class="p-8 text-center">
+                        <h3 class="text-2xl font-black italic text-white uppercase">${c.title}</h3>
+                        <p class="text-gray-500 text-[10px] mt-4 line-clamp-2">${c.desc || ""}</p>
                         <div class="mt-8 flex justify-between items-center">
-                            <span class="text-3xl font-black text-[#eab308] italic">₹${c.price}</span>
-                            <button onclick="enroll('${d.id}')" class="bg-[#eab308] text-[#0b1120] px-8 py-3 rounded-2xl font-black uppercase text-[10px]">Enroll Now</button>
+                            <span class="text-3xl font-black text-[#eab308]">₹${c.price}</span>
+                            <button onclick="openPay('${d.id}', '${c.title}', '${c.price}')" class="bg-[#eab308] text-black px-8 py-3 rounded-2xl font-black uppercase text-[10px]">Buy Course</button>
                         </div>
                     </div>
                 </div>`;
             });
         });
 
-        window.enroll = async (id) => {
-            if(!auth.currentUser) return alert("Login first!");
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { enrolled: arrayUnion(id) });
-            alert("Enrollment Successful! Check Study Section.");
+        window.openPay = (id, title, price) => {
+            selectedCid = id;
+            document.getElementById('payTitle').innerText = title;
+            document.getElementById('payAmount').innerText = '₹' + price;
+            document.getElementById('payModal').classList.remove('hidden');
+        };
+
+        window.closePay = () => document.getElementById('payModal').classList.add('hidden');
+
+        window.processPayment = async () => {
+            if(!auth.currentUser) return alert("Login First!");
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            await updateDoc(userRef, { enrolled: arrayUnion(selectedCid) });
+            alert("Payment Successful! Welcome to " + document.getElementById('payTitle').innerText);
+            closePay();
+            parent.location.href = 'dashboard.html';
         };
     </script>
 </body>
