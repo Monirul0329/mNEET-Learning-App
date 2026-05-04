@@ -135,20 +135,32 @@
         }
 
         function loadStudy(el) {
-            el.innerHTML = `
-                <h2 class="text-xs font-black uppercase text-gray-500 mb-6 tracking-[0.2em]">Chapter-wise Study</h2>
-                <div class="space-y-4">
-                    <div class="card-navy p-6 rounded-3xl border-l-4 border-gold">
-                        <p class="text-[10px] text-gold font-black mb-1 uppercase">Biology - Chapter 1</p>
-                        <h3 class="font-bold text-lg mb-4">Cell: The Unit of Life</h3>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button class="bg-gray-800 p-2 rounded-lg text-[9px] font-bold"><i class="fa-solid fa-play mr-1"></i> VIDEO</button>
-                            <button class="bg-gray-800 p-2 rounded-lg text-[9px] font-bold"><i class="fa-solid fa-file-pdf mr-1"></i> NOTES</button>
-                            <button class="bg-gray-800 p-2 rounded-lg text-[9px] font-bold"><i class="fa-solid fa-bolt mr-1"></i> DPP</button>
-                        </div>
+    el.innerHTML = `<h2 class="text-xs font-black uppercase text-gray-500 mb-6 tracking-[0.2em]">Chapter-wise Study</h2><div id="studyContent" class="space-y-4">Loading...</div>`;
+    
+    onSnapshot(collection(db, "study_material"), (snap) => {
+        const studyDiv = document.getElementById('studyContent');
+        studyDiv.innerHTML = "";
+        snap.forEach(d => {
+            const s = d.data();
+            studyDiv.innerHTML += `
+                <div class="card-navy p-6 rounded-3xl border-l-4 border-gold mb-4">
+                    <p class="text-[10px] text-gold font-black mb-1 uppercase italic">Topic Analysis</p>
+                    <h3 class="font-bold text-lg mb-4 text-white">${s.chapterName}</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="playVid('${s.videoId}')" class="bg-gray-800 p-2 rounded-lg text-[9px] font-bold text-white"><i class="fa-solid fa-play text-gold mr-1"></i> VIDEO</button>
+                        <a href="${s.notesUrl}" target="_blank" class="bg-gray-800 p-2 rounded-lg text-[9px] font-bold text-white text-center"><i class="fa-solid fa-file-pdf text-gold mr-1"></i> NOTES</a>
+                        <a href="${s.dppUrl}" target="_blank" class="bg-gray-800 p-2 rounded-lg text-[9px] font-bold text-white text-center"><i class="fa-solid fa-bolt text-gold mr-1"></i> DPP</a>
                     </div>
                 </div>`;
-        }
+        });
+    });
+}
+
+// Video Play Window (Simple Popup)
+window.playVid = (id) => {
+    const win = window.open(`https://youtu.be/XXXXX{id}`, '_blank');
+    win.focus();
+};
 
         function loadTest(el) {
             el.innerHTML = `
@@ -170,20 +182,26 @@
         }
 
         function loadMStore(el) {
-            el.innerHTML = `
-                <h2 class="text-xs font-black uppercase text-gray-500 mb-6 tracking-[0.2em]">mNEET Store</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="card-navy rounded-2xl overflow-hidden">
-                        <div class="h-32 bg-gray-800"></div>
-                        <div class="p-3">
-                            <p class="text-[10px] font-bold">Physics Formula Book</p>
-                            <p class="text-gold font-black mt-1">₹199</p>
-                            <button class="w-full bg-white text-black text-[9px] font-black py-1 rounded mt-2 uppercase">Buy Now</button>
-                        </div>
+    el.innerHTML = `<h2 class="text-xs font-black uppercase text-gray-500 mb-6 tracking-[0.2em]">mNEET Store</h2><div id="productGrid" class="grid grid-cols-2 gap-4"></div>`;
+    
+    onSnapshot(collection(db, "mstore_products"), (snap) => {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = "";
+        snap.forEach(d => {
+            const p = d.data();
+            grid.innerHTML += `
+                <div class="card-navy rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
+                    <img src="${p.img || 'https://via.placeholder.com/150'}" class="h-32 w-full object-cover bg-gray-900">
+                    <div class="p-4">
+                        <p class="text-[10px] font-bold text-white truncate">${p.name}</p>
+                        <p class="text-gold font-black mt-1 text-lg italic">₹${p.price}</p>
+                        <button class="w-full bg-white text-black text-[9px] font-black py-2 rounded-xl mt-3 uppercase shadow-md">Buy Now</button>
                     </div>
                 </div>`;
-        }
-
+        });
+    });
+                }
+        
         window.logout = () => signOut(auth).then(() => window.location.href="index.html");
     </script>
 </body>
