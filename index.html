@@ -19,7 +19,7 @@
         
         <h2 id="authTitle" class="text-xl font-bold mb-6">Login</h2>
 
-        <div id="regFields" class="hidden text-left">
+        <div id="regFields" class="hidden">
             <input type="text" id="userName" class="input-navy" placeholder="Full Name">
             <input type="text" id="userCity" class="input-navy" placeholder="City">
         </div>
@@ -83,7 +83,7 @@
                     await setDoc(doc(db, "users", res.user.uid), {
                         name, city, email, coins: 0, isBlocked: false, role: 'student'
                     });
-                    alert("Account Created!");
+                    alert("Account Created! Now Login.");
                     location.reload();
                 }
             } catch (e) { alert("Error: " + e.code); }
