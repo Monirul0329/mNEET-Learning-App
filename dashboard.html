@@ -3,19 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET - Dashboard</title>
+    <title>mNeet - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0b1120; color: white; font-family: sans-serif; }
+        .card-navy { background-color: #16213e; border: 1px solid #1f2937; }
+        .btn-gold { background-color: #eab308; color: #0b1120; font-weight: 800; }
+        .text-gold { color: #eab308; }
+    </style>
 </head>
-<body style="background-color: #0a1128; color: white; font-family: sans-serif;">
-    <nav class="p-5 border-b border-gray-800 flex justify-between items-center bg-[#0a1128]">
-        <h1 style="color: #d97706;" class="text-2xl font-bold uppercase tracking-tighter">mNEET</h1>
-        <button onclick="window.location.href='index.html'" class="bg-red-900/20 text-red-400 px-4 py-1 rounded text-xs border border-red-800">Logout</button>
+<body>
+    <nav class="p-6 border-b border-gray-800 flex justify-between items-center sticky top-0 bg-[#0b1120] z-50">
+        <h1 class="text-3xl font-black text-gold italic tracking-tighter">mNeet</h1>
+        <button onclick="window.location.href='index.html'" class="bg-red-900/20 text-red-400 px-4 py-1 rounded-full text-xs border border-red-800 uppercase font-bold">Logout</button>
     </nav>
 
     <div class="p-6 max-w-lg mx-auto">
-        <h2 class="text-xl font-bold mb-6">Available Courses</h2>
-        <div id="courseList" class="space-y-4">
-            <p class="text-gray-600 italic">Fetching courses...</p>
+        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+            <span class="w-2 h-6 bg-gold rounded-full"></span> My Courses
+        </h2>
+        
+        <div id="courseList" class="space-y-6">
+            <p class="text-gray-600 italic text-center py-10">Fetching your courses...</p>
         </div>
     </div>
 
@@ -39,14 +48,18 @@
         onSnapshot(collection(db, "courses"), (snap) => {
             const container = document.getElementById('courseList');
             container.innerHTML = "";
-            if(snap.empty) container.innerHTML = "<p class='text-gray-600'>No courses available yet.</p>";
+            if(snap.empty) container.innerHTML = "<p class='text-gray-500 text-center'>No courses found.</p>";
+            
             snap.forEach(d => {
                 const data = d.data();
                 container.innerHTML += `
-                    <div style="background-color: #16213e; border: 1px solid #1f2937;" class="p-5 rounded-2xl shadow-lg border-l-4 border-[#d97706]">
-                        <h3 class="text-lg font-bold">${data.title}</h3>
-                        <p style="color: #d97706;" class="font-bold mb-4">₹${data.price}</p>
-                        <button class="w-full py-2 bg-gray-700 rounded-lg text-xs font-bold uppercase tracking-widest">Enroll Now</button>
+                    <div class="card-navy p-6 rounded-[2rem] shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-gold px-4 py-1 rounded-bl-2xl text-[10px] text-[#0b1120] font-black uppercase">Active</div>
+                        <h3 class="text-2xl font-bold mb-1">${data.title}</h3>
+                        <p class="text-gold font-mono font-bold text-lg mb-6 tracking-wide">₹${data.price}</p>
+                        <button class="w-full btn-gold py-4 rounded-2xl text-sm uppercase tracking-widest shadow-lg active:scale-95 transition-transform">
+                            Enroll Now
+                        </button>
                     </div>
                 `;
             });
