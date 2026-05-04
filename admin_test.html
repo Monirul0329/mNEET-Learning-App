@@ -1,71 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><script src="https://cdn.tailwindcss.com"></script></head>
-<body class="bg-[#0b1120] p-6 text-white font-sans pb-20">
-    <div class="bg-[#16213e] p-6 rounded-3xl border border-yellow-500/20 mb-8 shadow-2xl">
-        <h2 id="formTitle" class="text-yellow-500 text-[10px] font-black uppercase mb-6 tracking-[0.3em] text-center italic">Create / Edit Test</h2>
+<body class="bg-[#0b1120] p-6 text-white pb-32">
+    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-yellow-500/20 shadow-2xl mb-10">
+        <h2 id="formTitle" class="text-yellow-500 text-[10px] font-black uppercase text-center mb-8 tracking-widest italic">Test Center Manager</h2>
         
         <input type="hidden" id="editId">
-        <select id="courseSelect" class="w-full bg-[#1e293b] p-4 rounded-xl mb-4 border border-gray-700 outline-none text-sm text-white focus:border-yellow-500">
-            <option value="">Loading Courses...</option>
+        
+        <label class="text-[9px] text-gray-500 font-black uppercase ml-1">Target Subject</label>
+        <select id="courseSelect" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-4 border border-gray-700 outline-none text-sm text-white focus:border-yellow-500 mt-1">
+            <option value="">Loading Subjects...</option>
         </select>
 
-        <input type="text" id="testName" placeholder="Test Name (e.g. Physics Mock 01)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none text-sm focus:border-yellow-500">
-        <input type="text" id="testLink" placeholder="Quiz/Google Form Link" class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 outline-none text-sm focus:border-yellow-500">
+        <input type="text" id="tName" placeholder="Test Title (e.g. Weekly Full Mock)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none text-sm focus:border-yellow-500">
+        <input type="text" id="tLink" placeholder="Google Form / Quiz Link" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-6 border border-gray-700 outline-none text-sm focus:border-yellow-500">
         
-        <button onclick="saveTest()" id="saveBtn" class="w-full bg-yellow-500 text-black py-4 rounded-xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Publish Test</button>
+        <button onclick="saveTest()" id="saveBtn" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Publish Test</button>
     </div>
 
-    <h3 class="text-[10px] text-gray-500 uppercase font-black mb-6 ml-2 tracking-widest">Active Tests</h3>
     <div id="testList" class="space-y-4"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
         const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
-        // Load courses for dropdown
         onSnapshot(collection(db, "courses"), (snap) => {
             const select = document.getElementById('courseSelect');
-            select.innerHTML = '<option value="">-- Choose Subject/Course --</option>';
+            select.innerHTML = '<option value="">-- Select Subject --</option>';
             snap.forEach(d => select.innerHTML += `<option value="${d.id}">${d.data().title}</option>`);
         });
 
-        // Save Test
         window.saveTest = async () => {
             const cid = document.getElementById('courseSelect').value;
-            const name = document.getElementById('testName').value;
-            const link = document.getElementById('testLink').value;
+            const name = document.getElementById('tName').value;
+            const link = document.getElementById('tLink').value;
             const editId = document.getElementById('editId').value;
+            if(!cid || !name) return alert("Fill all fields!");
 
-            if(!cid || !name || !link) return alert("Fill all fields!");
-
-            try {
-                if(editId) {
-                    await updateDoc(doc(db, "tests", editId), { cid, name, link, updated: new Date() });
-                } else {
-                    await addDoc(collection(db, "tests"), { cid, name, link, timestamp: new Date() });
-                }
-                location.reload();
-            } catch(e) { alert(e.message); }
+            if(editId) await updateDoc(doc(db, "tests", editId), { cid, name, link });
+            else await addDoc(collection(db, "tests"), { cid, name, link, timestamp: new Date() });
+            
+            location.reload();
         };
 
-        // List Tests
         onSnapshot(collection(db, "tests"), (snap) => {
-            const list = document.getElementById('testList');
-            list.innerHTML = "";
+            const list = document.getElementById('testList'); list.innerHTML = "";
             snap.forEach(d => {
                 const t = d.data();
-                list.innerHTML += `<div class="bg-[#16213e] p-4 rounded-2xl flex justify-between items-center border border-gray-800">
-                    <p class="font-bold text-xs">${t.name}</p>
-                    <button onclick="deleteDoc(doc(db, 'tests', '${d.id}'))" class="text-red-500 text-xs"><i class="fa-solid fa-trash"></i></button>
+                list.innerHTML += `<div class="bg-[#16213e] p-5 rounded-3xl border border-gray-800 flex justify-between items-center shadow-xl">
+                    <div class="flex-1">
+                        <p class="text-[7px] text-yellow-500 font-black uppercase mb-1">MAP: ${t.cid.substring(0,8)}</p>
+                        <p class="font-bold text-sm text-white italic">${t.name}</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <button onclick="editT('${d.id}', '${t.cid}', '${t.name}', '${t.link}')" class="text-blue-400"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteDoc(doc(db, 'tests', '${d.id}'))" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 </div>`;
             });
         });
+
+        window.editT = (id, cid, n, l) => {
+            document.getElementById('editId').value = id;
+            document.getElementById('courseSelect').value = cid;
+            document.getElementById('tName').value = n;
+            document.getElementById('tLink').value = l;
+            document.getElementById('saveBtn').innerText = "Update Test";
+            window.scrollTo(0,0);
+        };
     </script>
 </body>
 </html>
-
