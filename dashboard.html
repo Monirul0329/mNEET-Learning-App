@@ -3,52 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNeet - Dashboard</title>
+    <title>mNeet - Student Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0b1120; color: white; font-family: sans-serif; }
         .card-navy { background-color: #16213e; border: 1px solid #1f2937; }
         .btn-gold { background-color: #eab308; color: #0b1120; font-weight: 800; }
-        .modal-bg { background-color: rgba(0, 0, 0, 0.9); display: none; }
+        .text-gold { color: #eab308; }
+        .coin-box { background: linear-gradient(90deg, #eab308, #d97706); color: #0b1120; }
     </style>
 </head>
 <body>
-    <nav class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#0b1120] sticky top-0 z-50">
-        <h1 class="text-2xl font-black text-[#eab308] italic">mNeet</h1>
-        <button onclick="window.location.href='index.html'" class="text-xs text-gray-500 font-bold uppercase">Logout</button>
+    <nav class="p-4 border-b border-gray-800 bg-[#0b1120] sticky top-0 z-50 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-black text-gold italic">mNeet</h1>
+            <p id="studentInfo" class="text-[10px] text-gray-500 uppercase tracking-widest"></p>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <div class="coin-box px-3 py-1 rounded-full flex items-center gap-1 shadow-lg">
+                <span class="font-black text-sm" id="userCoins">0</span>
+                <span class="text-[9px] font-bold">BP</span>
+            </div>
+            <button onclick="logout()" class="text-xs text-red-500 font-bold uppercase">Logout</button>
+        </div>
     </nav>
 
     <div class="p-6 max-w-lg mx-auto">
-        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-            <span class="w-2 h-6 bg-[#eab308] rounded-full"></span> My Courses
-        </h2>
-        <div id="courseList" class="space-y-8"></div>
+        <h2 class="text-xl font-bold mb-6">Continue Learning</h2>
+        <div id="courseList" class="space-y-8 text-center">
+            <p class="text-gray-600 animate-pulse">Loading courses...</p>
+        </div>
     </div>
 
-    <div id="payModal" class="modal-bg fixed inset-0 z-[100] flex items-center justify-center p-6">
-        <div class="card-navy w-full max-w-md p-8 rounded-[2.5rem] text-center border-2 border-[#eab308]">
-            <h2 class="text-2xl font-bold text-[#eab308] mb-2">Complete Payment</h2>
-            <p id="payFor" class="text-gray-400 text-sm mb-6"></p>
-            
+    <div id="payModal" class="fixed inset-0 bg-black/90 z-[100] hidden items-center justify-center p-6">
+        <div class="card-navy w-full max-w-md p-8 rounded-[2.5rem] text-center border-2 border-gold shadow-2xl">
+            <h2 class="text-2xl font-bold text-gold mb-2">Buy Course</h2>
             <div class="bg-white p-4 rounded-2xl mb-4 inline-block">
-                <img id="qrImg" src="" alt="Scan to Pay">
+                <img id="qrImg" src="" alt="Payment QR">
             </div>
-
-            <div class="mb-6">
-                <p class="text-xs text-gray-500 mb-2 uppercase">Or Copy UPI ID</p>
-                <div class="bg-[#0b1120] p-3 rounded-xl border border-gray-700 flex justify-between items-center">
-                    <span id="upiId" class="text-sm font-mono text-gray-300">mt40@ptyes</span>
-                    <button onclick="copyUpi()" class="text-[#eab308] text-xs font-bold uppercase">Copy</button>
-                </div>
-            </div>
-
-            <button onclick="closePay()" class="w-full btn-gold py-4 rounded-2xl uppercase shadow-lg">Done / Close</button>
+            <p class="text-gray-400 text-sm mb-6">Scan QR to pay. Send screenshot to WhatsApp for approval.</p>
+            <a id="waLink" href="#" target="_blank" class="block w-full bg-green-600 text-white py-4 rounded-2xl font-bold uppercase mb-4 shadow-md">WhatsApp Screenshot</a>
+            <button onclick="closePay()" class="text-gray-500 text-xs font-bold uppercase">Close</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
@@ -61,54 +64,62 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        // Payment Popup Logic
+        // 1. Check User State & Load Profile (Name/City/Coins)
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userSnap = await getDoc(doc(db, "users", user.uid));
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    // Block System Check
+                    if(data.isBlocked) {
+                        alert("Your account is blocked by Admin.");
+                        signOut(auth).then(() => window.location.href = "index.html");
+                        return;
+                    }
+                    document.getElementById('studentInfo').innerText = `${data.name} | ${data.city}`;
+                    document.getElementById('userCoins').innerText = data.coins || 0;
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Logout
+        window.logout = () => signOut(auth).then(() => window.location.href = "index.html");
+
+        // 2. Payment Popup
         window.openPay = (price, title) => {
-            const myUpi = "mt40@ptyes"; // <--- CHANGE YOUR UPI ID HERE
-            document.getElementById('payFor').innerText = `Pay ₹${price} for ${title}`;
-            document.getElementById('upiId').innerText = myUpi;
-            
-            // Dynamic QR Generation
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${myUpi}%26pn=mNeet%26am=${price}%26cu=INR`;
+            const upi = "mt40@ptyes"; 
+            const phone = "801664280357";
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${upi}%26pn=mNeet%26am=${price}%26cu=INR`;
             document.getElementById('qrImg').src = qrUrl;
-            
+            document.getElementById('waLink').href = `https://wa.me/${phone}?text=I%20paid%20${price}%20for%20${title}`;
             document.getElementById('payModal').style.display = 'flex';
         };
-
         window.closePay = () => document.getElementById('payModal').style.display = 'none';
 
-        window.copyUpi = () => {
-            const id = document.getElementById('upiId').innerText;
-            navigator.clipboard.writeText(id);
-            alert("UPI ID Copied!");
-        };
-
+        // 3. Load Courses
         onSnapshot(collection(db, "courses"), (snap) => {
             const container = document.getElementById('courseList');
             container.innerHTML = "";
             snap.forEach(d => {
                 const data = d.data();
-                
-                // Clean Video Player (Removed controls & title)
                 const videoHTML = data.video ? 
                     `<div class="aspect-video w-full rounded-t-[2rem] overflow-hidden">
-                        <iframe width="100%" height="100%" 
-                        src="https://www.youtube.com/embed/${data.video}?modestbranding=1&rel=0&showinfo=0" 
-                        frameborder="0" allowfullscreen></iframe>
-                    </div>` : 
-                    `<div class="h-48 bg-gray-800 flex items-center justify-center text-gray-600 rounded-t-[2rem]">No Preview Video</div>`;
+                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${data.video}?modestbranding=1&rel=0" frameborder="0" allowfullscreen></iframe>
+                    </div>` : "";
 
                 container.innerHTML += `
-                    <div class="card-navy rounded-[2rem] overflow-hidden shadow-2xl mb-8">
+                    <div class="card-navy rounded-[2rem] overflow-hidden shadow-2xl">
                         ${videoHTML}
-                        <div class="p-6">
+                        <div class="p-6 text-left">
                             <h3 class="text-2xl font-bold mb-1">${data.title}</h3>
-                            <p class="text-gray-400 text-sm mb-4">${data.desc || 'Complete NEET Guide.'}</p>
+                            <p class="text-gray-400 text-sm mb-4">${data.desc || 'Complete Preparation.'}</p>
                             <div class="flex justify-between items-center mt-6">
-                                <span class="text-2xl font-black text-[#eab308]">₹${data.price}</span>
-                                <button onclick="openPay('${data.price}', '${data.title}')" class="btn-gold px-8 py-3 rounded-xl text-sm uppercase font-bold shadow-lg">
-                                    Enroll Now
-                                </button>
+                                <span class="text-2xl font-black text-gold">₹${data.price}</span>
+                                <button onclick="openPay('${data.price}', '${data.title}')" class="btn-gold px-8 py-3 rounded-xl text-sm uppercase font-bold shadow-lg">Enroll</button>
                             </div>
                         </div>
                     </div>`;
