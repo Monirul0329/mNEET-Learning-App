@@ -2,70 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET Admin Panel</title>
+    <title>mNEET Admin Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0b1120; color: white; padding-bottom: 90px; font-family: sans-serif; overflow: hidden; }
-        .nav-btn { color: #6b7280; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; }
-        .nav-active { color: #eab308 !important; }
-        .glass { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(10px); }
-        iframe { width: 100%; height: calc(100vh - 160px); border: none; }
+        body { background-color: #0b1120; color: white; margin: 0; padding: 0; font-family: sans-serif; height: 100vh; overflow: hidden; }
+        .header { height: 70px; background-color: #16213e; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+        .nav-bar { height: 80px; background: rgba(22, 33, 62, 0.98); backdrop-filter: blur(10px); border-top: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; }
+        .main-container { padding-top: 70px; padding-bottom: 80px; height: 100vh; width: 100%; box-sizing: border-box; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .nav-btn { color: #6b7280; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .active-btn { color: #eab308 !important; }
     </style>
 </head>
 <body>
 
-    <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] shadow-2xl border-b border-gray-800 flex justify-between items-center">
+    <div class="header shadow-2xl">
         <div>
-            <h1 class="text-2xl font-black text-[#eab308] italic">Admin Panel</h1>
-            <p class="text-[8px] uppercase font-black text-gray-500 tracking-[0.2em]">mNEET Control Center</p>
+            <h1 class="text-xl font-black text-[#eab308] italic tracking-tighter">mNEET ADMIN</h1>
+            <p class="text-[8px] uppercase font-bold text-gray-500">System Controller</p>
         </div>
-        <button onclick="window.location.href='index.html'" class="text-red-500 text-2xl active:scale-90 transition-all">
+        <button onclick="window.location.href='index.html'" class="text-red-500 text-xl active:scale-90 transition-all">
             <i class="fa-solid fa-power-off"></i>
         </button>
     </div>
 
-    <div id="adminContent">
+    <div class="main-container">
         <iframe id="adminFrame" src="admin_course.html"></iframe>
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 flex h-20 z-50">
-        <button onclick="nav('admin_course.html', 'c')" id="btn-c" class="nav-btn nav-active">
+    <div class="nav-bar">
+        <button onclick="nav('admin_course.html', 'c')" id="tab-c" class="nav-btn active-btn">
             <i class="fa-solid fa-layer-group text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Course</span>
+            <span class="text-[9px] font-bold uppercase">Course</span>
         </button>
-        <button onclick="nav('admin_study.html', 's')" id="btn-s" class="nav-btn">
+        <button onclick="nav('admin_study.html', 's')" id="tab-s" class="nav-btn">
             <i class="fa-solid fa-book-medical text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Study</span>
+            <span class="text-[9px] font-bold uppercase">Study</span>
         </button>
-        <button onclick="nav('admin_test.html', 't')" id="btn-t" class="nav-btn">
+        <button onclick="nav('admin_test.html', 't')" id="tab-t" class="nav-btn">
             <i class="fa-solid fa-vial-circle-check text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Test</span>
+            <span class="text-[9px] font-bold uppercase">Test</span>
         </button>
-        <button onclick="nav('admin_users.html', 'u')" id="btn-u" class="nav-btn">
+        <button onclick="nav('admin_users.html', 'u')" id="tab-u" class="nav-btn">
             <i class="fa-solid fa-users-gear text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Users</span>
+            <span class="text-[9px] font-bold uppercase">Users</span>
         </button>
-        <button onclick="nav('admin_mstore.html', 'm')" id="btn-m" class="nav-btn">
-            <i class="fa-solid fa-boxes-packing text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">mStore</span>
+        <button onclick="nav('admin_mstore.html', 'm')" id="tab-m" class="nav-btn">
+            <i class="fa-solid fa-shop text-xl"></i>
+            <span class="text-[9px] font-bold uppercase">mStore</span>
         </button>
     </div>
 
     <script>
         function nav(file, id) {
-            // Iframe change
-            document.getElementById('adminFrame').src = file;
-            
-            // UI Active state change
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('nav-active'));
-            document.getElementById('btn-' + id).classList.add('nav-active');
-        }
+            // Update Iframe
+            const frame = document.getElementById('adminFrame');
+            frame.style.opacity = '0';
+            setTimeout(() => {
+                frame.src = file;
+                frame.style.opacity = '1';
+            }, 150);
 
-        // Handle iframe errors
-        document.getElementById('adminFrame').onerror = function() {
-            alert("File not found! Make sure " + this.src + " exists in GitHub.");
-        };
+            // Update UI Active State
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-btn'));
+            document.getElementById('tab-' + id).classList.add('active-btn');
+        }
     </script>
 </body>
 </html>
