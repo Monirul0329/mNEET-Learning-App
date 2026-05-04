@@ -3,104 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNeet - Dashboard</title>
+    <title>mNEET - Student Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0b1120; color: white; font-family: sans-serif; }
+        body { background-color: #0b1120; color: white; font-family: 'Inter', sans-serif; padding-bottom: 80px; }
         .card-navy { background-color: #16213e; border: 1px solid #1f2937; }
-        .btn-gold { background-color: #eab308; color: #0b1120; font-weight: 800; }
-        .modal-bg { background-color: rgba(0, 0, 0, 0.9); display: none; }
+        .text-gold { color: #eab308; }
+        .bg-gold { background-color: #eab308; }
+        .nav-active { color: #eab308; border-top: 2px solid #eab308; }
     </style>
 </head>
 <body>
-    <nav class="p-5 border-b border-gray-800 flex justify-between items-center bg-[#0b1120] sticky top-0 z-50">
-        <h1 class="text-2xl font-black text-[#eab308] italic">mNeet</h1>
-        <div class="flex items-center gap-3">
-            <div class="bg-yellow-600/20 text-[#eab308] px-3 py-1 rounded-full text-xs font-bold border border-yellow-600/50">
-                <span id="userCoins">0</span> BP
+    <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] shadow-2xl border-b border-gray-800">
+        <div class="flex justify-between items-start mb-6">
+            <div>
+                <h1 class="text-3xl font-black text-gold italic">mNEET</h1>
+                <p id="userName" class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Loading...</p>
             </div>
-            <button onclick="logout()" class="text-[10px] text-red-500 font-bold uppercase border border-red-900 px-2 py-1 rounded">Logout</button>
+            <button onclick="logout()" class="text-red-500 text-xl"><i class="fa-solid fa-power-off"></i></button>
         </div>
-    </nav>
 
-    <div class="p-6 max-w-lg mx-auto">
-        <p id="welcomeMsg" class="text-[10px] text-gray-500 mb-6 uppercase tracking-widest text-center"></p>
-        <div id="courseList" class="space-y-10"></div>
+        <div class="flex gap-4 items-center mb-4">
+            <div class="flex-1 bg-[#0b1120] p-4 rounded-2xl border border-gray-700 flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] text-gray-500 uppercase font-bold">BP Balance</p>
+                    <p id="userCoins" class="text-2xl font-black text-gold">0</p>
+                </div>
+                <i class="fa-solid fa-coins text-3xl text-gold opacity-50"></i>
+            </div>
+            <div class="flex-1 bg-[#0b1120] p-4 rounded-2xl border border-gray-700">
+                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Course Progress</p>
+                <div class="w-full bg-gray-800 h-2 rounded-full mt-2">
+                    <div id="progressBar" class="bg-gold h-2 rounded-full" style="width: 0%"></div>
+                </div>
+                <p class="text-right text-[10px] mt-1 text-gold font-bold"><span id="progressText">0</span>%</p>
+            </div>
+        </div>
+
+        <div class="flex justify-between gap-2 mt-4 text-center">
+            <button class="flex-1 bg-gray-800/50 p-3 rounded-xl border border-gray-700">
+                <i class="fa-solid fa-book-open text-gold mb-1"></i>
+                <p class="text-[10px] font-bold uppercase">Study</p>
+            </button>
+            <button class="flex-1 bg-gray-800/50 p-3 rounded-xl border border-gray-700">
+                <i class="fa-solid fa-bell text-gold mb-1"></i>
+                <p class="text-[10px] font-bold uppercase">Notify</p>
+            </button>
+            <button class="flex-1 bg-gray-800/50 p-3 rounded-xl border border-gray-700">
+                <i class="fa-solid fa-trophy text-gold mb-1"></i>
+                <p class="text-[10px] font-bold uppercase">Rank</p>
+            </button>
+        </div>
     </div>
 
-    <div id="payModal" class="modal-bg fixed inset-0 z-[100] flex items-center justify-center p-6">
-        <div class="card-navy w-full max-w-md p-8 rounded-[2.5rem] text-center border-2 border-[#eab308]">
-            <h2 class="text-2xl font-bold text-[#eab308] mb-4">Enroll Now</h2>
-            <div class="bg-white p-4 rounded-2xl mb-6 inline-block shadow-lg">
-                <img id="qrImg" src="" alt="QR">
+    <div id="mainContent" class="p-6">
+        <div id="courseList" class="space-y-6">
             </div>
-            <input type="text" id="trxId" class="w-full bg-[#0b1120] border border-gray-700 p-4 rounded-xl mb-4 text-white outline-none focus:border-[#eab308]" placeholder="Enter Transaction ID">
-            <button onclick="submitRequest()" class="w-full btn-gold py-4 rounded-2xl uppercase">Submit Request</button>
-            <button onclick="closePay()" class="text-gray-500 text-[10px] mt-6 uppercase font-bold tracking-widest">Cancel</button>
-        </div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-[#16213e] border-t border-gray-800 flex justify-around p-3 z-50 shadow-2xl">
+        <button onclick="changePage('store')" class="flex flex-col items-center text-gray-500 nav-active" id="btn-store">
+            <i class="fa-solid fa-cart-shopping text-lg"></i>
+            <span class="text-[9px] uppercase font-bold mt-1">Store</span>
+        </button>
+        <button onclick="changePage('study')" class="flex flex-col items-center text-gray-500" id="btn-study">
+            <i class="fa-solid fa-graduation-cap text-lg"></i>
+            <span class="text-[9px] uppercase font-bold mt-1">Study</span>
+        </button>
+        <button onclick="changePage('test')" class="flex flex-col items-center text-gray-500" id="btn-test">
+            <i class="fa-solid fa-file-lines text-lg"></i>
+            <span class="text-[9px] uppercase font-bold mt-1">Test</span>
+        </button>
+        <button onclick="changePage('mstore')" class="flex flex-col items-center text-gray-500" id="btn-mstore">
+            <i class="fa-solid fa-store text-lg"></i>
+            <span class="text-[9px] uppercase font-bold mt-1">mStore</span>
+        </button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, getDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
-          authDomain: "mneet-7699.firebaseapp.com",
-          projectId: "mneet-7699",
-          storageBucket: "mneet-7699.firebasestorage.app",
-          messagingSenderId: "801664280357",
-          appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
-        };
+        const firebaseConfig = { /* Apnar config ekhane thakbe */ };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        let selectedCourse = "";
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const snap = await getDoc(doc(db, "users", user.uid));
-                if(snap.exists()){
+                onSnapshot(doc(db, "users", user.uid), (snap) => {
                     const d = snap.data();
-                    if(d.isBlocked) { alert("Blocked!"); signOut(auth); window.location.href="index.html"; }
-                    document.getElementById('welcomeMsg').innerText = `Learning as: ${d.name} (${d.city})`;
+                    document.getElementById('userName').innerText = d.name;
                     document.getElementById('userCoins').innerText = d.coins || 0;
-                }
+                    document.getElementById('progressText').innerText = d.progress || 0;
+                    document.getElementById('progressBar').style.width = (d.progress || 0) + '%';
+                });
             } else { window.location.href = "index.html"; }
         });
 
-        window.logout = () => signOut(auth).then(() => window.location.href = "index.html");
+        window.logout = () => signOut(auth).then(() => window.location.href="index.html");
 
-        window.openPay = (price, title) => {
-            selectedCourse = title;
-            const upi = "mt40@ptyes"; 
-            document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi://pay?pa=${upi}%26pn=mNeet%26am=${price}%26cu=INR`;
-            document.getElementById('payModal').style.display = 'flex';
+        window.changePage = (page) => {
+            // Logic for different pages like Study, Test, mStore
+            console.log("Navigating to: " + page);
         };
-
-        window.closePay = () => document.getElementById('payModal').style.display = 'none';
-
-        window.submitRequest = async () => {
-            const trx = document.getElementById('trxId').value;
-            if(!trx) return alert("Transaction ID required");
-            await addDoc(collection(db, "requests"), {
-                uid: auth.currentUser.uid, email: auth.currentUser.email,
-                trxId: trx, courseTitle: selectedCourse, status: 'pending', timestamp: new Date()
-            });
-            alert("Sent! Wait for approval."); closePay();
-        };
-
-        onSnapshot(collection(db, "courses"), (snap) => {
-            const container = document.getElementById('courseList');
-            container.innerHTML = "";
-            snap.forEach(d => {
-                const data = d.data();
-                const vId = data.video;
-                const videoHTML = vId ? `<div class="aspect-video w-full rounded-t-[2rem] overflow-hidden"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vId}?modestbranding=1&rel=0" frameborder="0" allowfullscreen></iframe></div>` : "";
-                container.innerHTML += `<div class="card-navy rounded-[2rem] overflow-hidden shadow-2xl">${videoHTML}<div class="p-6 text-left"><h3 class="text-2xl font-bold mb-1">${data.title}</h3><p class="text-gray-400 text-sm mb-6">${data.desc || 'Quality NEET Material.'}</p><div class="flex justify-between items-center"><span class="text-2xl font-black text-[#eab308]">₹${data.price}</span><button onclick="openPay('${data.price}', '${data.title}')" class="btn-gold px-8 py-3 rounded-xl text-xs font-black uppercase">Enroll Now</button></div></div></div>`;
-            });
-        });
     </script>
 </body>
 </html>
