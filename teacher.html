@@ -2,49 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>mNeet Admin</title>
+    <title>mNeet - Admin Control</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0b1120; color: white; font-family: sans-serif; }
-        .card-navy { background-color: #16213e; border: 1px solid #1f2937; padding: 20px; border-radius: 20px; margin-bottom: 20px; }
-        .input-navy { background-color: #1e293b; border: 1px solid #334155; color: white; width: 100%; padding: 12px; border-radius: 12px; margin-bottom: 10px; outline: none; }
-        .tab-btn { flex: 1; padding: 15px; text-align: center; font-size: 10px; font-weight: bold; border-bottom: 2px solid #1f2937; }
+        .card-navy { background-color: #16213e; border: 1px solid #1f2937; padding: 25px; border-radius: 25px; margin-bottom: 20px; }
+        .input-navy { background-color: #1e293b; border: 1px solid #334155; color: white; width: 100%; padding: 12px; border-radius: 12px; margin-bottom: 12px; outline: none; }
+        .tab-btn { flex: 1; padding: 15px; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 2px solid #1f2937; }
         .active-tab { border-color: #eab308; color: #eab308; }
     </style>
 </head>
-<body class="p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-xl font-bold text-[#eab308] italic">ADMIN PANEL</h1>
-        <button onclick="logout()" class="bg-red-900/30 text-red-500 border border-red-900 px-3 py-1 rounded text-xs font-bold">LOGOUT</button>
+<body class="p-4 md:p-10">
+    <div class="flex justify-between items-center mb-10 max-w-4xl mx-auto">
+        <h1 class="text-2xl font-black text-[#eab308] italic">ADMIN CONTROL</h1>
+        <button onclick="logout()" class="bg-red-900/40 text-red-500 border border-red-900 px-4 py-2 rounded-xl text-xs font-bold">LOGOUT</button>
     </div>
 
-    <div class="flex mb-8">
-        <button onclick="switchTab('courses')" id="t-courses" class="tab-btn active-tab uppercase">Courses</button>
-        <button onclick="switchTab('payments')" id="t-payments" class="tab-btn uppercase">Payments</button>
-        <button onclick="switchTab('students')" id="t-students" class="tab-btn uppercase">Students</button>
+    <div class="flex mb-10 max-w-4xl mx-auto">
+        <button onclick="switchTab('courses')" id="t-courses" class="tab-btn active-tab uppercase tracking-widest">Manage Courses</button>
+        <button onclick="switchTab('payments')" id="t-payments" class="tab-btn uppercase tracking-widest">Payments</button>
+        <button onclick="switchTab('students')" id="t-students" class="tab-btn uppercase tracking-widest">Students</button>
     </div>
 
-    <div id="sec-courses" class="max-w-xl mx-auto">
-        <div class="card-navy border-2 border-[#eab308]/20">
-            <h2 id="formTitle" class="text-[#eab308] font-bold mb-4 uppercase text-xs">Create/Edit Course</h2>
+    <div id="sec-courses" class="max-w-2xl mx-auto">
+        <div class="card-navy border border-[#eab308]/30">
+            <h2 id="formTitle" class="text-[#eab308] font-bold mb-6 uppercase text-sm tracking-widest text-center">Add / Edit Course</h2>
             <input type="hidden" id="editId">
-            <input type="text" id="cTitle" class="input-navy" placeholder="Course Title">
+            <input type="text" id="cTitle" class="input-navy" placeholder="Course Name">
             <input type="number" id="cPrice" class="input-navy" placeholder="Price (₹)">
-            <input type="text" id="cVideo" class="input-navy" placeholder="YouTube Video ID">
-            <textarea id="cDesc" class="input-navy h-20" placeholder="Description"></textarea>
-            <button onclick="saveCourse()" id="saveBtn" class="w-full bg-[#eab308] text-black py-3 rounded-xl font-bold uppercase text-xs">Publish Course</button>
+            <input type="text" id="cVideo" class="input-navy" placeholder="YouTube Video ID (shudhu ID-ta)">
+            <textarea id="cDesc" class="input-navy h-24" placeholder="Course Features & Description"></textarea>
+            <button onclick="saveCourse()" id="saveBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-bold uppercase text-sm shadow-xl">Publish Now</button>
         </div>
-        <div id="courseList"></div>
+        <div id="courseList" class="space-y-4"></div>
     </div>
 
-    <div id="sec-payments" class="max-w-xl mx-auto hidden">
-        <h2 class="text-gray-500 uppercase text-[10px] mb-4">Pending Approvals</h2>
-        <div id="reqList"></div>
+    <div id="sec-payments" class="max-w-2xl mx-auto hidden">
+        <h2 class="text-gray-500 uppercase text-xs font-bold mb-6 text-center tracking-widest">Pending Payment Approvals</h2>
+        <div id="reqList" class="space-y-4"></div>
     </div>
 
-    <div id="sec-students" class="max-w-xl mx-auto hidden">
-        <h2 class="text-gray-500 uppercase text-[10px] mb-4">Manage Students</h2>
-        <div id="studentList"></div>
+    <div id="sec-students" class="max-w-2xl mx-auto hidden">
+        <h2 class="text-gray-500 uppercase text-xs font-bold mb-6 text-center tracking-widest">Manage Student Access</h2>
+        <div id="studentList" class="space-y-4"></div>
     </div>
 
     <script type="module">
@@ -52,7 +52,14 @@
         import { getFirestore, collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-        const firebaseConfig = { /* Same as index.html */ };
+        const firebaseConfig = {
+          apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
+          authDomain: "mneet-7699.firebaseapp.com",
+          projectId: "mneet-7699",
+          storageBucket: "mneet-7699.firebasestorage.app",
+          messagingSenderId: "801664280357",
+          appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
+        };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
@@ -66,15 +73,23 @@
             });
         };
 
-        // --- COURSES ---
+        // --- MANAGE COURSES ---
         window.saveCourse = async () => {
             const title = document.getElementById('cTitle').value;
             const price = document.getElementById('cPrice').value;
             const video = document.getElementById('cVideo').value;
             const desc = document.getElementById('cDesc').value;
             const eid = document.getElementById('editId').value;
-            if(eid) { await updateDoc(doc(db, "courses", eid), {title, price, video, desc}); alert("Updated!"); }
-            else { await addDoc(collection(db, "courses"), {title, price, video, desc, timestamp: new Date()}); alert("Added!"); }
+
+            if(!title || !price) return alert("Fill mandatory fields");
+
+            if(eid) { 
+                await updateDoc(doc(db, "courses", eid), {title, price, video, desc}); 
+                alert("Updated!"); 
+            } else { 
+                await addDoc(collection(db, "courses"), {title, price, video, desc, timestamp: new Date()}); 
+                alert("Added!"); 
+            }
             location.reload();
         };
 
@@ -83,43 +98,49 @@
             list.innerHTML = "";
             snap.forEach(d => {
                 const c = d.data();
-                list.innerHTML += `<div class="card-navy flex justify-between items-center">
+                list.innerHTML += `<div class="card-navy flex justify-between items-center border-l-4 border-yellow-600">
                     <div><b>${c.title}</b><p class="text-xs text-gold">₹${c.price}</p></div>
-                    <div class="flex gap-2">
-                        <button onclick="editC('${d.id}','${c.title}','${c.price}','${c.video||''}','${c.desc||''}')" class="text-blue-400 text-[10px] font-bold uppercase">Edit</button>
-                        <button onclick="delC('${d.id}')" class="text-red-500 text-[10px] font-bold uppercase">Del</button>
+                    <div class="flex gap-4">
+                        <button onclick="editC('${d.id}','${c.title}','${c.price}','${c.video||''}','${c.desc||''}')" class="text-blue-400 text-xs font-bold uppercase">Edit</button>
+                        <button onclick="delC('${d.id}')" class="text-red-500 text-xs font-bold uppercase">Delete</button>
                     </div>
                 </div>`;
             });
         });
+
         window.editC = (id,t,p,v,d) => {
             document.getElementById('editId').value=id; document.getElementById('cTitle').value=t;
             document.getElementById('cPrice').value=p; document.getElementById('cVideo').value=v;
-            document.getElementById('cDesc').value=d; document.getElementById('formTitle').innerText="Edit Course";
-            window.scrollTo(0,0);
+            document.getElementById('cDesc').value=d; document.getElementById('formTitle').innerText="Edit Course Mode";
+            document.getElementById('saveBtn').innerText="Update Course"; window.scrollTo(0,0);
         };
-        window.delC = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "courses", id)); };
+        window.delC = async (id) => { if(confirm("Permanently delete?")) await deleteDoc(doc(db, "courses", id)); };
 
-        // --- PAYMENTS ---
+        // --- MANAGE PAYMENTS ---
         onSnapshot(collection(db, "requests"), (snap) => {
             const list = document.getElementById('reqList'); list.innerHTML = "";
             snap.forEach(d => { const r = d.data(); if(r.status==='pending') {
-                list.innerHTML += `<div class="card-navy border-l-4 border-yellow-500">
-                    <p class="text-xs text-gray-500">${r.email}</p><p class="font-bold">${r.courseTitle}</p>
-                    <p class="text-gold font-mono text-xs mt-2">TRX: ${r.trxId}</p>
-                    <button onclick="approve('${d.id}','${r.uid}')" class="w-full bg-green-600 py-2 rounded-xl mt-4 font-bold text-xs uppercase">Approve</button>
+                list.innerHTML += `<div class="card-navy border-2 border-yellow-600/30">
+                    <p class="text-xs text-gray-500 font-bold uppercase mb-1">${r.email}</p>
+                    <p class="font-bold text-lg">${r.courseTitle}</p>
+                    <p class="text-gold font-mono text-sm mt-3 bg-black/40 p-2 rounded">TRX: ${r.trxId}</p>
+                    <div class="flex gap-2 mt-6">
+                        <button onclick="approve('${d.id}','${r.uid}')" class="flex-1 bg-green-600 py-3 rounded-xl font-bold text-xs uppercase shadow-lg">Approve</button>
+                        <button onclick="reject('${d.id}')" class="flex-1 bg-red-600/20 text-red-500 py-3 rounded-xl font-bold text-xs uppercase">Reject</button>
+                    </div>
                 </div>`;
             }});
         });
-        window.approve = async (rid, uid) => { await updateDoc(doc(db, "requests", rid), {status:'approved'}); alert("Approved!"); };
+        window.approve = async (rid, uid) => { await updateDoc(doc(db, "requests", rid), {status:'approved'}); alert("Access Approved!"); };
+        window.reject = async (rid) => { if(confirm("Reject?")) await deleteDoc(doc(db, "requests", rid)); };
 
-        // --- STUDENTS ---
+        // --- MANAGE STUDENTS ---
         onSnapshot(collection(db, "users"), (snap) => {
             const list = document.getElementById('studentList'); list.innerHTML = "";
             snap.forEach(d => { const s = d.data(); if(s.role !== 'admin') {
                 list.innerHTML += `<div class="card-navy flex justify-between items-center">
-                    <div><b>${s.name}</b><p class="text-[10px] text-gray-500">${s.city}</p></div>
-                    <button onclick="toggleB('${d.id}',${s.isBlocked})" class="px-3 py-1 rounded text-[10px] font-bold ${s.isBlocked ? 'bg-green-600':'bg-red-900/30 text-red-500'}">${s.isBlocked ? 'UNBLOCK':'BLOCK'}</button>
+                    <div><b>${s.name}</b><p class="text-xs text-gray-500 uppercase tracking-widest">${s.city}</p></div>
+                    <button onclick="toggleB('${d.id}',${s.isBlocked})" class="px-4 py-2 rounded-xl text-xs font-bold uppercase ${s.isBlocked ? 'bg-green-600':'bg-red-900/40 text-red-500 border border-red-900'}">${s.isBlocked ? 'Unblock':'Block Student'}</button>
                 </div>`;
             }});
         });
