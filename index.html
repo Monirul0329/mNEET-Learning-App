@@ -1,4 +1,40 @@
-                const firebaseConfig = {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mNEET - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0a1128; color: white; font-family: sans-serif; }
+        .input-box { background-color: #16213e; border: 1px solid #1f2937; color: white; width: 100%; padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+        .btn-gold { background-color: #d97706; color: #0a1128; font-weight: bold; width: 100%; padding: 15px; border-radius: 12px; cursor: pointer; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+    <div class="w-full max-w-md bg-[#16213e]/50 p-8 rounded-3xl border border-gray-800 shadow-2xl">
+        <h1 class="text-4xl font-black text-[#d97706] text-center mb-2 italic text-center">mNEET</h1>
+        <p class="text-center text-gray-500 text-sm mb-8">Future Doctors' Hub</p>
+
+        <h2 id="authTitle" class="text-xl font-bold mb-6 text-center">Login</h2>
+        
+        <input type="email" id="email" class="input-box" placeholder="Email Address">
+        <input type="password" id="password" class="input-box" placeholder="Password">
+        
+        <button onclick="handleAuth()" id="authBtn" class="btn-gold">LOGIN NOW</button>
+
+        <p class="text-center mt-6 text-sm text-gray-400">
+            Don't have an account? 
+            <button onclick="toggleAuth()" id="toggleBtn" class="text-[#d97706] font-bold">Create Account</button>
+        </p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
             apiKey: "AIzaSyBisQytTeFhjMdlkTUNwcmCelPy7C9iI1Y",
             authDomain: "mneet-7699.firebaseapp.com",
             projectId: "mneet-7699",
@@ -7,14 +43,25 @@
             appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+
+        let isLogin = true;
+
+        window.toggleAuth = () => {
+            isLogin = !isLogin;
+            document.getElementById('authTitle').innerText = isLogin ? "Login" : "Create Account";
+            document.getElementById('authBtn').innerText = isLogin ? "LOGIN NOW" : "SIGN UP FREE";
+            document.getElementById('toggleBtn').innerText = isLogin ? "Create Account" : "Login Here";
+        };
 
         window.handleAuth = async () => {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
-            if(!email || !pass) return alert("Please fill all fields");
+            const btn = document.getElementById('authBtn');
+
+            if(!email || !pass) return alert("Fill all fields!");
+            btn.innerText = "PROCESSING...";
 
             try {
                 if(isLogin) {
@@ -23,12 +70,15 @@
                     window.location.href = "dashboard.html";
                 } else {
                     await createUserWithEmailAndPassword(auth, email, pass);
-                    alert("Account Created! Now please Login.");
-                    location.reload(); 
+                    alert("Account Created! Now Please Login.");
+                    toggleAuth();
                 }
             } catch (err) {
-                console.error(err);
-                alert("Error: " + err.code); // Eita dekhle amra vul-ta dhorte parbo
+                alert("Error: " + err.code);
             }
+            btn.innerText = isLogin ? "LOGIN NOW" : "SIGN UP FREE";
         };
-
+    </script>
+</body>
+              </html>
+              
