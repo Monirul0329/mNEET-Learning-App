@@ -1,43 +1,106 @@
-<div id="regFields" class="hidden">
-    <input type="text" id="userName" class="w-full bg-[#1e293b] border border-gray-700 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Full Name">
-    <input type="text" id="userCity" class="w-full bg-[#1e293b] border border-gray-700 p-4 rounded-xl mb-4 text-white outline-none" placeholder="City">
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mNeet - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0b1120; color: white; font-family: sans-serif; }
+        .card-navy { background-color: #16213e; border: 1px solid #1f2937; }
+        .input-navy { background-color: #1e293b; border: 1px solid #334155; color: white; width: 100%; padding: 15px; border-radius: 15px; margin-bottom: 15px; outline: none; }
+        .input-navy:focus { border-color: #eab308; }
+        .btn-gold { background-color: #eab308; color: #0b1120; font-weight: 900; width: 100%; padding: 15px; border-radius: 15px; }
+        .text-gold { color: #eab308; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
 
-<script type="module">
-    // Firebase imports (auth, db)
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-    const db = getFirestore(app);
+    <div class="w-full max-w-md card-navy p-10 rounded-[2.5rem] shadow-2xl text-center">
+        <h1 class="text-5xl font-black text-gold mb-2 italic tracking-tighter">mNeet</h1>
+        <p class="text-gray-500 text-[10px] uppercase tracking-[0.3em] mb-10">Future Doctors' Hub</p>
+        
+        <h2 id="authTitle" class="text-xl font-bold mb-6">Login</h2>
 
-    window.handleAuth = async () => {
-        const email = document.getElementById('email').value.trim();
-        const pass = document.getElementById('password').value;
-        const name = document.getElementById('userName').value;
-        const city = document.getElementById('userCity').value;
+        <div id="authForm">
+            <div id="regFields" class="hidden">
+                <input type="text" id="userName" class="input-navy" placeholder="Full Name">
+                <input type="text" id="userCity" class="input-navy" placeholder="Your City">
+            </div>
 
-        try {
-            if(isLogin) {
-                await signInWithEmailAndPassword(auth, email, pass);
-                window.location.href = "dashboard.html";
-            } else {
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                // Student-er profile save kora
-                await setDoc(doc(db, "users", res.user.uid), {
-                    name: name,
-                    city: city,
-                    email: email,
-                    coins: 0,
-                    isBlocked: false,
-                    role: 'student'
-                });
-                alert("Account Created!");
-                location.reload();
-            }
-        } catch (err) { alert(err.code); }
-    };
+            <input type="email" id="email" class="input-navy" placeholder="Email Address">
+            <input type="password" id="password" class="input-navy" placeholder="Password">
+            
+            <button onclick="handleAuth()" id="authBtn" class="btn-gold uppercase tracking-widest shadow-lg active:scale-95 transition-transform">
+                LOGIN NOW
+            </button>
+            
+            <div class="mt-8 flex justify-between text-[10px] font-bold uppercase tracking-widest">
+                <button class="text-gray-500">Forgot Password?</button>
+                <button onclick="toggleAuth()" id="toggleBtn" class="text-gold">Create Account</button>
+            </div>
+        </div>
+    </div>
 
-    window.toggleAuth = () => {
-        isLogin = !isLogin;
-        document.getElementById('regFields').classList.toggle('hidden');
-        // Ager toggle logic...
-    };
-</script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY",
+          authDomain: "mneet-7699.firebaseapp.com",
+          projectId: "mneet-7699",
+          storageBucket: "mneet-7699.firebasestorage.app",
+          messagingSenderId: "801664280357",
+          appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let isLogin = true;
+
+        window.toggleAuth = () => {
+            isLogin = !isLogin;
+            document.getElementById('authTitle').innerText = isLogin ? "Login" : "Create Account";
+            document.getElementById('authBtn').innerText = isLogin ? "LOGIN NOW" : "SIGN UP FREE";
+            document.getElementById('toggleBtn').innerText = isLogin ? "Create Account" : "Login Here";
+            document.getElementById('regFields').classList.toggle('hidden');
+        };
+
+        window.handleAuth = async () => {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            const name = document.getElementById('userName').value;
+            const city = document.getElementById('userCity').value;
+
+            if(!email || !pass) return alert("Fill all fields!");
+
+            try {
+                if(isLogin) {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                    window.location.href = "dashboard.html";
+                } else {
+                    if(!name || !city) return alert("Please enter Name and City");
+                    const res = await createUserWithEmailAndPassword(auth, email, pass);
+                    
+                    // Save Name & City to Firestore
+                    await setDoc(doc(db, "users", res.user.uid), {
+                        name: name,
+                        city: city,
+                        email: email,
+                        coins: 0,
+                        isBlocked: false,
+                        role: 'student'
+                    });
+                    
+                    alert("Account Created! Now Login.");
+                    location.reload();
+                }
+            } catch (err) { alert("Error: " + err.code); }
+        };
+    </script>
+</body>
+</html>
