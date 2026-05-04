@@ -3,73 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET Admin - Full Control</title>
+    <title>mNEET Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background-color: #0a1128; color: white; font-family: sans-serif; }
-        .btn-gold { background-color: #d97706; color: #0a1128; font-weight: bold; }
-        .card-dark { background-color: #16213e; border: 1px solid #1f2937; }
-        .input-dark { background-color: #0f172a; border: 1px solid #334155; color: white; }
-    </style>
 </head>
-<body>
-
-    <nav class="p-4 border-b border-gray-800 flex justify-between items-center sticky top-0 bg-[#0a1128] z-50">
-        <h1 class="text-xl font-bold text-yellow-500">mNEET ADMIN</h1>
-        <button onclick="location.reload()" class="text-gray-400"><i class="fas fa-sync-alt"></i></button>
+<body style="background-color: #0a1128; color: white; font-family: sans-serif;">
+    <nav class="p-5 border-b border-gray-800 flex justify-between items-center bg-[#0a1128]">
+        <h1 style="color: #d97706;" class="text-2xl font-bold uppercase">Admin Panel</h1>
     </nav>
-
-    <div class="p-5 max-w-lg mx-auto">
-        <div id="courseSection">
-            <button onclick="openModal('courseModal')" class="w-full btn-gold py-4 rounded-xl mb-6 shadow-lg">+ NEW COURSE</button>
-            <h3 class="text-xs font-bold text-gray-500 uppercase mb-4">Your Courses</h3>
-            <div id="courseContainer" class="space-y-4"></div>
+    <div class="p-6 max-w-lg mx-auto">
+        <div style="background-color: #16213e;" class="p-6 rounded-2xl mb-8">
+            <h2 class="text-lg font-bold mb-4">Create New Course</h2>
+            <input type="text" id="cTitle" style="background-color: #0f172a; border: 1px solid #334155;" class="w-full p-4 rounded-xl mb-4 text-white outline-none" placeholder="Course Name">
+            <input type="number" id="cPrice" style="background-color: #0f172a; border: 1px solid #334155;" class="w-full p-4 rounded-xl mb-4 text-white outline-none" placeholder="Price">
+            <button onclick="saveCourse()" style="background-color: #d97706; color: #0a1128;" class="w-full py-4 rounded-xl font-bold">PUBLISH COURSE</button>
         </div>
-
-        <div id="chapterSection" class="hidden">
-            <button onclick="showSection('courseSection')" class="text-yellow-500 mb-4 font-bold"><i class="fas fa-arrow-left"></i> Back</button>
-            <h2 id="viewCourseName" class="text-2xl font-bold mb-4"></h2>
-            <button onclick="addChapterPrompt()" class="w-full border-2 border-dashed border-gray-700 py-4 rounded-xl mb-6">+ ADD CHAPTER</button>
-            <div id="chapterContainer" class="space-y-3"></div>
-        </div>
-
-        <div id="topicSection" class="hidden">
-            <button onclick="showSection('chapterSection')" class="text-yellow-500 mb-4 font-bold"><i class="fas fa-arrow-left"></i> Back to Chapters</button>
-            <h2 id="viewChapterName" class="text-2xl font-bold mb-4"></h2>
-            
-            <div class="card-dark p-6 rounded-2xl mb-6 border-t-4 border-yellow-500">
-                <h4 class="font-bold mb-4 text-sm uppercase">Upload New Question</h4>
-                <input type="file" id="qImage" accept="image/jpeg" class="hidden" onchange="previewImage(event)">
-                <label for="qImage" class="block w-full bg-gray-800 border border-dashed border-gray-600 py-8 text-center rounded-xl mb-4 cursor-pointer">
-                    <i class="fas fa-image text-3xl mb-2 text-gray-500"></i>
-                    <p id="imgLabel" class="text-xs text-gray-400">Click to Select JPEG Question</p>
-                </label>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    <input type="text" id="optA" placeholder="Option A" class="input-dark p-3 rounded-lg text-sm">
-                    <input type="text" id="optB" placeholder="Option B" class="input-dark p-3 rounded-lg text-sm">
-                    <input type="text" id="optC" placeholder="Option C" class="input-dark p-3 rounded-lg text-sm">
-                    <input type="text" id="optD" placeholder="Option D" class="input-dark p-3 rounded-lg text-sm">
-                </div>
-                <select id="correctOpt" class="input-dark w-full p-3 rounded-lg mb-4 text-sm">
-                    <option value="">Select Correct Answer</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
-                </select>
-                <button onclick="uploadQuestion()" id="upBtn" class="w-full btn-gold py-3 rounded-xl">SAVE QUESTION</button>
-            </div>
-            
-            <div id="questionContainer" class="space-y-4"></div>
-        </div>
+        <div id="adminCourseList" class="space-y-4"></div>
     </div>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         const firebaseConfig = {
             apiKey: "AIzaSyBisQytTeFhjMdlkTUNwcmCelPy7C9iI1Y",
             authDomain: "mneet-7699.firebaseapp.com",
@@ -78,144 +30,23 @@
             messagingSenderId: "801664280357",
             appId: "1:801664280357:web:03da6173f29bedfeaa9ccc"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        let currentCourseId = "";
-        let currentChapterId = "";
-
-        // Navigation
-        window.showSection = (id) => {
-            document.getElementById('courseSection').classList.add('hidden');
-            document.getElementById('chapterSection').classList.add('hidden');
-            document.getElementById('topicSection').classList.add('hidden');
-            document.getElementById(id).classList.remove('hidden');
+        window.saveCourse = async () => {
+            const title = document.getElementById('cTitle').value;
+            const price = document.getElementById('cPrice').value;
+            if(!title || !price) return alert("Fill all fields");
+            await addDoc(collection(db, "courses"), { title, price, timestamp: new Date() });
+            alert("Published!");
         };
-
-        // --- Load Courses ---
-        onSnapshot(query(collection(db, "courses"), orderBy("timestamp", "desc")), (snap) => {
-            const container = document.getElementById('courseContainer');
+        onSnapshot(collection(db, "courses"), (snap) => {
+            const container = document.getElementById('adminCourseList');
             container.innerHTML = "";
             snap.forEach(d => {
                 const data = d.data();
-                container.innerHTML += `
-                    <div class="card-dark p-5 rounded-2xl flex justify-between items-center shadow-lg" onclick="viewChapters('${d.id}', '${data.title}')">
-                        <div>
-                            <p class="text-yellow-500 text-[10px] font-bold">${data.courseId}</p>
-                            <h3 class="text-lg font-bold">${data.title}</h3>
-                        </div>
-                        <i class="fas fa-chevron-right text-gray-700"></i>
-                    </div>
-                `;
+                container.innerHTML += `<div class="p-4 bg-gray-800 rounded-xl flex justify-between"><span>${data.title}</span><span style="color: #d97706;">₹${data.price}</span></div>`;
             });
         });
-
-        // --- Chapter Logic ---
-        window.viewChapters = (id, title) => {
-            currentCourseId = id;
-            document.getElementById('viewCourseName').innerText = title;
-            showSection('chapterSection');
-            loadChapters();
-        };
-
-        window.addChapterPrompt = async () => {
-            const name = prompt("Chapter Name:");
-            if(!name) return;
-            const snap = await getDocs(collection(db, `courses/${currentCourseId}/chapters`));
-            await addDoc(collection(db, `courses/${currentCourseId}/chapters`), {
-                name, order: snap.size + 1, timestamp: new Date()
-            });
-        };
-
-        function loadChapters() {
-            onSnapshot(query(collection(db, `courses/${currentCourseId}/chapters`), orderBy("order", "asc")), (snap) => {
-                const container = document.getElementById('chapterContainer');
-                container.innerHTML = "";
-                snap.forEach(d => {
-                    const data = d.data();
-                    container.innerHTML += `
-                        <div class="bg-gray-800/40 p-4 rounded-xl flex justify-between items-center border border-gray-800" onclick="viewTopics('${d.id}', '${data.name}')">
-                            <span class="font-bold text-sm">Chapter ${data.order}: ${data.name}</span>
-                            <i class="fas fa-plus-circle text-yellow-600"></i>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        // --- Question Upload Logic ---
-        window.viewTopics = (id, name) => {
-            currentChapterId = id;
-            document.getElementById('viewChapterName').innerText = name;
-            showSection('topicSection');
-            loadQuestions();
-        };
-
-        window.previewImage = (e) => {
-            document.getElementById('imgLabel').innerText = e.target.files[0].name;
-        };
-
-        window.uploadQuestion = async () => {
-            const file = document.getElementById('qImage').files[0];
-            const a = document.getElementById('optA').value;
-            const b = document.getElementById('optB').value;
-            const c = document.getElementById('optC').value;
-            const d = document.getElementById('optD').value;
-            const ans = document.getElementById('correctOpt').value;
-
-            if(!file || !ans) return alert("Select Image and Correct Answer!");
-
-            const btn = document.getElementById('upBtn');
-            btn.innerText = "UPLOADING...";
-            btn.disabled = true;
-
-            try {
-                // Upload to Firebase Storage
-                const storageRef = ref(storage, `questions/${Date.now()}_${file.name}`);
-                await uploadBytes(storageRef, file);
-                const url = await getDownloadURL(storageRef);
-
-                // Save to Firestore
-                const snap = await getDocs(collection(db, `courses/${currentCourseId}/chapters/${currentChapterId}/questions`));
-                await addDoc(collection(db, `courses/${currentCourseId}/chapters/${currentChapterId}/questions`), {
-                    imageUrl: url,
-                    options: { A: a, B: b, C: c, D: d },
-                    answer: ans,
-                    qNumber: snap.size + 1,
-                    timestamp: new Date()
-                });
-
-                alert("Question Uploaded!");
-                location.reload();
-            } catch (err) { alert(err.message); }
-        };
-
-        function loadQuestions() {
-            onSnapshot(query(collection(db, `courses/${currentCourseId}/chapters/${currentChapterId}/questions`), orderBy("qNumber", "asc")), (snap) => {
-                const container = document.getElementById('questionContainer');
-                container.innerHTML = "";
-                snap.forEach(d => {
-                    const data = d.data();
-                    container.innerHTML += `
-                        <div class="card-dark p-4 rounded-xl border border-gray-800">
-                            <div class="flex justify-between text-[10px] text-gray-500 mb-2">
-                                <span>QUESTION ${data.qNumber}</span>
-                                <button onclick="deleteQ('${d.id}')" class="text-red-500">DELETE</button>
-                            </div>
-                            <img src="${data.imageUrl}" class="w-full rounded-lg mb-3 border border-gray-700">
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <div class="${data.answer=='A'?'text-green-500 font-bold':''}">A: ${data.options.A}</div>
-                                <div class="${data.answer=='B'?'text-green-500 font-bold':''}">B: ${data.options.B}</div>
-                                <div class="${data.answer=='C'?'text-green-500 font-bold':''}">C: ${data.options.C}</div>
-                                <div class="${data.answer=='D'?'text-green-500 font-bold':''}">D: ${data.options.D}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-        }
     </script>
 </body>
 </html>
