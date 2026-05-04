@@ -20,5 +20,10 @@
         <button onclick="nav('mstore.html', 'm')" id="btn-m" class="nav-btn"><i class="fa-solid fa-shop text-xl"></i><span class="text-[9px] uppercase mt-1">mStore</span></button>
     </div>
     <script> function nav(f, id) { document.getElementById('adminFrame').src = f; document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active')); document.getElementById('btn-'+id).classList.add('nav-active'); } </script>
+<button onclick="nav('admin_users.html', 'users')" id="btn-users" class="nav-btn">
+    <i class="fa-solid fa-users-gear text-xl"></i>
+    <span class="text-[9px] font-bold uppercase mt-1">Users</span>
+</button>
+    
 </body>
 </html>
