@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mNEET Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -10,26 +9,25 @@
         body { background-color: #0b1120; color: white; padding-bottom: 100px; font-family: sans-serif; }
         .card-navy { background-color: #16213e; border: 1px solid #1f2937; padding: 20px; border-radius: 20px; }
         .input-navy { background-color: #1e293b; border: 1px solid #334155; color: white; width: 100%; padding: 12px; border-radius: 12px; margin-bottom: 10px; outline: none; }
-        .nav-btn { color: #6b7280; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .nav-btn { color: #6b7280; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; outline: none; }
         .nav-active { color: #eab308 !important; }
         .glass { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
 <body>
-
     <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] shadow-2xl">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-black text-[#eab308] italic">mNEET Admin</h1>
-            <button onclick="logout()" class="text-red-500 font-bold text-xs border border-red-900 px-3 py-1 rounded-lg uppercase">Logout</button>
+            <h1 class="text-2xl font-black text-[#eab308] italic text-center w-full ml-6">mNEET Admin</h1>
+            <button onclick="logout()" class="text-red-500 text-xl"><i class="fa-solid fa-power-off"></i></button>
         </div>
-        <div class="grid grid-cols-2 gap-4 text-center">
-            <div class="bg-[#0b1120] p-4 rounded-2xl border border-gray-700">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-center">
                 <p id="statUsers" class="text-xl font-black text-[#eab308]">0</p>
-                <p class="text-[9px] text-gray-500 uppercase">Users</p>
+                <p class="text-[9px] text-gray-500 uppercase font-bold tracking-widest">Students</p>
             </div>
-            <div class="bg-[#0b1120] p-4 rounded-2xl border border-gray-700">
+            <div class="bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-center">
                 <p id="statPay" class="text-xl font-black text-white">0</p>
-                <p class="text-[9px] text-gray-500 uppercase">Pending</p>
+                <p class="text-[9px] text-gray-500 uppercase font-bold tracking-widest">Pending</p>
             </div>
         </div>
     </div>
@@ -37,22 +35,10 @@
     <div id="adminMain" class="p-6 max-w-xl mx-auto"></div>
 
     <div class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 flex h-20 z-50">
-        <button onclick="setTab('course')" id="btn-course" class="nav-btn nav-active">
-            <i class="fa-solid fa-play-circle text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Course</span>
-        </button>
-        <button onclick="setTab('study')" id="btn-study" class="nav-btn">
-            <i class="fa-solid fa-book text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Study</span>
-        </button>
-        <button onclick="setTab('test')" id="btn-test" class="nav-btn">
-            <i class="fa-solid fa-vial text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Test</span>
-        </button>
-        <button onclick="setTab('mstore')" id="btn-mstore" class="nav-btn">
-            <i class="fa-solid fa-shop text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">mStore</span>
-        </button>
+        <button onclick="setTab('course')" id="btn-course" class="nav-btn nav-active"><i class="fa-solid fa-layer-group text-xl"></i><span class="text-[9px] font-bold uppercase mt-1">Course</span></button>
+        <button onclick="setTab('study')" id="btn-study" class="nav-btn"><i class="fa-solid fa-book-medical text-xl"></i><span class="text-[9px] font-bold uppercase mt-1">Study</span></button>
+        <button onclick="setTab('test')" id="btn-test" class="nav-btn"><i class="fa-solid fa-vial-circle-check text-xl"></i><span class="text-[9px] font-bold uppercase mt-1">Test</span></button>
+        <button onclick="setTab('mstore')" id="btn-mstore" class="nav-btn"><i class="fa-solid fa-boxes-packing text-xl"></i><span class="text-[9px] font-bold uppercase mt-1">mStore</span></button>
     </div>
 
     <script type="module">
@@ -60,37 +46,17 @@
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-        const firebaseConfig = { /* APNAR CONFIG */ };
+        const firebaseConfig = { /* CONFIG */ };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Render Functions
-        const renderCourse = (el) => {
-            el.innerHTML = `<div class="card-navy">
-                <h2 class="text-[#eab308] text-xs font-bold mb-4">ADD NEW COURSE</h2>
-                <input type="text" id="cTitle" class="input-navy" placeholder="Name">
-                <input type="number" id="cPrice" class="input-navy" placeholder="Price">
-                <button onclick="saveC()" class="w-full bg-[#eab308] text-black py-3 rounded-xl font-bold uppercase text-xs">Publish</button>
-            </div>`;
-        };
-
-        const renderStudy = (el) => {
-            el.innerHTML = `<div class="card-navy">
-                <h2 class="text-[#eab308] text-xs font-bold mb-4">UPLOAD STUDY MATERIAL</h2>
-                <input type="text" id="chapter" class="input-navy" placeholder="Chapter">
-                <input type="text" id="vid" class="input-navy" placeholder="YouTube ID">
-                <button onclick="saveS()" class="w-full bg-blue-600 py-3 rounded-xl font-bold uppercase text-xs">Add Study</button>
-            </div>`;
-        };
-
-        window.setTab = (tab) => {
+        window.setTab = (t) => {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById('btn-' + tab).classList.add('nav-active');
-            const area = document.getElementById('adminMain');
-            if(tab === 'course') renderCourse(area);
-            else if(tab === 'study') renderStudy(area);
-            else area.innerHTML = `<p class="text-center mt-10">Coming Soon...</p>`;
+            document.getElementById('btn-' + t).classList.add('nav-active');
+            const el = document.getElementById('adminMain');
+            if(t === 'course') el.innerHTML = `<div class="card-navy"><h2 class="text-[#eab308] text-xs font-bold mb-4 uppercase">Create Course</h2><input type="text" class="input-navy" placeholder="Name"><button class="w-full bg-[#eab308] text-black py-3 rounded-xl font-bold uppercase text-xs">Publish</button></div>`;
+            else el.innerHTML = `<p class="text-center mt-10 uppercase text-xs tracking-widest text-gray-500">${t} Management Hub</p>`;
         };
 
         window.logout = () => signOut(auth).then(() => window.location.href="index.html");
