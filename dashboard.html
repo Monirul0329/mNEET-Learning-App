@@ -3,216 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET - All-in-One Learning</title>
+    <title>mNEET Student</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #0b1120; color: white; font-family: 'Inter', sans-serif; padding-bottom: 90px; }
-        .card-navy { background-color: #16213e; border: 1px solid #1f2937; }
-        .text-gold { color: #eab308; }
-        .bg-gold { background-color: #eab308; }
-        .nav-btn { color: #6b7280; transition: 0.3s; }
+        body { background-color: #0b1120; color: white; padding-bottom: 100px; }
+        .nav-btn { color: #6b7280; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .nav-active { color: #eab308 !important; }
-        .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(10px); }
+        .glass { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
 <body>
 
-    <div class="p-6 bg-[#16213e] rounded-b-[3rem] shadow-2xl border-b border-gray-800">
+    <div class="p-6 bg-[#16213e] rounded-b-[2.5rem] border-b border-gray-800">
         <div class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-3xl font-black text-gold italic tracking-tighter">mNEET</h1>
-                <p id="userName" class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Student Portal</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="bg-gold text-black px-4 py-1 rounded-full text-xs font-black shadow-lg">
-                    <span id="userCoins">0</span> BP
-                </div>
-                <button onclick="logout()" class="text-red-500"><i class="fa-solid fa-circle-user text-2xl"></i></button>
-            </div>
+            <h1 class="text-2xl font-black text-[#eab308] italic">mNEET</h1>
+            <div class="bg-[#eab308] text-black px-3 py-1 rounded-full text-xs font-bold">0 BP</div>
         </div>
-
-        <div class="bg-[#0b1120] p-4 rounded-2xl border border-gray-700">
-            <div class="flex justify-between text-[10px] font-black uppercase mb-2">
-                <span class="text-gray-500 tracking-widest">Course Progress</span>
-                <span class="text-gold"><span id="progressText">0</span>%</span>
-            </div>
-            <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-                <div id="progressBar" class="bg-gold h-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-        </div>
-
-        <div class="flex justify-between gap-4 mt-6">
-            <button class="flex-1 bg-gray-800/30 p-3 rounded-2xl border border-gray-700 text-center">
-                <i class="fa-solid fa-graduation-cap text-gold mb-1"></i>
-                <p class="text-[9px] font-bold uppercase">Study</p>
-            </button>
-            <button class="flex-1 bg-gray-800/30 p-3 rounded-2xl border border-gray-700 text-center">
-                <i class="fa-solid fa-bell text-gold mb-1"></i>
-                <p class="text-[9px] font-bold uppercase">Alerts</p>
-            </button>
-            <button class="flex-1 bg-gray-800/30 p-3 rounded-2xl border border-gray-700 text-center">
-                <i class="fa-solid fa-ranking-star text-gold mb-1"></i>
-                <p class="text-[9px] font-bold uppercase">Ranks</p>
-            </button>
+        <div class="w-full bg-gray-800 h-2 rounded-full mt-4 overflow-hidden">
+            <div class="bg-[#eab308] h-full" style="width: 10%"></div>
         </div>
     </div>
 
-    <div id="mainDisplay" class="p-6">
-        </div>
+    <div id="mainDisplay" class="p-6"></div>
 
-    <div class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 flex justify-around p-4 z-50">
-        <button onclick="changeTab('course')" id="tab-course" class="nav-btn nav-active flex flex-col items-center">
+    <div class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 flex h-20 z-50">
+        <button onclick="tab('course')" id="tab-course" class="nav-btn nav-active">
             <i class="fa-solid fa-play-circle text-xl"></i>
-            <span class="text-[10px] font-black uppercase mt-1">Course</span>
+            <span class="text-[9px] font-bold uppercase mt-1">Course</span>
         </button>
-        <button onclick="changeTab('study')" id="tab-study" class="nav-btn flex flex-col items-center">
-            <i class="fa-solid fa-book-open-reader text-xl"></i>
-            <span class="text-[10px] font-black uppercase mt-1">Study</span>
+        <button onclick="tab('study')" id="tab-study" class="nav-btn">
+            <i class="fa-solid fa-book-open text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Study</span>
         </button>
-        <button onclick="changeTab('test')" id="tab-test" class="nav-btn flex flex-col items-center">
-            <i class="fa-solid fa-vial text-xl"></i>
-            <span class="text-[10px] font-black uppercase mt-1">Test</span>
+        <button onclick="tab('test')" id="tab-test" class="nav-btn">
+            <i class="fa-solid fa-flask text-xl"></i>
+            <span class="text-[9px] font-bold uppercase mt-1">Test</span>
         </button>
-        <button onclick="changeTab('mstore')" id="tab-mstore" class="nav-btn flex flex-col items-center">
+        <button onclick="tab('mstore')" id="tab-mstore" class="nav-btn">
             <i class="fa-solid fa-shop text-xl"></i>
-            <span class="text-[10px] font-black uppercase mt-1">mStore</span>
+            <span class="text-[9px] font-bold uppercase mt-1">mStore</span>
         </button>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-        const firebaseConfig = { /* Apnar Config */ };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        // UI State
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                onSnapshot(doc(db, "users", user.uid), (snap) => {
-                    const d = snap.data();
-                    document.getElementById('userName').innerText = d.name;
-                    document.getElementById('userCoins').innerText = d.coins || 0;
-                    document.getElementById('progressText').innerText = d.progress || 0;
-                    document.getElementById('progressBar').style.width = (d.progress || 0) + '%';
-                });
-                changeTab('course'); // Default tab
-            } else { window.location.href = "index.html"; }
-        });
-
-       window.changeTab = (tab) => {
-    // Nav button highlight logic
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-    const currentBtn = document.getElementById('tab-' + tab);
-    if(currentBtn) currentBtn.classList.add('nav-active');
-    
-    const display = document.getElementById('mainDisplay');
-    if(!display) return;
-
-    display.innerHTML = `<p class="text-center mt-10 text-xs text-gray-600 uppercase tracking-widest">Fetching ${tab}...</p>`;
-
-    // Content trigger
-    if(tab === 'course') loadCourse(display);
-    if(tab === 'study') loadStudy(display);
-    if(tab === 'test') loadTest(display);
-    if(tab === 'mstore') loadMStore(display);
-};
-
-// Initial Load
-document.addEventListener('DOMContentLoaded', () => changeTab('course'));
-
-        function loadCourse(el) {
-            el.innerHTML = `<h2 class="text-xs font-black uppercase text-gray-500 mb-6 tracking-[0.2em]">Purchase Courses</h2>`;
-            onSnapshot(collection(db, "courses"), (snap) => {
-                snap.forEach(d => {
-                    const c = d.data();
-                    el.innerHTML += `
-                        <div class="card-navy rounded-[2rem] overflow-hidden mb-6">
-                            <div class="p-6">
-                                <h3 class="text-xl font-bold">${c.title}</h3>
-                                <div class="mt-4 flex justify-between items-center">
-                                    <span class="text-2xl font-black text-gold italic">₹${c.price}</span>
-                                    <button class="bg-gold text-black px-6 py-2 rounded-xl font-black uppercase text-[10px]">Enroll</button>
-                                </div>
-                            </div>
-                        </div>`;
-                });
-            });
-        }
-
-        function loadStudy(el) {
-    el.innerHTML = `<h2 class="text-xs font-black uppercase text-gray-500 mb-6 tracking-[0.2em]">Chapter-wise Study</h2><div id="studyContent" class="space-y-4">Loading...</div>`;
-    
-    onSnapshot(collection(db, "study_material"), (snap) => {
-        const studyDiv = document.getElementById('studyContent');
-        studyDiv.innerHTML = "";
-        snap.forEach(d => {
-            const s = d.data();
-            studyDiv.innerHTML += `
-                <div class="card-navy p-6 rounded-3xl border-l-4 border-gold mb-4">
-                    <p class="text-[10px] text-gold font-black mb-1 uppercase italic">Topic Analysis</p>
-                    <h3 class="font-bold text-lg mb-4 text-white">${s.chapterName}</h3>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button onclick="playVid('${s.videoId}')" class="bg-gray-800 p-2 rounded-lg text-[9px] font-bold text-white"><i class="fa-solid fa-play text-gold mr-1"></i> VIDEO</button>
-                        <a href="${s.notesUrl}" target="_blank" class="bg-gray-800 p-2 rounded-lg text-[9px] font-bold text-white text-center"><i class="fa-solid fa-file-pdf text-gold mr-1"></i> NOTES</a>
-                        <a href="${s.dppUrl}" target="_blank" class="bg-gray-800 p-2 rounded-lg text-[9px] font-bold text-white text-center"><i class="fa-solid fa-bolt text-gold mr-1"></i> DPP</a>
-                    </div>
-                </div>`;
-        });
-    });
-}
-
-// Video Play Window (Simple Popup)
-window.playVid = (id) => {
-    const win = window.open(`https://youtu.be/XXXXX{id}`, '_blank');
-    win.focus();
-};
-
-        function loadTest(el) {
-            el.innerHTML = `
-                <h2 class="text-xs font-black uppercase text-gray-500 mb-6 tracking-[0.2em]">Test Center</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="card-navy p-4 rounded-2xl text-center">
-                        <i class="fa-solid fa-flask text-gold text-xl mb-2"></i>
-                        <p class="text-[10px] font-black uppercase">Topic Test</p>
-                    </div>
-                    <div class="card-navy p-4 rounded-2xl text-center">
-                        <i class="fa-solid fa-file-invoice text-gold text-xl mb-2"></i>
-                        <p class="text-[10px] font-black uppercase">Full Mock</p>
-                    </div>
-                    <div class="card-navy p-4 rounded-2xl text-center">
-                        <i class="fa-solid fa-clock-rotate-left text-gold text-xl mb-2"></i>
-                        <p class="text-[10px] font-black uppercase">PYQs</p>
-                    </div>
-                </div>`;
-        }
-
-        function loadMStore(el) {
-    el.innerHTML = `<h2 class="text-xs font-black uppercase text-gray-500 mb-6 tracking-[0.2em]">mNEET Store</h2><div id="productGrid" class="grid grid-cols-2 gap-4"></div>`;
-    
-    onSnapshot(collection(db, "mstore_products"), (snap) => {
-        const grid = document.getElementById('productGrid');
-        grid.innerHTML = "";
-        snap.forEach(d => {
-            const p = d.data();
-            grid.innerHTML += `
-                <div class="card-navy rounded-2xl overflow-hidden border border-gray-800 shadow-lg">
-                    <img src="${p.img || 'https://via.placeholder.com/150'}" class="h-32 w-full object-cover bg-gray-900">
-                    <div class="p-4">
-                        <p class="text-[10px] font-bold text-white truncate">${p.name}</p>
-                        <p class="text-gold font-black mt-1 text-lg italic">₹${p.price}</p>
-                        <button class="w-full bg-white text-black text-[9px] font-black py-2 rounded-xl mt-3 uppercase shadow-md">Buy Now</button>
-                    </div>
-                </div>`;
-        });
-    });
-                }
-        
-        window.logout = () => signOut(auth).then(() => window.location.href="index.html");
+        window.tab = (t) => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            document.getElementById('tab-' + t).classList.add('nav-active');
+            document.getElementById('mainDisplay').innerHTML = `<p class="text-center mt-10">Loading ${t}...</p>`;
+        };
+        document.addEventListener('DOMContentLoaded', () => tab('course'));
     </script>
 </body>
 </html>
