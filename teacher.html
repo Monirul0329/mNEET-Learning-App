@@ -159,7 +159,29 @@ window.addProduct = async () => {
         
         // Initial Tab Load
         setTab('course');
+// teacher.html er script er bhitor eita thaka dorkar
+window.setTab = (tab) => {
+    // Shob button theke active class sorano
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+    // Shudhu click kora button-e active class deya
+    const activeBtn = document.getElementById('btn-' + tab);
+    if(activeBtn) activeBtn.classList.add('nav-active');
+    
+    const area = document.getElementById('adminMain');
+    if(!area) return; // Jodi area na thake
 
+    area.innerHTML = `<p class="text-center mt-10 animate-pulse text-xs text-gray-500">LOADING ${tab.toUpperCase()}...</p>`;
+
+    // Content Load kora
+    if(tab === 'course') renderCourseTab(area);
+    if(tab === 'study') renderStudyTab(area);
+    if(tab === 'test') renderTestTab(area);
+    if(tab === 'mstore') renderMStoreTab(area);
+};
+
+// Page load houar por auto prothom tab khula
+document.addEventListener('DOMContentLoaded', () => setTab('course'));
+        
     </script>
 </body>
 </html>
