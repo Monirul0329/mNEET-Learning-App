@@ -57,21 +57,34 @@
             document.getElementById('toggleBtn').innerText = isLogin ? "Create Account" : "Login Here";
         };
 
-        window.handleAuth = async () => {
+               window.handleAuth = async () => {
             const email = document.getElementById('email').value.trim();
             const pass = document.getElementById('password').value;
-            if(!email || !pass) return alert("Please fill all fields");
+            const btn = document.getElementById('authBtn');
+
+            if(!email || !pass) return alert("Fill all fields");
+            btn.innerText = "PROCESSING...";
 
             try {
                 if(isLogin) {
-                    await signInWithEmailAndPassword(auth, email, pass);
-                    window.location.href = "dashboard.html";
+                    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                    const user = userCredential.user;
+
+                    // ADMIN LOGIC: Jodi apnar email hobe admin email
+                    if(email === "mi4286803@gmail.com") { 
+                        alert("Welcome Admin!");
+                        window.location.href = "teacher.html"; // Admin panel-e niye jabe
+                    } else {
+                        alert("Login Success!");
+                        window.location.href = "dashboard.html"; // Student dashboard-e niye jabe
+                    }
                 } else {
                     await createUserWithEmailAndPassword(auth, email, pass);
                     alert("Account Created!");
-                    location.reload();
+                    toggleAuth();
                 }
-            } catch (err) { alert(err.code); }
+            } catch (err) { alert("Error: " + err.code); }
+            btn.innerText = "LOGIN NOW";
         };
     </script>
 </body>
