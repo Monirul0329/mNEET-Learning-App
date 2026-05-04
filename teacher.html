@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNeet - Admin</title>
+    <title>mNeet Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0b1120; color: white; font-family: sans-serif; }
@@ -19,17 +19,15 @@
 
     <div class="p-6 max-w-lg mx-auto">
         <div class="card-navy p-8 rounded-[2.5rem] mb-10 shadow-2xl">
-            <h2 class="text-xl font-bold mb-6 text-[#eab308] uppercase tracking-widest text-center">Create Course</h2>
+            <h2 class="text-xl font-bold mb-6 text-[#eab308] uppercase text-center">New Course</h2>
             <input type="text" id="cTitle" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="Course Name">
             <input type="number" id="cPrice" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="Price (₹)">
-            
-            <input type="text" id="cVideo" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="YouTube Link (e.g. https://youtu.be/...)">
-            
-            <textarea id="cDesc" class="w-full input-navy p-4 rounded-2xl mb-6 outline-none h-32" placeholder="Course Description..."></textarea>
-            <button onclick="saveCourse()" class="w-full btn-gold py-4 rounded-2xl font-bold uppercase tracking-widest shadow-lg">Publish Course</button>
+            <input type="text" id="cVideo" class="w-full input-navy p-4 rounded-2xl mb-4 outline-none" placeholder="YouTube Link (e.g. https://youtu.be/xyz)">
+            <textarea id="cDesc" class="w-full input-navy p-4 rounded-2xl mb-6 outline-none h-32" placeholder="Course Features..."></textarea>
+            <button onclick="saveCourse()" class="w-full btn-gold py-4 rounded-2xl font-bold uppercase shadow-lg">Publish Course</button>
         </div>
 
-        <h3 class="text-xs font-bold text-gray-500 uppercase mb-4 ml-2">Live Courses</h3>
+        <h3 class="text-xs font-bold text-gray-500 uppercase mb-4 ml-2">Active Courses</h3>
         <div id="adminCourseList" class="space-y-4"></div>
     </div>
 
@@ -56,8 +54,8 @@
             const desc = document.getElementById('cDesc').value;
 
             let videoId = "";
-            if(videoLink.includes("v=")) videoId = videoLink.split("v=")[1].split("&")[0];
-            else if(videoLink.includes("youtu.be/")) videoId = videoLink.split("youtu.be/")[1];
+            if (videoLink.includes("v=")) videoId = videoLink.split("v=")[1].split("&")[0];
+            else if (videoLink.includes("youtu.be/")) videoId = videoLink.split("youtu.be/")[1].split("?")[0];
 
             if(!title || !price) return alert("Title and Price are mandatory!");
             
@@ -68,12 +66,12 @@
                 desc, 
                 timestamp: new Date() 
             });
-            alert("Course Published!");
+            alert("Published!");
             location.reload();
         };
 
         window.delCourse = async (id) => {
-            if(confirm("Delete this course?")) await deleteDoc(doc(db, "courses", id));
+            if(confirm("Delete this?")) await deleteDoc(doc(db, "courses", id));
         };
 
         onSnapshot(collection(db, "courses"), (snap) => {
@@ -84,7 +82,7 @@
                 container.innerHTML += `
                     <div class="card-navy p-4 rounded-2xl flex justify-between items-center shadow-md">
                         <span class="font-bold">${data.title}</span>
-                        <button onclick="delCourse('${d.id}')" class="text-red-500 text-xs font-bold uppercase">Delete</button>
+                        <button onclick="delCourse('${d.id}')" class="text-red-500 font-bold">DEL</button>
                     </div>`;
             });
         });
