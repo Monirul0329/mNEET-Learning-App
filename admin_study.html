@@ -1,9 +1,117 @@
-<body style="background:#0b1120;color:white;padding:20px;font-family:sans-serif;">
-    <div style="background:#16213e;padding:20px;border-radius:20px;">
-        <h2 style="color:#eab308;font-size:12px;">UPLOAD CONTENT</h2>
-        <input type="text" placeholder="Chapter Name" style="width:100%;padding:10px;margin-top:10px;border-radius:10px;background:#1e293b;border:none;color:white;">
-        <input type="text" placeholder="YouTube Link" style="width:100%;padding:10px;margin-top:10px;border-radius:10px;background:#1e293b;border:none;color:white;">
-        <button style="width:100%;background:#3b82f6;color:white;padding:12px;margin-top:15px;border:none;border-radius:10px;font-weight:bold;">ADD TO STUDY</button>
-    </div>
-</body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0b1120] p-6 text-white font-sans pb-20">
+    <div class="bg-[#16213e] p-6 rounded-3xl border border-blue-500/20 mb-8 shadow-2xl">
+        <h2 id="formTitle" class="text-blue-400 text-[10px] font-black uppercase mb-6 tracking-[0.3em] text-center italic">Upload / Edit Study Content</h2>
+        
+        <input type="hidden" id="editId">
+        
+        <label class="text-[9px] text-gray-500 font-bold ml-1 uppercase">Select Course</label>
+        <select id="courseSelect" class="w-full bg-[#1e293b] p-4 rounded-xl mb-4 border border-gray-700 outline-none text-sm text-white appearance-none focus:border-blue-500">
+            <option value="">Loading Courses...</option>
+        </select>
 
+        <input type="text" id="chapName" placeholder="Chapter Name (e.g. Thermodynamics)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none text-sm focus:border-blue-500">
+        <input type="text" id="vidId" placeholder="YouTube Video ID (e.g. dQw4w9WgXcQ)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none text-sm focus:border-blue-500">
+        <input type="text" id="pdfUrl" placeholder="Notes PDF Link" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none text-sm focus:border-blue-500">
+        <input type="text" id="dppUrl" placeholder="DPP Link" class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 outline-none text-sm focus:border-blue-500">
+        
+        <button onclick="saveStudy()" id="saveBtn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Add to Library</button>
+    </div>
+
+    <h3 class="text-[10px] text-gray-500 uppercase font-black mb-6 ml-2 tracking-widest">Existing Materials</h3>
+    <div id="studyList" class="space-y-4"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 1. Load Courses into Dropdown
+        onSnapshot(collection(db, "courses"), (snap) => {
+            const select = document.getElementById('courseSelect');
+            select.innerHTML = '<option value="">-- Choose Course --</option>';
+            snap.forEach(d => {
+                const c = d.data();
+                select.innerHTML += `<option value="${d.id}">${c.title}</option>`;
+            });
+        });
+
+        // 2. Save or Update Study Material
+        window.saveStudy = async () => {
+            const courseId = document.getElementById('courseSelect').value;
+            const chapter = document.getElementById('chapName').value;
+            const video = document.getElementById('vidId').value;
+            const pdf = document.getElementById('pdfUrl').value;
+            const dpp = document.getElementById('dppUrl').value;
+            const editId = document.getElementById('editId').value;
+
+            if(!courseId || !chapter) return alert("Select Course and enter Chapter Name!");
+
+            const studyData = { courseId, chapter, video, pdf, dpp, updatedAt: new Date() };
+
+            try {
+                if(editId) {
+                    await updateDoc(doc(db, "study_material", editId), studyData);
+                    alert("Content Updated!");
+                } else {
+                    await addDoc(collection(db, "study_material"), studyData);
+                    alert("Content Added!");
+                }
+                resetForm();
+            } catch(e) { alert(e.message); }
+        };
+
+        // 3. Load Study Materials List
+        onSnapshot(collection(db, "study_material"), (snap) => {
+            const list = document.getElementById('studyList');
+            list.innerHTML = "";
+            snap.forEach(d => {
+                const s = d.data();
+                list.innerHTML += `
+                <div class="bg-[#16213e] p-5 rounded-2xl border border-gray-800 flex justify-between items-center shadow-xl">
+                    <div class="flex-1">
+                        <p class="text-[8px] text-blue-400 font-bold uppercase tracking-tighter">CID: ${s.courseId}</p>
+                        <p class="font-bold text-sm text-white">${s.chapter}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editStudy('${d.id}', '${s.courseId}', '${s.chapter}', '${s.video}', '${s.pdf}', '${s.dpp}')" class="text-blue-400 p-2 text-[10px] font-bold"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteStudy('${d.id}')" class="text-red-500 p-2 text-[10px] font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>`;
+            });
+        });
+
+        window.editStudy = (id, cid, ch, v, p, dpp) => {
+            document.getElementById('editId').value = id;
+            document.getElementById('courseSelect').value = cid;
+            document.getElementById('chapName').value = ch;
+            document.getElementById('vidId').value = v;
+            document.getElementById('pdfUrl').value = p;
+            document.getElementById('dppUrl').value = dpp;
+            document.getElementById('saveBtn').innerText = "Update Content";
+            window.scrollTo(0,0);
+        };
+
+        window.deleteStudy = async (id) => {
+            if(confirm("Delete this content?")) await deleteDoc(doc(db, "study_material", id));
+        };
+
+        function resetForm() {
+            document.getElementById('editId').value = "";
+            document.getElementById('chapName').value = "";
+            document.getElementById('vidId').value = "";
+            document.getElementById('pdfUrl').value = "";
+            document.getElementById('dppUrl').value = "";
+            document.getElementById('saveBtn').innerText = "Add to Library";
+        }
+    </script>
+</body>
+</html>
