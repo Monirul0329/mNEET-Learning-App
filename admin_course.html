@@ -4,92 +4,77 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#0b1120] p-6 text-white pb-32">
+<body class="bg-[#0b1120] p-6 text-white pb-32 font-sans">
+    
     <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-12">
-        <h2 class="text-gold text-[10px] font-black uppercase text-center mb-8 italic">Add Professional Course</h2>
+        <h2 class="text-gold text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">Course Publisher</h2>
         
-        <div class="mb-4">
-            <label class="block text-[10px] uppercase font-bold text-gray-500 mb-2">Course Thumbnail (Gallery)</label>
-            <input type="file" id="imgFile" accept="image/*" class="w-full bg-[#1e293b] p-3 rounded-xl border border-gray-700 text-xs">
-        </div>
+        <label class="block text-[9px] font-black text-gray-500 uppercase mb-2 ml-1">Upload Thumbnail (Gallery)</label>
+        <input type="file" id="imgFile" accept="image/*" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-xs mb-4">
 
-        <input type="text" id="cTitle" placeholder="Course Title" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none">
+        <input type="text" id="cTitle" placeholder="Course Title" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none focus:border-gold">
+        <input type="text" id="cVid" placeholder="Google Drive Intro Link" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none">
+        <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none">
+        <textarea id="cDesc" placeholder="Course Description..." class="w-full bg-[#1e293b] p-4 rounded-2xl mb-8 border border-gray-700 h-24 outline-none"></textarea>
         
-        <div class="grid grid-cols-1 gap-3 mb-3">
-            <input type="text" id="cVid" placeholder="Google Drive Video Link" class="w-full bg-[#1e293b] p-4 rounded-xl border border-gray-700 outline-none">
-            <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-xl border border-gray-700 outline-none">
-        </div>
-
-        <textarea id="cDesc" placeholder="Course Description..." class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 h-24 outline-none resize-none"></textarea>
-        
-        <button onclick="uploadAndSave()" id="saveBtn" class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase text-xs shadow-xl">
-            <span id="btnText">Publish Course</span>
+        <button onclick="publishCourse()" id="saveBtn" class="w-full bg-[#eab308] text-[#0b1120] py-5 rounded-[1.5rem] font-black uppercase text-xs shadow-xl active:scale-95 transition-all">
+            <span id="btnText">Publish Batch</span>
         </button>
     </div>
 
-    <div id="courseList" class="space-y-6"></div>
+    <div id="courseList" class="space-y-8"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
-        const firebaseConfig = { /* Apnar config ekhane thakbe */ };
+        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        window.uploadAndSave = async () => {
+        window.publishCourse = async () => {
             const file = document.getElementById('imgFile').files[0];
             const title = document.getElementById('cTitle').value;
             const btn = document.getElementById('btnText');
-            
-            if(!file || !title) return alert("Please select an image and enter a title!");
-            btn.innerText = "Uploading...";
+
+            if(!file || !title) return alert("Select Image & Enter Title!");
+            btn.innerText = "UPLOADING...";
 
             try {
-                // 1. Upload Image to Firebase Storage
-                const storageRef = ref(storage, 'thumbnails/' + Date.now() + "_" + file.name);
-                const snapshot = await uploadBytes(storageRef, file);
-                const downloadURL = await getDownloadURL(snapshot.ref);
+                const sRef = ref(storage, 'courses/' + Date.now() + "_" + file.name);
+                await uploadBytes(sRef, file);
+                const url = await getDownloadURL(sRef);
 
-                // 2. Save Data to Firestore
                 await addDoc(collection(db, "courses"), {
-                    title: title,
-                    img: downloadURL,
-                    vid: document.getElementById('cVid').value,
+                    title, img: url, vid: document.getElementById('cVid').value,
                     price: document.getElementById('cPrice').value,
                     desc: document.getElementById('cDesc').value,
-                    isHidden: false
+                    timestamp: new Date()
                 });
-
-                alert("Course Published Successfully!");
-                location.reload();
-            } catch (e) { alert(e.message); btn.innerText = "Try Again"; }
+                alert("Batch Live! 🚀"); location.reload();
+            } catch(e) { alert(e.message); btn.innerText = "RETRY"; }
         };
 
-        // Course List code updated for large cards
         onSnapshot(collection(db, "courses"), (snap) => {
             const list = document.getElementById('courseList'); list.innerHTML = "";
             snap.forEach(d => {
                 const c = d.data();
                 list.innerHTML += `
-                <div class="bg-[#16213e] rounded-[2rem] overflow-hidden border border-gray-800 shadow-xl">
-                    <img src="${c.img}" class="w-full h-48 object-cover ${c.isHidden ? 'grayscale opacity-30' : ''}">
-                    <div class="p-6">
-                        <h3 class="text-xl font-black italic uppercase text-white">${c.title}</h3>
-                        <p class="text-gray-500 text-[10px] mt-2 mb-4 uppercase">${c.desc}</p>
-                        <div class="flex gap-2">
-                            <button onclick="toggleHide('${d.id}', ${c.isHidden})" class="flex-1 bg-blue-600/20 text-blue-400 py-3 rounded-xl font-bold text-[10px] uppercase border border-blue-600/30">${c.isHidden ? 'Show' : 'Hide'}</button>
-                            <button onclick="delC('${d.id}')" class="flex-1 bg-red-600/20 text-red-500 py-3 rounded-xl font-bold text-[10px] uppercase border border-red-600/30">Delete</button>
+                <div class="bg-[#16213e] rounded-[3rem] overflow-hidden border border-gray-800 shadow-2xl relative">
+                    <img src="${c.img}" class="w-full h-56 object-cover opacity-60">
+                    <div class="p-8">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-2xl font-black italic uppercase">${c.title}</h3>
+                            <span class="text-gold font-black text-xl italic">₹${c.price}</span>
                         </div>
+                        <p class="text-gray-500 text-[10px] uppercase font-bold mb-6">${c.desc}</p>
+                        <button onclick="deleteDoc(doc(db, 'courses', '${d.id}'))" class="bg-red-500/10 w-full py-4 rounded-2xl text-red-500 font-black uppercase text-[9px] border border-red-500/20">Remove Batch</button>
                     </div>
                 </div>`;
             });
         });
-        
-        window.toggleHide = async (id, status) => await updateDoc(doc(db, "courses", id), { isHidden: !status });
-        window.delC = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "courses", id)); };
     </script>
 </body>
 </html>
