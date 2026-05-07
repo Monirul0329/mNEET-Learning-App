@@ -2,36 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>mNEET - Entry</title>
 </head>
-<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6 font-sans">
+<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6">
     <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl text-white">
-        <h1 class="text-4xl font-black italic uppercase text-center mb-2 tracking-tighter italic">m<span class="text-[#eab308]">NEET</span></h1>
-        <p class="text-gray-500 text-center text-[10px] uppercase tracking-[0.3em] mb-10 font-black">Future Surgeon's Portal</p>
-        
+        <h1 class="text-4xl font-black italic uppercase text-center mb-6 italic">m<span class="text-[#eab308]">NEET</span></h1>
         <div class="space-y-4">
-            <input type="text" id="userName" placeholder="Your Name" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308] transition-all">
-            <input type="text" id="targetCollege" placeholder="Dream Medical College" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308] transition-all">
+            <input type="text" id="uName" placeholder="Full Name" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
+            <input type="email" id="uEmail" placeholder="Email (For Database Sync)" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
+            <input type="text" id="uCollege" placeholder="Dream Medical College" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
         </div>
-        
-        <button onclick="saveUser()" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl active:scale-95 transition-all">Start Journey</button>
+        <button onclick="login()" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl active:scale-95 transition-all">Enter Portal</button>
     </div>
-
     <script>
-        function saveUser() {
-            const name = document.getElementById('userName').value;
-            const college = document.getElementById('targetCollege').value;
-            if(!name || !college) return alert("Enter details first!");
-            
-            localStorage.setItem('mNEET_User', JSON.stringify({
-                name: name,
-                college: college,
-                xp: 0,
-                hours: 0,
-                questions: 0
-            }));
-            window.location.href = 'dashboard.html';
+        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
+        const SB_KEY = 'YOUR_ANON_KEY';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        async function login() {
+            const name = document.getElementById('uName').value;
+            const email = document.getElementById('uEmail').value;
+            const college = document.getElementById('uCollege').value;
+
+            // Check if user exists, else create
+            const { data, error } = await supabaseClient.from('users_profile').upsert({ 
+                email, name, college, xp: 0, hours: 0, coins: 0, rank: 'Aspirant' 
+            }).select();
+
+            if(!error) {
+                localStorage.setItem('mUserEmail', email);
+                window.location.href = 'dashboard.html';
+            } else { alert("Sync Error: " + error.message); }
         }
     </script>
 </body>
