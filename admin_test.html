@@ -1,75 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script src="https://cdn.tailwindcss.com"></script></head>
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
 <body class="bg-[#0b1120] p-6 text-white pb-32">
-    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-yellow-500/20 shadow-2xl mb-10">
-        <h2 id="formTitle" class="text-yellow-500 text-[10px] font-black uppercase text-center mb-8 tracking-widest italic">Test Center Manager</h2>
+    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 max-w-lg mx-auto shadow-2xl">
+        <h2 class="text-blue-400 text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">Quiz & NEET Simulator Builder</h2>
         
-        <input type="hidden" id="editId">
+        <input type="text" id="qText" placeholder="Enter Question" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-3 border border-gray-700 outline-none">
+        <input type="text" id="optA" placeholder="Option A" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-2 border border-gray-700 outline-none">
+        <input type="text" id="optB" placeholder="Option B" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-2 border border-gray-700 outline-none">
+        <input type="text" id="correctOpt" placeholder="Correct Option (A or B)" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-4 border border-blue-500 outline-none text-blue-400">
+        <input type="number" id="ncertPage" placeholder="NCERT Page Number for Solution" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-8 border border-gray-700 outline-none">
         
-        <label class="text-[9px] text-gray-500 font-black uppercase ml-1">Target Subject</label>
-        <select id="courseSelect" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-4 border border-gray-700 outline-none text-sm text-white focus:border-yellow-500 mt-1">
-            <option value="">Loading Subjects...</option>
-        </select>
-
-        <input type="text" id="tName" placeholder="Test Title (e.g. Weekly Full Mock)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none text-sm focus:border-yellow-500">
-        <input type="text" id="tLink" placeholder="Google Form / Quiz Link" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-6 border border-gray-700 outline-none text-sm focus:border-yellow-500">
-        
-        <button onclick="saveTest()" id="saveBtn" class="w-full bg-yellow-500 text-black py-4 rounded-2xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Publish Test</button>
+        <button onclick="addQuiz()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95">Link to Question Bank</button>
     </div>
 
-    <div id="testList" class="space-y-4"></div>
+    <script>
+        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
+        const SB_KEY = 'YOUR_ANON_KEY';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-
-        onSnapshot(collection(db, "courses"), (snap) => {
-            const select = document.getElementById('courseSelect');
-            select.innerHTML = '<option value="">-- Select Subject --</option>';
-            snap.forEach(d => select.innerHTML += `<option value="${d.id}">${d.data().title}</option>`);
-        });
-
-        window.saveTest = async () => {
-            const cid = document.getElementById('courseSelect').value;
-            const name = document.getElementById('tName').value;
-            const link = document.getElementById('tLink').value;
-            const editId = document.getElementById('editId').value;
-            if(!cid || !name) return alert("Fill all fields!");
-
-            if(editId) await updateDoc(doc(db, "tests", editId), { cid, name, link });
-            else await addDoc(collection(db, "tests"), { cid, name, link, timestamp: new Date() });
-            
-            location.reload();
-        };
-
-        onSnapshot(collection(db, "tests"), (snap) => {
-            const list = document.getElementById('testList'); list.innerHTML = "";
-            snap.forEach(d => {
-                const t = d.data();
-                list.innerHTML += `<div class="bg-[#16213e] p-5 rounded-3xl border border-gray-800 flex justify-between items-center shadow-xl">
-                    <div class="flex-1">
-                        <p class="text-[7px] text-yellow-500 font-black uppercase mb-1">MAP: ${t.cid.substring(0,8)}</p>
-                        <p class="font-bold text-sm text-white italic">${t.name}</p>
-                    </div>
-                    <div class="flex gap-4">
-                        <button onclick="editT('${d.id}', '${t.cid}', '${t.name}', '${t.link}')" class="text-blue-400"><i class="fa-solid fa-pen-to-square"></i></button>
-                        <button onclick="deleteDoc(doc(db, 'tests', '${d.id}'))" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>`;
-            });
-        });
-
-        window.editT = (id, cid, n, l) => {
-            document.getElementById('editId').value = id;
-            document.getElementById('courseSelect').value = cid;
-            document.getElementById('tName').value = n;
-            document.getElementById('tLink').value = l;
-            document.getElementById('saveBtn').innerText = "Update Test";
-            window.scrollTo(0,0);
-        };
+        async function addQuiz() {
+            const { error } = await supabaseClient.from('quizzes').insert([{ 
+                question: document.getElementById('qText').value,
+                a: document.getElementById('optA').value,
+                b: document.getElementById('optB').value,
+                correct: document.getElementById('correctOpt').value,
+                page_link: document.getElementById('ncertPage').value
+            }]);
+            if(error) alert(error.message); else alert("Question Added! 📝");
+        }
     </script>
 </body>
 </html>
