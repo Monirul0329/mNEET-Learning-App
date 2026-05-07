@@ -1,71 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background: #0b1120; color: white; padding-bottom: 90px; }
-        .header-gradient { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-        .grid-item { background: #16213e; border: 1px solid #1f2937; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; border-radius: 1.5rem; transition: 0.2s; }
-        .grid-item:active { transform: scale(0.9); background: #1e293b; }
-        .nav-active { color: #eab308 !important; }
-        iframe { width: 100%; height: calc(100vh - 300px); border: none; }
-    </style>
-</head>
-<body>
-
-    <div class="header-gradient p-6 rounded-b-[3rem] shadow-2xl border-b border-gray-800">
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Welcome back,</p>
-                <h1 id="dispName" class="text-xl font-black text-white italic">Student</h1>
-            </div>
-            <div class="bg-white/5 p-2 rounded-2xl flex items-center gap-3 border border-white/10">
-                <div class="text-right">
-                    <p class="text-[8px] font-black text-gray-500 uppercase">My BP</p>
-                    <p id="dispCoins" class="text-sm font-black text-[#eab308]">0</p>
-                </div>
-                <img src="https://ui-avatars.com/api/?name=User&background=eab308&color=000" class="w-8 h-8 rounded-xl">
-            </div>
-        </div>
-        
-        <div class="grid grid-cols-4 gap-3 mt-4">
-            <div onclick="nav('course.html', 'c')" class="grid-item">
-                <i class="fa-solid fa-play text-[#eab308] text-lg"></i>
-                <span class="text-[8px] font-black uppercase mt-2">Classes</span>
-            </div>
-            <div onclick="nav('test.html', 't')" class="grid-item">
-                <i class="fa-solid fa-flask text-blue-400 text-lg"></i>
-                <span class="text-[8px] font-black uppercase mt-2">Tests</span>
-            </div>
-            <div onclick="openRanks()" class="grid-item">
-                <i class="fa-solid fa-trophy text-orange-400 text-lg"></i>
-                <span class="text-[8px] font-black uppercase mt-2">Ranking</span>
-            </div>
-            <div onclick="nav('mstore.html', 'm')" class="grid-item">
-                <i class="fa-solid fa-shop text-green-400 text-lg"></i>
-                <span class="text-[8px] font-black uppercase mt-2">Store</span>
-            </div>
-        </div>
+<div class="grid grid-cols-4 gap-4 p-6 bg-[#16213e] rounded-[3rem] mx-4 -mt-12 shadow-2xl relative z-20 border border-white/5">
+    <div onclick="nav('course.html', 'c')" class="flex flex-col items-center gap-2">
+        <div class="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center text-gold shadow-lg shadow-gold/5"><i class="fa-solid fa-play"></i></div>
+        <span class="text-[8px] font-black uppercase text-gray-400">Batches</span>
     </div>
-
-    <div id="mainView" class="p-4 mt-2">
-        <iframe id="appFrame" src="course.html"></iframe>
+    <div onclick="nav('test.html', 't')" class="flex flex-col items-center gap-2">
+        <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shadow-lg shadow-blue-500/5"><i class="fa-solid fa-vial"></i></div>
+        <span class="text-[8px] font-black uppercase text-gray-400">Tests</span>
     </div>
-
-    <div id="rankView" class="hidden p-6 animate-fade-in">
-        <h2 class="text-center font-black text-xs uppercase tracking-widest text-gray-500 mb-8 italic underline underline-offset-8">Global Leaderboard</h2>
-        <div id="rankList" class="space-y-3"></div>
+    <div onclick="openRanks()" class="flex flex-col items-center gap-2">
+        <div class="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-400 shadow-lg shadow-orange-500/5"><i class="fa-solid fa-trophy"></i></div>
+        <span class="text-[8px] font-black uppercase text-gray-400">Ranks</span>
     </div>
-
-    <div class="fixed bottom-0 left-0 right-0 h-20 bg-[#16213e]/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-around z-50">
-        <button onclick="nav('course.html', 'c')" class="flex flex-col items-center nav-active" id="nav-c"><i class="fa-solid fa-house"></i><span class="text-[9px] mt-1 font-bold">HOME</span></button>
-        <button onclick="nav('study.html', 's')" class="flex flex-col items-center text-gray-500" id="nav-s"><i class="fa-solid fa-book"></i><span class="text-[9px] mt-1 font-bold">STUDY</span></button>
-        <button onclick="openRanks()" class="flex flex-col items-center text-gray-500" id="nav-r"><i class="fa-solid fa-ranking-star"></i><span class="text-[9px] mt-1 font-bold">RANKS</span></button>
-        <button onclick="nav('mstore.html', 'm')" class="flex flex-col items-center text-gray-500" id="nav-m"><i class="fa-solid fa-bag-shopping"></i><span class="text-[9px] mt-1 font-bold">STORE</span></button>
+    <div onclick="nav('mstore.html', 'm')" class="flex flex-col items-center gap-2">
+        <div class="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-400 shadow-lg shadow-green-500/5"><i class="fa-solid fa-shop"></i></div>
+        <span class="text-[8px] font-black uppercase text-gray-400">M-Store</span>
     </div>
-
-</body>
-</html>
+</div>
