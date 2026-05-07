@@ -2,65 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET Gateway</title>
+    <title>mNEET - Professional Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: radial-gradient(circle at top, #1e293b, #0f172a); min-height: 100vh; font-family: 'Inter', sans-serif; color: white; }
+        .auth-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        input { background: #0f172a !important; border: 1px solid #334155 !important; transition: 0.3s; }
+        input:focus { border-color: #eab308 !important; box-shadow: 0 0 15px rgba(234, 179, 8, 0.1); }
+    </style>
 </head>
-<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6 font-sans">
-    <div class="w-full max-w-md bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 shadow-2xl text-center">
-        <h1 class="text-5xl font-black text-[#eab308] mb-12 italic tracking-tighter">mNEET</h1>
-        <h2 id="authTitle" class="text-white text-xs font-black uppercase mb-8 tracking-[0.2em]">Sign In</h2>
+<body class="flex items-center justify-center p-6">
+
+    <div class="w-full max-w-md auth-card p-10 rounded-[3rem] shadow-2xl text-center">
+        <h1 class="text-5xl font-black text-[#eab308] mb-2 italic tracking-tighter uppercase">mNEET</h1>
+        <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] mb-12 font-bold">The Future of NEET Prep</p>
         
-        <div id="signupFields" class="hidden">
-            <input type="text" id="userName" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 text-white outline-none" placeholder="Full Name">
-            <input type="text" id="userCity" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 text-white outline-none" placeholder="Your City Name">
+        <h2 id="authTitle" class="text-xl font-black mb-8">Sign In</h2>
+
+        <div id="signupFields" class="hidden space-y-4">
+            <input type="text" id="userName" class="w-full p-4 rounded-2xl text-white outline-none" placeholder="Full Name">
+            <input type="text" id="userCity" class="w-full p-4 rounded-2xl text-white outline-none" placeholder="City Name">
         </div>
         
-        <input type="email" id="email" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 text-white outline-none" placeholder="Email Address">
-        <input type="password" id="password" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-8 border border-gray-700 text-white outline-none" placeholder="Password">
+        <div class="mt-4 space-y-4">
+            <input type="email" id="email" class="w-full p-4 rounded-2xl text-white outline-none" placeholder="Email Address">
+            <input type="password" id="password" class="w-full p-4 rounded-2xl text-white outline-none" placeholder="Password">
+        </div>
         
-        <button onclick="handleAuth()" id="authBtn" class="w-full bg-[#eab308] text-[#0b1120] py-4 rounded-2xl font-black uppercase shadow-xl">Sign In Now</button>
+        <button onclick="handleAuth()" id="authBtn" class="w-full bg-[#eab308] text-[#0b1120] py-5 rounded-2xl font-black uppercase shadow-xl mt-10 hover:scale-[1.02] transition-all active:scale-95">Enter Dashboard</button>
         
-        <div class="flex flex-col gap-5 mt-10 px-2">
-            <button onclick="toggleAuth()" id="toggleBtn" class="text-[#eab308] text-[10px] font-black uppercase underline underline-offset-4">Create Account / Sign Up</button>
-            <button onclick="resetPass()" class="text-white text-[10px] font-black uppercase hover:text-gold transition-all">Forgot Password?</button>
+        <div class="mt-10 flex flex-col gap-4">
+            <button onclick="toggleAuth()" id="toggleBtn" class="text-[#eab308] text-[11px] font-black uppercase tracking-widest">New Student? Sign Up</button>
+            <button onclick="resetPass()" class="text-gray-400 text-[10px] font-bold uppercase hover:text-white transition-all">Trouble Signing In?</button>
         </div>
     </div>
 
     <script type="module">
+        // Firebase Logic (Pre-configured as before)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
         const app = initializeApp(firebaseConfig); const auth = getAuth(app); const db = getFirestore(app);
+        
         let isLogin = true;
 
         window.toggleAuth = () => {
             isLogin = !isLogin;
             document.getElementById('signupFields').classList.toggle('hidden');
-            document.getElementById('authTitle').innerText = isLogin ? "Sign In" : "Sign Up / Register";
-            document.getElementById('authBtn').innerText = isLogin ? "Sign In Now" : "Register Student Account";
+            document.getElementById('authTitle').innerText = isLogin ? "Sign In" : "Sign Up";
+            document.getElementById('toggleBtn').innerText = isLogin ? "New Student? Sign Up" : "Already Registered? Sign In";
         };
 
         window.resetPass = () => {
-            const email = document.getElementById('email').value;
-            if(!email) return alert("Enter email address!");
-            sendPasswordResetEmail(auth, email).then(() => alert("Reset link sent to email!")).catch(e => alert(e.message));
+            const em = document.getElementById('email').value;
+            if(!em) return alert("Enter email first.");
+            sendPasswordResetEmail(auth, em).then(() => alert("Reset Link Sent!")).catch(e => alert(e.message));
         };
 
         window.handleAuth = async () => {
-            const email = document.getElementById('email').value; const pass = document.getElementById('password').value;
+            const em = document.getElementById('email').value; const ps = document.getElementById('password').value;
             try {
                 if(isLogin) {
-                    const res = await signInWithEmailAndPassword(auth, email, pass);
-                    const snap = await getDoc(doc(db, "users", res.user.uid));
-                    window.location.href = (snap.exists() && snap.data().role === 'admin') ? "teacher.html" : "dashboard.html";
+                    const res = await signInWithEmailAndPassword(auth, em, ps);
+                    const sn = await getDoc(doc(db, "users", res.user.uid));
+                    window.location.href = (sn.exists() && sn.data().role === 'admin') ? "teacher.html" : "dashboard.html";
                 } else {
-                    const res = await createUserWithEmailAndPassword(auth, email, pass);
+                    const res = await createUserWithEmailAndPassword(auth, em, ps);
                     await setDoc(doc(db, "users", res.user.uid), { 
                         name: document.getElementById('userName').value, 
-                        city: document.getElementById('userCity').value,
-                        email, role: 'student', coins: 0, enrolled: [], rank: "Bronze" 
+                        city: document.getElementById('userCity').value, 
+                        email: em, role: 'student', coins: 0, enrolled: [], rank: "Bronze" 
                     });
                     location.reload();
                 }
