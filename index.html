@@ -4,36 +4,51 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <title>mNEET - Sign In</title>
 </head>
 <body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6">
     <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl text-white">
-        <h1 class="text-4xl font-black italic uppercase text-center mb-6 italic">m<span class="text-[#eab308]">NEET</span></h1>
+        <h1 class="text-4xl font-black italic uppercase text-center mb-2 italic">m<span class="text-[#eab308]">NEET</span></h1>
+        <p class="text-gray-500 text-center text-[10px] uppercase tracking-[0.3em] mb-10 font-black">Future Surgeon's Login</p>
+        
         <div class="space-y-4">
-            <input type="text" id="uName" placeholder="Full Name" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
-            <input type="email" id="uEmail" placeholder="Email (For Database Sync)" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
-            <input type="text" id="uCollege" placeholder="Dream Medical College" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
+            <input type="text" id="loginId" placeholder="Email or Phone Number" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308] transition-all">
+            <input type="password" id="loginPass" placeholder="Password" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308] transition-all">
         </div>
-        <button onclick="login()" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl active:scale-95 transition-all">Enter Portal</button>
+
+        <div class="flex justify-end mt-3">
+            <button onclick="forgetPass()" class="text-[10px] text-gray-500 hover:text-[#eab308] uppercase font-bold">Forget Password?</button>
+        </div>
+        
+        <button onclick="handleSignIn()" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-8 shadow-xl active:scale-95 transition-all">Sign In</button>
+        
+        <p class="text-center text-gray-500 text-[10px] mt-6 uppercase font-bold">
+            Don't have an account? <a href="signup.html" class="text-[#eab308]">Sign Up</a>
+        </p>
     </div>
+
     <script>
         const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
         const SB_KEY = 'YOUR_ANON_KEY';
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        async function login() {
-            const name = document.getElementById('uName').value;
-            const email = document.getElementById('uEmail').value;
-            const college = document.getElementById('uCollege').value;
+        async function handleSignIn() {
+            const email = document.getElementById('loginId').value;
+            const password = document.getElementById('loginPass').value;
 
-            // Check if user exists, else create
-            const { data, error } = await supabaseClient.from('users_profile').upsert({ 
-                email, name, college, xp: 0, hours: 0, coins: 0, rank: 'Aspirant' 
-            }).select();
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-            if(!error) {
-                localStorage.setItem('mUserEmail', email);
+            if (error) {
+                alert("Login Failed: " + error.message);
+            } else {
+                localStorage.setItem('mUserSession', JSON.stringify(data.session));
                 window.location.href = 'dashboard.html';
-            } else { alert("Sync Error: " + error.message); }
+            }
+        }
+
+        function forgetPass() {
+            alert("Password reset link will be sent to your registered email.");
+            // Supabase password reset logic can be added here
         }
     </script>
 </body>
