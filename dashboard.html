@@ -3,74 +3,70 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-[#0b1120] text-white p-6 pb-32">
 
-    <div class="bg-[#16213e] p-6 rounded-[2rem] border border-gray-800 text-center mb-8">
-        <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-2">NEET Battle Countdown</p>
-        <div id="countdown" class="text-2xl font-black text-[#eab308] italic">00:00:00:00</div>
-    </div>
-
-    <div class="flex justify-between items-start mb-10 px-2">
+    <div class="flex justify-between items-start mb-8">
         <div>
-            <h2 id="uName" class="text-2xl font-black italic uppercase">Dr. Loader</h2>
-            <p id="uCollege" class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Target: AIIMS</p>
+            <h2 id="dispName" class="text-2xl font-black italic uppercase italic">Dr. Loader...</h2>
+            <p id="dispCollege" class="text-[9px] text-gray-500 font-bold uppercase tracking-widest italic">Target: Loading...</p>
         </div>
         <div class="text-right">
-            <div id="uRank" class="bg-[#eab308] text-black px-4 py-1 rounded-full text-[9px] font-black uppercase italic">Aspirant</div>
-            <p class="text-[8px] text-gray-500 mt-1 uppercase font-bold italic">Rank 1/10</p>
+            <div id="dispRank" class="bg-[#eab308] text-black px-4 py-1 rounded-full text-[9px] font-black uppercase italic gold-glow">Aspirant</div>
         </div>
     </div>
 
     <div class="grid grid-cols-2 gap-4 mb-8">
         <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800">
-            <i class="fa-solid fa-book-open-reader text-blue-400 mb-3"></i>
-            <h4 id="uHours" class="text-xl font-black">0.0h</h4>
-            <p class="text-[8px] text-gray-500 uppercase font-black">Study Time</p>
+            <h4 id="dispHours" class="text-xl font-black">0.0h</h4>
+            <p class="text-[8px] text-gray-500 uppercase font-black">Study Hours</p>
         </div>
         <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800">
-            <i class="fa-solid fa-circle-check text-green-400 mb-3"></i>
-            <h4 id="uQs" class="text-xl font-black">0</h4>
-            <p class="text-[8px] text-gray-500 uppercase font-black">Qs Mastered</p>
+            <h4 id="dispCoins" class="text-xl font-black">0</h4>
+            <p class="text-[8px] text-gray-500 uppercase font-black">BP Coins</p>
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 bg-[#16213e]/90 backdrop-blur-lg border border-white/5 p-4 rounded-full flex justify-around shadow-2xl">
-        <i class="fa-solid fa-house text-[#eab308]"></i>
-        <a href="study.html"><i class="fa-solid fa-book text-gray-500"></i></a>
-        <a href="quiz.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
-        <a href="mstore.html"><i class="fa-solid fa-store text-gray-500"></i></a>
-    </nav>
+    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 text-center">
+        <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-3">NEET 2027 Countdown</p>
+        <div id="timer" class="text-2xl font-black text-[#eab308] italic">00:00:00:00</div>
+    </div>
 
     <script>
-        // NEET TIMER
-        function updateTimer() {
+        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxb3NhdG9pbXlpamNhaHB6YXVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzE5NDQsImV4cCI6MjA5MzcwNzk0NH0.F-CvTbRnr-2EI5UbvOycTMF_RR7xQCln0E95cwBUN6Y';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        const email = localStorage.getItem('mUserEmail');
+
+        async function loadProfile() {
+            if(!email) { window.location.href = 'index.html'; return; }
+            
+            const { data, error } = await supabaseClient
+                .from('users_profile')
+                .select('*')
+                .eq('email', email)
+                .single();
+
+            if(data) {
+                document.getElementById('dispName').innerText = "Dr. " + data.name;
+                document.getElementById('dispCollege').innerText = "Target: " + data.college;
+                document.getElementById('dispRank').innerText = data.rank;
+                document.getElementById('dispHours').innerText = data.hours + "h";
+                document.getElementById('dispCoins').innerText = data.coins;
+            }
+        }
+        loadProfile();
+
+        // TIMER LOGIC
+        setInterval(() => {
             const target = new Date("May 2, 2027 10:00:00").getTime();
             const now = new Date().getTime();
-            const diff = target - now;
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-            document.getElementById('countdown').innerText = `${d}d : ${h}h : ${m}m : ${s}s`;
-        }
-        setInterval(updateTimer, 1000);
-
-        // DATA LOAD & RANK LOGIC
-        const data = JSON.parse(localStorage.getItem('mNEET_User'));
-        if(data) {
-            document.getElementById('uName').innerText = "Dr. " + data.name;
-            document.getElementById('uCollege').innerText = "Target: " + data.college;
-            document.getElementById('uHours').innerText = data.hours + "h";
-            document.getElementById('uQs').innerText = data.questions;
-            
-            // Basic Rank Logic (Example)
-            const ranks = ["Aspirant", "Junior Intern", "Senior Intern", "Junior Resident", "Senior Resident", "Specialist", "Chief Surgeon", "Director", "Legend", "Surgeon General"];
-            let rIndex = Math.floor(data.questions / 100); // 100 Qs per rank
-            if(rIndex > 9) rIndex = 9;
-            document.getElementById('uRank').innerText = ranks[rIndex];
-        }
+            const d = target - now;
+            const days = Math.floor(d / 86400000), hours = Math.floor((d % 86400000) / 3600000), mins = Math.floor((d % 3600000) / 60000), secs = Math.floor((d % 60000) / 1000);
+            document.getElementById('timer').innerText = `${days}d : ${hours}h : ${mins}m : ${secs}s`;
+        }, 1000);
     </script>
 </body>
 </html>
