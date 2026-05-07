@@ -1,100 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com/"></script>
 </head>
 <body class="bg-[#0b1120] p-6 text-white pb-32">
-    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-12">
-        <h2 class="text-gold text-[10px] font-black uppercase text-center mb-10 tracking-[0.3em] italic">Batch Publisher</h2>
+    
+    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-12 max-w-lg mx-auto">
+        <h2 class="text-[#eab308] text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">mNEET Batch Publisher</h2>
         
-        <div class="mb-6">
-            <label class="block text-[9px] font-black text-gray-500 uppercase mb-2 ml-1">Upload Thumbnail (Gallery)</label>
-            <input type="file" id="imgFile" accept="image/*" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-[10px]">
-        </div>
-
-        <input type="text" id="cTitle" placeholder="Batch Name (e.g. Physics Pro)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
-        <input type="text" id="cVid" placeholder="Google Drive Video Link" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
-        <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
-        <textarea id="cDesc" placeholder="Course Description..." class="w-full bg-[#1e293b] p-4 rounded-2xl mb-8 border border-gray-700 h-24 outline-none"></textarea>
+        <input type="text" id="cTitle" placeholder="Batch Name (Physics, Bio etc.)" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-3 border border-gray-700 outline-none focus:border-[#eab308]">
+        <input type="text" id="cImg" placeholder="Thumbnail URL (Google theke chobir link)" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-3 border border-gray-700 outline-none">
+        <input type="number" id="cPrice" placeholder="Batch Price (₹)" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-3 border border-gray-700 outline-none">
+        <textarea id="cDesc" placeholder="Description..." class="w-full bg-[#0b1120] p-4 rounded-2xl mb-8 border border-gray-700 h-24 outline-none"></textarea>
         
-        <button onclick="publishCourse()" id="saveBtn" class="w-full bg-[#eab308] text-[#0b1120] py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">
-            <span id="btnText">Publish To Dashboard</span>
-        </button>
+        <button onclick="publish()" id="btn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Publish Batch Now</button>
     </div>
 
-    <div id="courseList" class="space-y-8"></div>
+    <div id="courseList" class="space-y-6 max-w-lg mx-auto"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+    <script>
+        // Supabase Setup with Your Keys
+        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxb3NhdG9pbXlpamNhaHB6YXVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzE5NDQsImV4cCI6MjA5MzcwNzk0NH0.F-CvTbRnr-2EI5UbvOycTMF_RR7xQCln0E95cwBUN6Y';
 
-        // 🔥 Notun Config Applied
-        const firebaseConfig = {
-            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
-            authDomain: "mneet-spark.firebaseapp.com",
-            projectId: "mneet-spark",
-            storageBucket: "mneet-spark.firebasestorage.app",
-            messagingSenderId: "252201633700",
-            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
-        };
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
-
-        window.publishCourse = async () => {
-            const file = document.getElementById('imgFile').files[0];
+        async function publish() {
+            const btn = document.getElementById('btn');
             const title = document.getElementById('cTitle').value;
-            const btn = document.getElementById('btnText');
+            const price = document.getElementById('cPrice').value;
+            const img = document.getElementById('cImg').value;
 
-            if(!file || !title) return alert("Thumbnail and Title are required!");
-            btn.innerText = "UPLOADING IMAGE...";
+            if(!title || !price) return alert("Title and Price are required!");
+            btn.innerText = "UPLOADING...";
+            
+            const { error } = await supabaseClient
+                .from('courses')
+                .insert([{ 
+                    title: title,
+                    price: parseInt(price),
+                    img_url: img,
+                    description: document.getElementById('cDesc').value
+                }]);
 
-            try {
-                // Upload to Firebase Storage
-                const sRef = ref(storage, 'courses/' + Date.now() + "_" + file.name);
-                const snapshot = await uploadBytes(sRef, file);
-                const url = await getDownloadURL(snapshot.ref);
-
-                // Save to Firestore
-                await addDoc(collection(db, "courses"), {
-                    title, img: url, vid: document.getElementById('cVid').value,
-                    price: document.getElementById('cPrice').value,
-                    desc: document.getElementById('cDesc').value,
-                    isHidden: false,
-                    timestamp: new Date()
-                });
-                alert("Batch Published Successfully! 🚀");
+            if (error) {
+                alert("Error: " + error.message);
+                btn.innerText = "RETRY";
+            } else {
+                alert("Batch Published Live! 🚀");
                 location.reload();
-            } catch(e) { 
-                console.error(e);
-                alert("Error: " + e.message + "\nCheck if Storage is enabled!"); 
-                btn.innerText = "TRY AGAIN"; 
             }
-        };
+        }
 
-        onSnapshot(collection(db, "courses"), (snap) => {
-            const list = document.getElementById('courseList'); list.innerHTML = "";
-            snap.forEach(d => {
-                const c = d.data();
-                list.innerHTML += `
-                <div class="bg-[#16213e] rounded-[3rem] overflow-hidden border border-gray-800 shadow-2xl relative">
-                    <img src="${c.img}" class="w-full h-56 object-cover opacity-60">
-                    <div class="p-8">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-2xl font-black italic uppercase">${c.title}</h3>
-                            <span class="text-gold font-black text-xl italic">₹${c.price}</span>
+        async function loadCourses() {
+            const { data, error } = await supabaseClient.from('courses').select('*');
+            if (data) {
+                document.getElementById('courseList').innerHTML = data.map(c => `
+                    <div class="bg-[#16213e] rounded-[2rem] overflow-hidden border border-gray-800 p-6 flex gap-4 items-center animate-fade-in">
+                        <img src="${c.img_url || 'https://via.placeholder.com/150'}" class="w-20 h-20 rounded-2xl object-cover">
+                        <div class="flex-1">
+                            <h3 class="font-black italic uppercase text-sm">${c.title}</h3>
+                            <p class="text-[#eab308] font-black italic">₹${c.price}</p>
                         </div>
-                        <p class="text-gray-500 text-[9px] uppercase font-bold mb-6">${c.desc || 'No Description'}</p>
-                        <button onclick="deleteDoc(doc(db, 'courses', '${d.id}'))" class="bg-red-500/10 w-full py-4 rounded-2xl text-red-500 font-black uppercase text-[9px] border border-red-500/20">Remove Batch</button>
                     </div>
-                </div>`;
-            });
-        });
+                `).join('');
+            }
+        }
+        loadCourses();
     </script>
 </body>
 </html>
