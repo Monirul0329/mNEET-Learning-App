@@ -1,33 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script src="https://cdn.tailwindcss.com"></script></head>
-<body class="bg-[#0b1120] p-6 text-white pb-32">
-    <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-10 text-center italic">mNEET Official Shop</h2>
-    <div id="storeGrid" class="grid grid-cols-2 gap-4"></div>
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0b1120] text-white p-6 pb-32">
+    <div class="flex justify-between items-center mb-10 bg-[#16213e] p-6 rounded-[2rem] border border-gray-800">
+        <h2 class="text-xl font-black italic uppercase italic tracking-tighter italic text-[#eab308]">mStore</h2>
+        <div class="bg-black/40 px-4 py-2 rounded-xl flex items-center gap-2 border border-[#eab308]/20">
+            <i class="fa-solid fa-coins text-[#eab308]"></i>
+            <span id="storeCoins" class="font-black">1250</span>
+        </div>
+    </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
+    <div class="grid grid-cols-1 gap-6">
+        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 relative overflow-hidden group">
+            <div class="absolute -right-4 -top-4 w-20 h-20 bg-[#eab308] rotate-45 flex items-end justify-center pb-2">
+                <i class="fa-solid fa-bolt text-black text-xs -rotate-45"></i>
+            </div>
+            <h3 class="text-lg font-black italic uppercase">Legendary PYQ Bank</h3>
+            <p class="text-[9px] text-gray-500 font-bold mb-6">Last 35 Years Solved Papers</p>
+            <button class="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Buy for 500 BP</button>
+        </div>
+    </div>
 
-        onSnapshot(collection(db, "products"), (snap) => {
-            const grid = document.getElementById('storeGrid'); grid.innerHTML = "";
-            snap.forEach(d => {
-                const p = d.data();
-                const mainImg = p.images ? p.images[0] : 'https://via.placeholder.com/150';
-                grid.innerHTML += `
-                <div class="bg-[#16213e] rounded-[2rem] border border-gray-800 p-4 shadow-xl flex flex-col">
-                    <img src="${mainImg}" class="h-28 w-full object-contain mb-4 rounded-xl">
-                    <h3 class="font-bold text-[9px] uppercase h-8 overflow-hidden">${p.title || p.name}</h3>
-                    <p class="text-[7px] text-gray-500 mt-2 flex-1 line-clamp-3">${p.desc || ''}</p>
-                    <div class="flex justify-between items-center mt-4">
-                        <span class="text-green-400 font-black text-xs">₹${p.price}</span>
-                        <button class="bg-white text-black px-4 py-1.5 rounded-lg font-black text-[8px] uppercase">BUY</button>
-                    </div>
-                </div>`;
-            });
-        });
-    </script>
+    <nav class="fixed bottom-6 left-6 right-6 bg-[#16213e]/90 backdrop-blur-lg border border-white/5 p-4 rounded-full flex justify-around shadow-2xl">
+        <a href="dashboard.html"><i class="fa-solid fa-house text-gray-500"></i></a>
+        <a href="study.html"><i class="fa-solid fa-book text-gray-500"></i></a>
+        <i class="fa-solid fa-pen-nib text-gray-500"></i>
+        <i class="fa-solid fa-store text-[#eab308]"></i>
+    </nav>
 </body>
 </html>
