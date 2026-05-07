@@ -2,57 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>mNEET - Sign In</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>mNEET - Login</title>
 </head>
 <body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6">
     <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl text-white">
-        <h1 class="text-4xl font-black italic uppercase text-center mb-2 italic">m<span class="text-[#eab308]">NEET</span></h1>
-        <p class="text-gray-500 text-center text-[10px] uppercase tracking-[0.3em] mb-10 font-black">Future Surgeon's Login</p>
+        <h1 class="text-4xl font-black italic uppercase text-center mb-10 italic">m<span class="text-[#eab308]">NEET</span></h1>
         
         <div class="space-y-4">
-            <input type="text" id="loginId" placeholder="Email or Phone Number" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308] transition-all">
-            <input type="password" id="loginPass" placeholder="Password" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308] transition-all">
-        </div>
-
-        <div class="flex justify-end mt-3">
-            <button onclick="forgetPass()" class="text-[10px] text-gray-500 hover:text-[#eab308] uppercase font-bold">Forget Password?</button>
+            <input type="email" id="loginEmail" placeholder="Registered Email" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
+            <input type="password" id="loginPass" placeholder="Password" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
         </div>
         
-        <button onclick="handleSignIn()" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-8 shadow-xl active:scale-95 transition-all">Sign In</button>
-        
-        <p class="text-center text-gray-500 text-[10px] mt-6 uppercase font-bold">
-            Don't have an account? <a href="signup.html" class="text-[#eab308]">Sign Up</a>
-        </p>
+        <button onclick="handleLogin()" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl">Sign In</button>
+        <p class="text-center text-gray-500 text-[10px] mt-6 font-bold uppercase tracking-widest italic">New Surgeon? <a href="signup.html" class="text-[#eab308]">Sign Up</a></p>
     </div>
 
     <script>
         const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
-        const SB_KEY = 'YOUR_ANON_KEY';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxb3NhdG9pbXlpamNhaHB6YXVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzE5NDQsImV4cCI6MjA5MzcwNzk0NH0.F-CvTbRnr-2EI5UbvOycTMF_RR7xQCln0E95cwBUN6Y';
         const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-      async function handleSignIn() {
-    const email = document.getElementById('loginId').value;
-    const password = document.getElementById('loginPass').value;
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const { data, error } = await supabase.from('users_profile').select('*').eq('email', email).single();
 
-    if(!email || !password) return alert("Please enter both Email and Password");
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-        alert("Login Error: " + error.message);
-    } else {
-        // User session save kora
-        localStorage.setItem('mUserEmail', email);
-        window.location.href = 'dashboard.html';
-    }
-      }
-        
-
-        function forgetPass() {
-            alert("Password reset link will be sent to your registered email.");
-            // Supabase password reset logic can be added here
+            if (data) {
+                localStorage.setItem('mUserEmail', email);
+                window.location.href = 'dashboard.html';
+            } else {
+                alert("User not found! Please sign up first.");
+            }
         }
     </script>
 </body>
