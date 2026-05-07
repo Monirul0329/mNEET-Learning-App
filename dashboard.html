@@ -1,18 +1,76 @@
-<div class="grid grid-cols-4 gap-4 p-6 bg-[#16213e] rounded-[3rem] mx-4 -mt-12 shadow-2xl relative z-20 border border-white/5">
-    <div onclick="nav('course.html', 'c')" class="flex flex-col items-center gap-2">
-        <div class="w-12 h-12 bg-gold/10 rounded-2xl flex items-center justify-center text-gold shadow-lg shadow-gold/5"><i class="fa-solid fa-play"></i></div>
-        <span class="text-[8px] font-black uppercase text-gray-400">Batches</span>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0b1120] text-white p-6 pb-32">
+
+    <div class="bg-[#16213e] p-6 rounded-[2rem] border border-gray-800 text-center mb-8">
+        <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-2">NEET Battle Countdown</p>
+        <div id="countdown" class="text-2xl font-black text-[#eab308] italic">00:00:00:00</div>
     </div>
-    <div onclick="nav('test.html', 't')" class="flex flex-col items-center gap-2">
-        <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 shadow-lg shadow-blue-500/5"><i class="fa-solid fa-vial"></i></div>
-        <span class="text-[8px] font-black uppercase text-gray-400">Tests</span>
+
+    <div class="flex justify-between items-start mb-10 px-2">
+        <div>
+            <h2 id="uName" class="text-2xl font-black italic uppercase">Dr. Loader</h2>
+            <p id="uCollege" class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Target: AIIMS</p>
+        </div>
+        <div class="text-right">
+            <div id="uRank" class="bg-[#eab308] text-black px-4 py-1 rounded-full text-[9px] font-black uppercase italic">Aspirant</div>
+            <p class="text-[8px] text-gray-500 mt-1 uppercase font-bold italic">Rank 1/10</p>
+        </div>
     </div>
-    <div onclick="openRanks()" class="flex flex-col items-center gap-2">
-        <div class="w-12 h-12 bg-orange-500/10 rounded-2xl flex items-center justify-center text-orange-400 shadow-lg shadow-orange-500/5"><i class="fa-solid fa-trophy"></i></div>
-        <span class="text-[8px] font-black uppercase text-gray-400">Ranks</span>
+
+    <div class="grid grid-cols-2 gap-4 mb-8">
+        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800">
+            <i class="fa-solid fa-book-open-reader text-blue-400 mb-3"></i>
+            <h4 id="uHours" class="text-xl font-black">0.0h</h4>
+            <p class="text-[8px] text-gray-500 uppercase font-black">Study Time</p>
+        </div>
+        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800">
+            <i class="fa-solid fa-circle-check text-green-400 mb-3"></i>
+            <h4 id="uQs" class="text-xl font-black">0</h4>
+            <p class="text-[8px] text-gray-500 uppercase font-black">Qs Mastered</p>
+        </div>
     </div>
-    <div onclick="nav('mstore.html', 'm')" class="flex flex-col items-center gap-2">
-        <div class="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-400 shadow-lg shadow-green-500/5"><i class="fa-solid fa-shop"></i></div>
-        <span class="text-[8px] font-black uppercase text-gray-400">M-Store</span>
-    </div>
-</div>
+
+    <nav class="fixed bottom-6 left-6 right-6 bg-[#16213e]/90 backdrop-blur-lg border border-white/5 p-4 rounded-full flex justify-around shadow-2xl">
+        <i class="fa-solid fa-house text-[#eab308]"></i>
+        <a href="study.html"><i class="fa-solid fa-book text-gray-500"></i></a>
+        <a href="quiz.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
+        <a href="mstore.html"><i class="fa-solid fa-store text-gray-500"></i></a>
+    </nav>
+
+    <script>
+        // NEET TIMER
+        function updateTimer() {
+            const target = new Date("May 2, 2027 10:00:00").getTime();
+            const now = new Date().getTime();
+            const diff = target - now;
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            document.getElementById('countdown').innerText = `${d}d : ${h}h : ${m}m : ${s}s`;
+        }
+        setInterval(updateTimer, 1000);
+
+        // DATA LOAD & RANK LOGIC
+        const data = JSON.parse(localStorage.getItem('mNEET_User'));
+        if(data) {
+            document.getElementById('uName').innerText = "Dr. " + data.name;
+            document.getElementById('uCollege').innerText = "Target: " + data.college;
+            document.getElementById('uHours').innerText = data.hours + "h";
+            document.getElementById('uQs').innerText = data.questions;
+            
+            // Basic Rank Logic (Example)
+            const ranks = ["Aspirant", "Junior Intern", "Senior Intern", "Junior Resident", "Senior Resident", "Specialist", "Chief Surgeon", "Director", "Legend", "Surgeon General"];
+            let rIndex = Math.floor(data.questions / 100); // 100 Qs per rank
+            if(rIndex > 9) rIndex = 9;
+            document.getElementById('uRank').innerText = ranks[rIndex];
+        }
+    </script>
+</body>
+</html>
