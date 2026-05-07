@@ -5,38 +5,36 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .white-mode { background: #ffffff !important; color: #000000 !important; }
-        .sepia-mode { background: #f4ecd8 !important; color: #5b4636 !important; }
-        .dark-mode { background: #0b1120 !important; color: #ffffff !important; }
+        .mode-white { background: #fff; color: #000; }
+        .mode-sepia { background: #f4ecd8; color: #5b4636; }
+        .mode-dark { background: #0b1120; color: #fff; }
     </style>
 </head>
-<body id="mainBody" class="white-mode p-6 min-h-screen transition-all duration-500">
-
-    <div class="flex justify-between items-center mb-10 sticky top-0 bg-inherit py-4">
-        <div class="flex gap-3">
-            <button onclick="changeMode('white-mode')" class="w-8 h-8 rounded-full border border-gray-300 bg-white shadow-sm"></button>
-            <button onclick="changeMode('sepia-mode')" class="w-8 h-8 rounded-full border border-gray-300 bg-[#f4ecd8] shadow-sm"></button>
-            <button onclick="changeMode('dark-mode')" class="w-8 h-8 rounded-full border border-gray-300 bg-[#0b1120] shadow-sm"></button>
+<body id="reader" class="mode-white p-6 transition-all duration-500">
+    <div class="flex justify-between items-center mb-8 sticky top-0 bg-inherit py-2 z-20">
+        <div class="flex gap-2">
+            <div onclick="setM('white')" class="w-8 h-8 rounded-full border bg-white shadow-sm"></div>
+            <div onclick="setM('sepia')" class="w-8 h-8 rounded-full border bg-[#f4ecd8] shadow-sm"></div>
+            <div onclick="setM('dark')" class="w-8 h-8 rounded-full border bg-[#0b1120] shadow-sm"></div>
         </div>
-        <button id="audioPlay" class="bg-black text-white px-6 py-2 rounded-full text-[10px] font-black uppercase flex items-center gap-2">
+        <button onclick="playA()" class="bg-[#eab308] text-black px-4 py-2 rounded-full font-black text-[10px] uppercase flex items-center gap-2 shadow-lg">
             <i class="fa-solid fa-headphones"></i> Audio Book
         </button>
     </div>
 
     <article class="prose max-w-full">
-        <h2 class="font-black italic uppercase text-xl mb-6 underline decoration-[#eab308] decoration-4">The Cell: Unit of Life</h2>
-        <p class="mb-4 text-lg leading-relaxed">
-            When you look around, you see both living and non-living things. You must have wondered and asked yourself – ‘what is it that makes an organism living, or what is it that an inanimate thing does not have which a living thing has?’
-            <span class="bg-yellow-400/30 px-1 border-b-2 border-yellow-600 font-bold cursor-help" onclick="alert('PYQ 2021: What is the fundamental unit of life?')">
-                The answer to this is the presence of the basic unit of life – the cell in all living organisms.
-            </span>
+        <h2 class="text-xl font-black italic uppercase mb-6 underline decoration-4 decoration-[#eab308]">Cell: The Unit of Life</h2>
+        <p class="text-lg leading-relaxed mb-4">
+            Biology is the study of living organisms. 
+            <span class="bg-yellow-200 px-1 border-b-2 border-yellow-600 font-bold" onclick="alert('NEET 2021: Fundamental unit is Cell.')">Cells are the basic structural and functional units.</span>
         </p>
     </article>
 
+    <audio id="audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+
     <script>
-        function changeMode(cls) {
-            document.getElementById('mainBody').className = cls + " p-6 min-h-screen transition-all duration-500";
-        }
+        function setM(m) { document.getElementById('reader').className = `mode-${m} p-6 transition-all duration-500`; }
+        function playA() { const a = document.getElementById('audio'); a.paused ? a.play() : a.pause(); }
     </script>
 </body>
 </html>
