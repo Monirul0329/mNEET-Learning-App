@@ -4,19 +4,16 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <title>mNEET - Login</title>
 </head>
 <body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6">
-    <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl text-white">
-        <h1 class="text-4xl font-black italic uppercase text-center mb-10 italic">m<span class="text-[#eab308]">NEET</span></h1>
+    <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl text-white text-center">
+        <h1 class="text-4xl font-black italic uppercase mb-10 tracking-tighter">m<span class="text-[#eab308]">NEET</span></h1>
         
-        <div class="space-y-4">
-            <input type="email" id="loginEmail" placeholder="Registered Email" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
-            <input type="password" id="loginPass" placeholder="Password" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none">
-        </div>
+        <input type="email" id="loginId" placeholder="Email Address" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none mb-4">
+        <input type="password" id="loginPass" placeholder="Password" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none mb-8">
         
-        <button onclick="handleLogin()" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl">Sign In</button>
-        <p class="text-center text-gray-500 text-[10px] mt-6 font-bold uppercase tracking-widest italic">New Surgeon? <a href="signup.html" class="text-[#eab308]">Sign Up</a></p>
+        <button onclick="handleLogin()" id="logBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl transition-all active:scale-95">Sign In</button>
+        <p class="mt-6 text-gray-500 text-[10px] uppercase font-bold tracking-widest">New Surgeon? <a href="signup.html" class="text-[#eab308]">Sign Up</a></p>
     </div>
 
     <script>
@@ -25,14 +22,20 @@
         const supabase = supabase.createClient(SB_URL, SB_KEY);
 
         async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const { data, error } = await supabase.from('users_profile').select('*').eq('email', email).single();
+            const email = document.getElementById('loginId').value;
+            const pass = document.getElementById('loginPass').value;
+            const btn = document.getElementById('logBtn');
+
+            btn.innerText = "Verifying...";
+            const { data, error } = await supabase.from('users_profile')
+                .select('*').eq('email', email).eq('password', pass).single();
 
             if (data) {
                 localStorage.setItem('mUserEmail', email);
                 window.location.href = 'dashboard.html';
             } else {
-                alert("User not found! Please sign up first.");
+                alert("Invalid Credentials or User Not Found!");
+                btn.innerText = "Sign In";
             }
         }
     </script>
