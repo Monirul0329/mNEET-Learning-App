@@ -3,18 +3,15 @@
 <head><script src="https://cdn.tailwindcss.com"></script></head>
 <body class="bg-[#0b1120] p-6 text-white pb-32">
     <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-12">
-        <h2 id="formTitle" class="text-gold text-[10px] font-black uppercase text-center mb-8 tracking-widest underline underline-offset-8">Course Publisher</h2>
-        
+        <h2 id="formTitle" class="text-gold text-[10px] font-black uppercase text-center mb-8 italic">Course Publisher</h2>
         <input type="hidden" id="editId">
-        <input type="text" id="cTitle" placeholder="Course Title (e.g. Physics Pro 2026)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none">
+        <input type="text" id="cTitle" placeholder="Course Title" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none">
         <div class="grid grid-cols-2 gap-3 mb-3">
-            <input type="text" id="cImg" placeholder="Thumbnail URL" class="bg-[#1e293b] p-4 rounded-xl border border-gray-700 outline-none">
-            <input type="text" id="cVid" placeholder="Intro Video ID" class="bg-[#1e293b] p-4 rounded-xl border border-gray-700 outline-none">
+            <input type="text" id="cImg" placeholder="Image URL" class="bg-[#1e293b] p-4 rounded-xl border border-gray-700 outline-none">
+            <input type="text" id="cVid" placeholder="Intro Video Link" class="bg-[#1e293b] p-4 rounded-xl border border-gray-700 outline-none">
         </div>
-        <input type="number" id="cPrice" placeholder="Course Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-3 border border-gray-700 outline-none">
-        <textarea id="cDesc" placeholder="Brief Description..." class="w-full bg-[#1e293b] p-4 rounded-xl mb-8 border border-gray-700 h-24 outline-none"></textarea>
-        
-        <button onclick="saveCourse()" id="saveBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Publish Live Course</button>
+        <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-xl mb-6 border border-gray-700 outline-none">
+        <button onclick="saveCourse()" id="saveBtn" class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase text-xs">Publish Now</button>
     </div>
 
     <div id="courseList" class="grid grid-cols-1 gap-8"></div>
@@ -26,21 +23,11 @@
         const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
         window.saveCourse = async () => {
-            const data = { 
-                title: document.getElementById('cTitle').value, 
-                img: document.getElementById('cImg').value, 
-                vid: document.getElementById('cVid').value,
-                price: document.getElementById('cPrice').value, 
-                desc: document.getElementById('cDesc').value 
-            };
+            const data = { title: document.getElementById('cTitle').value, img: document.getElementById('cImg').value, vid: document.getElementById('cVid').value, price: document.getElementById('cPrice').value, isHidden: false };
             const eid = document.getElementById('editId').value;
-            if(!data.title || !data.price) return alert("Fill Name & Price!");
-
-            try {
-                if(eid) await updateDoc(doc(db, "courses", eid), data);
-                else await addDoc(collection(db, "courses"), {...data, timestamp: new Date()});
-                location.reload();
-            } catch(e) { alert(e.message); }
+            if(eid) await updateDoc(doc(db, "courses", eid), data);
+            else await addDoc(collection(db, "courses"), data);
+            location.reload();
         };
 
         onSnapshot(collection(db, "courses"), (snap) => {
@@ -48,30 +35,23 @@
             snap.forEach(d => {
                 const c = d.data();
                 list.innerHTML += `
-                <div class="bg-[#16213e] rounded-[2.5rem] overflow-hidden border border-gray-800 shadow-2xl relative">
-                    <img src="${c.img || 'https://via.placeholder.com/400x200'}" class="w-full h-48 object-cover opacity-60">
+                <div class="bg-[#16213e] rounded-[3rem] overflow-hidden border border-gray-800 shadow-2xl relative">
+                    <img src="${c.img || 'https://via.placeholder.com/400x200'}" class="w-full h-48 object-cover ${c.isHidden ? 'opacity-20 grayscale' : 'opacity-70'}">
                     <div class="p-8">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-2xl font-black italic uppercase">${c.title}</h3>
-                            <span class="text-gold font-black text-xl italic">₹${c.price}</span>
-                        </div>
-                        <div class="flex gap-4">
-                            <button onclick="editC('${d.id}','${c.title}','${c.img}','${c.vid}','${c.price}','${c.desc}')" class="flex-1 bg-white/5 py-3 rounded-xl font-bold text-[10px] uppercase border border-white/10 hover:bg-white/10">Edit Specs</button>
-                            <button onclick="delC('${d.id}')" class="flex-1 bg-red-500/10 py-3 rounded-xl font-bold text-[10px] uppercase border border-red-500/20 text-red-500 hover:bg-red-500/20">Delete Forever</button>
+                        <div class="flex justify-between mb-6"><h3 class="text-2xl font-black italic uppercase">${c.title}</h3><p class="text-gold font-black">₹${c.price}</p></div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="editC('${d.id}','${c.title}','${c.img}','${c.vid}','${c.price}')" class="bg-white/5 py-3 rounded-xl font-bold text-[9px] uppercase border border-white/10">Edit</button>
+                            <button onclick="toggleHide('${d.id}', ${c.isHidden})" class="bg-blue-500/10 py-3 rounded-xl font-bold text-[9px] uppercase border border-blue-500/20 text-blue-400">${c.isHidden ? 'Unhide' : 'Hide'}</button>
+                            <button onclick="delC('${d.id}')" class="bg-red-500/10 py-3 rounded-xl font-bold text-[9px] uppercase border border-red-500/20 text-red-500">Delete</button>
                         </div>
                     </div>
                 </div>`;
             });
         });
 
-        window.delC = async (id) => { if(confirm("Delete this course permanently?")) await deleteDoc(doc(db, "courses", id)); };
-        window.editC = (id,t,i,v,p,d) => {
-            document.getElementById('editId').value=id; document.getElementById('cTitle').value=t;
-            document.getElementById('cImg').value=i; document.getElementById('cVid').value=v;
-            document.getElementById('cPrice').value=p; document.getElementById('cDesc').value=d;
-            document.getElementById('saveBtn').innerText="Update & Sync Course";
-            window.scrollTo(0,0);
-        };
+        window.delC = async (id) => { if(confirm("Permanently Delete?")) await deleteDoc(doc(db, "courses", id)); };
+        window.toggleHide = async (id, status) => { await updateDoc(doc(db, "courses", id), { isHidden: !status }); };
+        window.editC = (id,t,i,v,p) => { document.getElementById('editId').value=id; document.getElementById('cTitle').value=t; document.getElementById('cImg').value=i; document.getElementById('cVid').value=v; document.getElementById('cPrice').value=p; window.scrollTo(0,0); };
     </script>
 </body>
 </html>
