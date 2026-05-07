@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#0b1120] p-6 text-white pb-32 font-sans">
-    
+<body class="bg-[#0b1120] p-6 text-white pb-32">
     <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-12">
-        <h2 class="text-gold text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">Course Publisher</h2>
+        <h2 class="text-gold text-[10px] font-black uppercase text-center mb-10 tracking-[0.3em] italic">Batch Publisher</h2>
         
-        <label class="block text-[9px] font-black text-gray-500 uppercase mb-2 ml-1">Upload Thumbnail (Gallery)</label>
-        <input type="file" id="imgFile" accept="image/*" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-xs mb-4">
+        <div class="mb-6">
+            <label class="block text-[9px] font-black text-gray-500 uppercase mb-2 ml-1">Upload Thumbnail (Gallery)</label>
+            <input type="file" id="imgFile" accept="image/*" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-[10px]">
+        </div>
 
-        <input type="text" id="cTitle" placeholder="Course Title" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none focus:border-gold">
-        <input type="text" id="cVid" placeholder="Google Drive Intro Link" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none">
-        <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-3 border border-gray-700 outline-none">
+        <input type="text" id="cTitle" placeholder="Batch Name (e.g. Physics Pro)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
+        <input type="text" id="cVid" placeholder="Google Drive Video Link" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
+        <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full bg-[#1e293b] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
         <textarea id="cDesc" placeholder="Course Description..." class="w-full bg-[#1e293b] p-4 rounded-2xl mb-8 border border-gray-700 h-24 outline-none"></textarea>
         
-        <button onclick="publishCourse()" id="saveBtn" class="w-full bg-[#eab308] text-[#0b1120] py-5 rounded-[1.5rem] font-black uppercase text-xs shadow-xl active:scale-95 transition-all">
-            <span id="btnText">Publish Batch</span>
+        <button onclick="publishCourse()" id="saveBtn" class="w-full bg-[#eab308] text-[#0b1120] py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">
+            <span id="btnText">Publish To Dashboard</span>
         </button>
     </div>
 
@@ -29,7 +32,16 @@
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
+        // 🔥 Notun Config Applied
+        const firebaseConfig = {
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
+            authDomain: "mneet-spark.firebaseapp.com",
+            projectId: "mneet-spark",
+            storageBucket: "mneet-spark.firebasestorage.app",
+            messagingSenderId: "252201633700",
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
@@ -39,22 +51,30 @@
             const title = document.getElementById('cTitle').value;
             const btn = document.getElementById('btnText');
 
-            if(!file || !title) return alert("Select Image & Enter Title!");
-            btn.innerText = "UPLOADING...";
+            if(!file || !title) return alert("Thumbnail and Title are required!");
+            btn.innerText = "UPLOADING IMAGE...";
 
             try {
+                // Upload to Firebase Storage
                 const sRef = ref(storage, 'courses/' + Date.now() + "_" + file.name);
-                await uploadBytes(sRef, file);
-                const url = await getDownloadURL(sRef);
+                const snapshot = await uploadBytes(sRef, file);
+                const url = await getDownloadURL(snapshot.ref);
 
+                // Save to Firestore
                 await addDoc(collection(db, "courses"), {
                     title, img: url, vid: document.getElementById('cVid').value,
                     price: document.getElementById('cPrice').value,
                     desc: document.getElementById('cDesc').value,
+                    isHidden: false,
                     timestamp: new Date()
                 });
-                alert("Batch Live! 🚀"); location.reload();
-            } catch(e) { alert(e.message); btn.innerText = "RETRY"; }
+                alert("Batch Published Successfully! 🚀");
+                location.reload();
+            } catch(e) { 
+                console.error(e);
+                alert("Error: " + e.message + "\nCheck if Storage is enabled!"); 
+                btn.innerText = "TRY AGAIN"; 
+            }
         };
 
         onSnapshot(collection(db, "courses"), (snap) => {
@@ -69,7 +89,7 @@
                             <h3 class="text-2xl font-black italic uppercase">${c.title}</h3>
                             <span class="text-gold font-black text-xl italic">₹${c.price}</span>
                         </div>
-                        <p class="text-gray-500 text-[10px] uppercase font-bold mb-6">${c.desc}</p>
+                        <p class="text-gray-500 text-[9px] uppercase font-bold mb-6">${c.desc || 'No Description'}</p>
                         <button onclick="deleteDoc(doc(db, 'courses', '${d.id}'))" class="bg-red-500/10 w-full py-4 rounded-2xl text-red-500 font-black uppercase text-[9px] border border-red-500/20">Remove Batch</button>
                     </div>
                 </div>`;
