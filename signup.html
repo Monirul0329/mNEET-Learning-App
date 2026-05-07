@@ -1,31 +1,65 @@
-<div class="space-y-3">
-    <input type="text" id="newName" placeholder="Full Name" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-    <input type="email" id="newEmail" placeholder="Email Address" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-    <input type="text" id="newPhone" placeholder="Phone Number" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-    <input type="text" id="dreamCollege" placeholder="Dream Medical College (e.g. AIIMS)" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none border-[#eab308]/50">
-    <input type="password" id="newPass" placeholder="Set Password" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>mNEET - Create Account</title>
+</head>
+<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6">
 
-<script>
-async function handleSignUp() {
-    const email = document.getElementById('newEmail').value;
-    const password = document.getElementById('newPass').value;
-    const name = document.getElementById('newName').value;
-    const phone = document.getElementById('newPhone').value;
-    const college = document.getElementById('dreamCollege').value;
+    <div class="bg-[#16213e] p-8 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl text-white">
+        <h2 class="text-2xl font-black italic uppercase text-center mb-8">CREATE <span class="text-[#eab308]">ACCOUNT</span></h2>
+        
+        <div class="space-y-4">
+            <input type="text" id="newName" placeholder="Full Name" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308] transition-all">
+            <input type="email" id="newEmail" placeholder="Email Address" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308]">
+            <input type="text" id="newPhone" placeholder="Phone Number" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308]">
+            <input type="text" id="dreamCollege" placeholder="Dream Medical College (e.g. AIIMS)" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none border-[#eab308]/30">
+            <input type="password" id="newPass" placeholder="Set Password" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308]">
+        </div>
+        
+        <button onclick="handleSignUp()" id="regBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl active:scale-95 transition-all">Register Now</button>
+        
+        <p class="text-center text-gray-500 text-[10px] mt-6 uppercase font-bold tracking-widest">
+            ALREADY A MEMBER? <a href="index.html" class="text-[#eab308]">LOGIN</a>
+        </p>
+    </div>
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    <script>
+        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
+        const SB_KEY = 'YOUR_ANON_KEY_HERE'; // Apnar oi lomba Anon Key ta ekhane boshan
+        const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-    if (error) {
-        alert("Signup Error: " + error.message);
-    } else {
-        // user_profile table-e details save kora
-        await supabase.from('users_profile').insert([{ 
-            email, name, phone, college, xp: 0, rank: 'Aspirant', coins: 0 
-        }]);
-        alert("Registration Successful! Now Login.");
-        window.location.href = 'index.html';
-    }
-}
-                                         </script>
-                                         
+        async function handleSignUp() {
+            const btn = document.getElementById('regBtn');
+            const email = document.getElementById('newEmail').value;
+            const password = document.getElementById('newPass').value;
+            const name = document.getElementById('newName').value;
+            const phone = document.getElementById('newPhone').value;
+            const college = document.getElementById('dreamCollege').value;
+
+            if(!email || !password || !name) return alert("Please fill all fields!");
+
+            btn.innerText = "CREATING...";
+            btn.disabled = true;
+
+            const { data, error } = await supabase.auth.signUp({ email, password });
+
+            if (error) {
+                alert("Error: " + error.message);
+                btn.innerText = "REGISTER NOW";
+                btn.disabled = false;
+            } else {
+                // Profile data save kora
+                await supabase.from('users_profile').insert([{ 
+                    email, name, phone, college, xp: 0, rank: 'Aspirant', coins: 0 
+                }]);
+                alert("Registration Successful! Now please login.");
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
