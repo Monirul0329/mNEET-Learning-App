@@ -1,54 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script src="https://cdn.tailwindcss.com"></script></head>
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
 <body class="bg-[#0b1120] p-6 text-white pb-32">
-    <div id="scr1">
-        <h2 class="text-gold text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">Step 1: Choose Subject</h2>
-        <div id="subList" class="space-y-4"></div>
-    </div>
-
-    <div id="scr2" class="hidden animate-fade-in">
-        <button onclick="toggleScr(1)" class="text-[9px] font-black text-gray-500 uppercase mb-6 tracking-widest"><i class="fa-solid fa-arrow-left"></i> Back to Subjects</button>
-        <div class="bg-[#16213e] p-8 rounded-[3rem] border border-blue-500/20 shadow-2xl mb-10">
-            <h2 id="activeSub" class="text-xl font-black text-blue-400 mb-6 italic tracking-tighter uppercase">Subject</h2>
-            <input type="text" id="chName" placeholder="Enter New Chapter Name" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 mb-4 outline-none focus:border-blue-500">
-            <button onclick="addCh()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-[10px]">Add Chapter</button>
-        </div>
-        <h3 class="text-[8px] font-black text-gray-600 uppercase mb-4 ml-4">Existing Chapters</h3>
-        <div id="chList" class="space-y-3"></div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
-        let activeSid = '';
-
-        onSnapshot(collection(db, "courses"), snap => {
-            const list = document.getElementById('subList'); list.innerHTML = "";
-            snap.forEach(d => {
-                list.innerHTML += `<div onclick="openSub('${d.id}', '${d.data().title}')" class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 font-black italic flex justify-between uppercase text-xs tracking-tight shadow-xl">${d.data().title} <i class="fa-solid fa-chevron-right text-gold"></i></div>`;
-            });
-        });
-
-        window.openSub = (id, title) => { activeSid = id; document.getElementById('activeSub').innerText = title; toggleScr(2); loadCh(); };
-        window.toggleScr = (v) => { document.getElementById('scr1').classList.toggle('hidden', v !== 1); document.getElementById('scr2').classList.toggle('hidden', v !== 2); };
+    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 max-w-lg mx-auto shadow-2xl">
+        <h2 class="text-[#eab308] text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">NCERT Content Manager</h2>
         
-        window.addCh = async () => {
-            const n = document.getElementById('chName').value; if(!n) return;
-            await addDoc(collection(db, "chapters"), { sid: activeSid, name: n, timestamp: new Date() });
-            document.getElementById('chName').value = "";
-        };
+        <input type="text" id="chTitle" placeholder="Chapter Name" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
+        <input type="text" id="audioUrl" placeholder="Audio Revision URL (MP3)" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
+        <textarea id="ncertContent" placeholder="Paste NCERT Text here for Highlighting..." class="w-full bg-[#0b1120] p-4 rounded-2xl mb-4 border border-gray-700 h-32 outline-none"></textarea>
+        <input type="text" id="pyqTag" placeholder="PYQ Tag (e.g. NEET 2023, Page 12)" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-8 border border-gray-700 outline-none">
+        
+        <button onclick="uploadStudy()" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95">Publish NCERT Study</button>
+    </div>
 
-        function loadCh() {
-            const q = query(collection(db, "chapters"), where("sid", "==", activeSid));
-            onSnapshot(q, sn => {
-                const list = document.getElementById('chList'); list.innerHTML = "";
-                sn.forEach(d => {
-                    list.innerHTML += `<div class="bg-[#16213e] p-5 rounded-2xl border border-gray-800 flex justify-between items-center text-[10px] font-black italic text-gray-400 uppercase tracking-widest">${d.data().name} <button onclick="deleteDoc(doc(db, 'chapters', '${d.id}'))" class="text-red-500 px-2"><i class="fa-solid fa-trash"></i></button></div>`;
-                });
-            });
+    <script>
+        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
+        const SB_KEY = 'YOUR_ANON_KEY';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        async function uploadStudy() {
+            const { error } = await supabaseClient.from('chapters').insert([{ 
+                name: document.getElementById('chTitle').value,
+                audio_url: document.getElementById('audioUrl').value,
+                content: document.getElementById('ncertContent').value,
+                pyq_info: document.getElementById('pyqTag').value
+            }]);
+            if(error) alert(error.message); else alert("NCERT Study Live! 📖");
         }
     </script>
 </body>
