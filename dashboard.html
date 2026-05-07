@@ -1,142 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>mNEET Student Dashboard</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mNEET Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body, html { height: 100%; margin: 0; padding: 0; background-color: #0b1120; color: white; font-family: sans-serif; overflow: hidden; }
-        .header { height: 160px; background-color: #16213e; border-bottom: 1px solid #1f2937; padding: 20px; box-sizing: border-box; }
-        .main-content { height: calc(100vh - 240px); width: 100%; overflow: hidden; }
-        iframe { width: 100%; height: 100%; border: none; }
-        .nav-bar { height: 80px; background: rgba(22, 33, 62, 0.98); backdrop-filter: blur(15px); border-top: 1px solid #1f2937; position: fixed; bottom: 0; left: 0; right: 0; display: flex; z-index: 1000; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6b7280; transition: 0.3s; }
+        body { background: #0b1120; color: white; padding-bottom: 90px; }
+        .header-gradient { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .grid-item { background: #16213e; border: 1px solid #1f2937; display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1/1; border-radius: 1.5rem; transition: 0.2s; }
+        .grid-item:active { transform: scale(0.9); background: #1e293b; }
         .nav-active { color: #eab308 !important; }
-        #leaderboardArea { height: 100%; overflow-y: auto; padding-bottom: 20px; }
+        iframe { width: 100%; height: calc(100vh - 300px); border: none; }
     </style>
 </head>
 <body>
 
-    <div class="header rounded-b-[2.5rem] shadow-2xl relative z-10">
-        <div class="flex justify-between items-center mb-4">
+    <div class="header-gradient p-6 rounded-b-[3rem] shadow-2xl border-b border-gray-800">
+        <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-2xl font-black text-[#eab308] italic tracking-tighter uppercase">mNEET</h1>
-                <p id="userRankDisplay" class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">Tier: Bronze</p>
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Welcome back,</p>
+                <h1 id="dispName" class="text-xl font-black text-white italic">Student</h1>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="bg-[#eab308] text-black px-4 py-1.5 rounded-full text-xs font-black shadow-lg">
-                    <span id="userCoins">0</span> BP
+            <div class="bg-white/5 p-2 rounded-2xl flex items-center gap-3 border border-white/10">
+                <div class="text-right">
+                    <p class="text-[8px] font-black text-gray-500 uppercase">My BP</p>
+                    <p id="dispCoins" class="text-sm font-black text-[#eab308]">0</p>
                 </div>
-                <button onclick="logout()" class="text-red-500 text-xl"><i class="fa-solid fa-power-off"></i></button>
+                <img src="https://ui-avatars.com/api/?name=User&background=eab308&color=000" class="w-8 h-8 rounded-xl">
             </div>
-        </div>
-
-        <div class="bg-[#0b1120]/50 p-4 rounded-2xl border border-gray-800">
-            <div class="flex justify-between text-[8px] font-black uppercase mb-2">
-                <span class="text-gray-500">Academic Journey</span>
-                <span class="text-[#eab308]"><span id="progressText">0</span>%</span>
-            </div>
-            <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
-                <div id="progressBar" class="bg-[#eab308] h-full transition-all duration-1000" style="width: 0%"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="main-content">
-        <div id="iframeWrapper" class="h-full w-full">
-            <iframe id="appFrame" src="course.html"></iframe>
         </div>
         
-        <div id="leaderboardArea" class="hidden p-6 animate-fade-in bg-[#0b1120]">
-            <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-6 text-center">Global Student Ranking</h2>
-            <div id="leaderboardList" class="space-y-3"></div>
+        <div class="grid grid-cols-4 gap-3 mt-4">
+            <div onclick="nav('course.html', 'c')" class="grid-item">
+                <i class="fa-solid fa-play text-[#eab308] text-lg"></i>
+                <span class="text-[8px] font-black uppercase mt-2">Classes</span>
+            </div>
+            <div onclick="nav('test.html', 't')" class="grid-item">
+                <i class="fa-solid fa-flask text-blue-400 text-lg"></i>
+                <span class="text-[8px] font-black uppercase mt-2">Tests</span>
+            </div>
+            <div onclick="openRanks()" class="grid-item">
+                <i class="fa-solid fa-trophy text-orange-400 text-lg"></i>
+                <span class="text-[8px] font-black uppercase mt-2">Ranking</span>
+            </div>
+            <div onclick="nav('mstore.html', 'm')" class="grid-item">
+                <i class="fa-solid fa-shop text-green-400 text-lg"></i>
+                <span class="text-[8px] font-black uppercase mt-2">Store</span>
+            </div>
         </div>
     </div>
 
-    <div class="nav-bar">
-        <button onclick="nav('course.html', 'course')" id="tab-course" class="nav-btn nav-active">
-            <i class="fa-solid fa-circle-play text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Course</span>
-        </button>
-        <button onclick="nav('study.html', 'study')" id="tab-study" class="nav-btn">
-            <i class="fa-solid fa-book-open-reader text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Study</span>
-        </button>
-        <button onclick="nav('test.html', 'test')" id="tab-test" class="nav-btn">
-            <i class="fa-solid fa-flask-vial text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Test</span>
-        </button>
-        <button onclick="openRanks()" id="tab-ranks" class="nav-btn">
-            <i class="fa-solid fa-trophy text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Ranks</span>
-        </button>
-        <button onclick="nav('mstore.html', 'mstore')" id="tab-mstore" class="nav-btn">
-            <i class="fa-solid fa-shop text-xl"></i>
-            <span class="text-[9px] font-bold uppercase mt-1">Store</span>
-        </button>
+    <div id="mainView" class="p-4 mt-2">
+        <iframe id="appFrame" src="course.html"></iframe>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, query, orderBy, limit, collection } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    <div id="rankView" class="hidden p-6 animate-fade-in">
+        <h2 class="text-center font-black text-xs uppercase tracking-widest text-gray-500 mb-8 italic underline underline-offset-8">Global Leaderboard</h2>
+        <div id="rankList" class="space-y-3"></div>
+    </div>
 
-        const firebaseConfig = { apiKey: "AIzaSyBisQytTeFhjMd1kTUNwcmCelPy7C0ilIY", authDomain: "mneet-7699.firebaseapp.com", projectId: "mneet-7699", storageBucket: "mneet-7699.firebasestorage.app", messagingSenderId: "801664280357", appId: "1:801664280357:web:03da6173f29bedfeaa9ccc" };
-        const app = initializeApp(firebaseConfig); const db = getFirestore(app); const auth = getAuth(app);
+    <div class="fixed bottom-0 left-0 right-0 h-20 bg-[#16213e]/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-around z-50">
+        <button onclick="nav('course.html', 'c')" class="flex flex-col items-center nav-active" id="nav-c"><i class="fa-solid fa-house"></i><span class="text-[9px] mt-1 font-bold">HOME</span></button>
+        <button onclick="nav('study.html', 's')" class="flex flex-col items-center text-gray-500" id="nav-s"><i class="fa-solid fa-book"></i><span class="text-[9px] mt-1 font-bold">STUDY</span></button>
+        <button onclick="openRanks()" class="flex flex-col items-center text-gray-500" id="nav-r"><i class="fa-solid fa-ranking-star"></i><span class="text-[9px] mt-1 font-bold">RANKS</span></button>
+        <button onclick="nav('mstore.html', 'm')" class="flex flex-col items-center text-gray-500" id="nav-m"><i class="fa-solid fa-bag-shopping"></i><span class="text-[9px] mt-1 font-bold">STORE</span></button>
+    </div>
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                onSnapshot(doc(db, "users", user.uid), (snap) => {
-                    const d = snap.data();
-                    if(d) {
-                        document.getElementById('userCoins').innerText = d.coins || 0;
-                        document.getElementById('progressText').innerText = d.progress || 0;
-                        document.getElementById('progressBar').style.width = (d.progress || 0) + '%';
-                        document.getElementById('userRankDisplay').innerText = `Tier: ${d.rank || 'Bronze'}`;
-                    }
-                });
-            } else { window.location.href = "index.html"; }
-        });
-
-        window.nav = (file, id) => {
-            document.getElementById('leaderboardArea').classList.add('hidden');
-            document.getElementById('iframeWrapper').classList.remove('hidden');
-            document.getElementById('appFrame').src = file;
-            updateNavUI(id);
-        };
-
-        window.openRanks = () => {
-            document.getElementById('iframeWrapper').classList.add('hidden');
-            document.getElementById('leaderboardArea').classList.remove('hidden');
-            updateNavUI('ranks');
-            
-            const q = query(collection(db, "users"), orderBy("coins", "desc"), limit(20));
-            onSnapshot(q, (snap) => {
-                const list = document.getElementById('leaderboardList'); list.innerHTML = "";
-                let rank = 1;
-                snap.forEach(d => {
-                    const u = d.data();
-                    const me = auth.currentUser.uid === d.id ? "border-[#eab308] bg-[#1e293b]" : "border-gray-800 bg-[#16213e]";
-                    list.innerHTML += `<div class="p-4 rounded-2xl border ${me} flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <span class="font-black ${rank <= 3 ? 'text-[#eab308]' : 'text-gray-600'}">#${rank}</span>
-                            <div><p class="text-sm font-bold">${u.name}</p><p class="text-[8px] uppercase text-gray-500">${u.rank || 'Bronze'}</p></div>
-                        </div>
-                        <p class="font-black text-[#eab308] text-xs">${u.coins} BP</p>
-                    </div>`;
-                    rank++;
-                });
-            });
-        };
-
-        function updateNavUI(id) {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
-            document.getElementById('tab-' + id).classList.add('nav-active');
-        }
-
-        window.logout = () => signOut(auth).then(() => window.location.href="index.html");
-    </script>
 </body>
-                </html>
-    
+</html>
