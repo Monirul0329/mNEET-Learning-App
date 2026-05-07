@@ -32,19 +32,23 @@
         const SB_KEY = 'YOUR_ANON_KEY';
         const supabase = supabase.createClient(SB_URL, SB_KEY);
 
-        async function handleSignIn() {
-            const email = document.getElementById('loginId').value;
-            const password = document.getElementById('loginPass').value;
+      async function handleSignIn() {
+    const email = document.getElementById('loginId').value;
+    const password = document.getElementById('loginPass').value;
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if(!email || !password) return alert("Please enter both Email and Password");
 
-            if (error) {
-                alert("Login Failed: " + error.message);
-            } else {
-                localStorage.setItem('mUserSession', JSON.stringify(data.session));
-                window.location.href = 'dashboard.html';
-            }
-        }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+        alert("Login Error: " + error.message);
+    } else {
+        // User session save kora
+        localStorage.setItem('mUserEmail', email);
+        window.location.href = 'dashboard.html';
+    }
+      }
+        
 
         function forgetPass() {
             alert("Password reset link will be sent to your registered email.");
