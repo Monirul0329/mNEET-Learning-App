@@ -3,38 +3,133 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .mode-white { background: #fff; color: #000; }
-        .mode-sepia { background: #f4ecd8; color: #5b4636; }
-        .mode-dark { background: #0b1120; color: #fff; }
+        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
+        body { background: #070b14; }
+        .tab-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
-<body id="reader" class="mode-white p-6 transition-all duration-500">
-    <div class="flex justify-between items-center mb-8 sticky top-0 bg-inherit py-2 z-20">
-        <div class="flex gap-2">
-            <div onclick="setM('white')" class="w-8 h-8 rounded-full border bg-white shadow-sm"></div>
-            <div onclick="setM('sepia')" class="w-8 h-8 rounded-full border bg-[#f4ecd8] shadow-sm"></div>
-            <div onclick="setM('dark')" class="w-8 h-8 rounded-full border bg-[#0b1120] shadow-sm"></div>
+<body class="text-white p-4 pb-28 font-sans">
+
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-black italic gold-glow uppercase tracking-tighter">STUDY ZONE</h1>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1 bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20">
+                <i class="fa-solid fa-coins text-[#eab308] text-xs"></i>
+                <span id="uCoins" class="text-xs font-black">0</span>
+            </div>
+            <button onclick="window.location.href='index.html'" class="w-9 h-9 flex items-center justify-center bg-red-500/10 text-red-500 rounded-full border border-red-500/20">
+                <i class="fa-solid fa-power-off text-sm"></i>
+            </button>
         </div>
-        <button onclick="playA()" class="bg-[#eab308] text-black px-4 py-2 rounded-full font-black text-[10px] uppercase flex items-center gap-2 shadow-lg">
-            <i class="fa-solid fa-headphones"></i> Audio Book
-        </button>
     </div>
 
-    <article class="prose max-w-full">
-        <h2 class="text-xl font-black italic uppercase mb-6 underline decoration-4 decoration-[#eab308]">Cell: The Unit of Life</h2>
-        <p class="text-lg leading-relaxed mb-4">
-            Biology is the study of living organisms. 
-            <span class="bg-yellow-200 px-1 border-b-2 border-yellow-600 font-bold" onclick="alert('NEET 2021: Fundamental unit is Cell.')">Cells are the basic structural and functional units.</span>
-        </p>
-    </article>
+    <div class="grid grid-cols-1 gap-4 mb-8">
+        
+        <div class="glass p-6 rounded-[2.5rem] border-l-4 border-blue-500">
+            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Core Resources</h3>
+            <div class="flex justify-between items-center">
+                <button class="tab-btn flex flex-col items-center gap-2 p-4 rounded-2xl w-[30%]">
+                    <i class="fa-solid fa-play text-blue-400"></i>
+                    <span class="text-[8px] font-black uppercase">Lecture</span>
+                </button>
+                <button class="tab-btn flex flex-col items-center gap-2 p-4 rounded-2xl w-[30%]">
+                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
+                    <span class="text-[8px] font-black uppercase">Notes</span>
+                </button>
+                <button class="tab-btn flex flex-col items-center gap-2 p-4 rounded-2xl w-[30%]">
+                    <i class="fa-solid fa-file-lines text-green-400"></i>
+                    <span class="text-[8px] font-black uppercase">DPP</span>
+                </button>
+            </div>
+        </div>
 
-    <audio id="audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+        <a href="ncert_reader.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-[#eab308]">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-[#eab308]/10 flex items-center justify-center">
+                    <i class="fa-solid fa-book-open text-[#eab308]"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-black uppercase italic">NCERT Reading</h4>
+                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Audio & Highlighting</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-700"></i>
+        </a>
+
+        <a href="topic_quiz.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-purple-500">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                    <i class="fa-solid fa-vial text-purple-400"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-black uppercase italic">Topic Wise Quiz</h4>
+                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Practice by concept</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-700"></i>
+        </a>
+
+        <div class="glass p-6 rounded-[2.5rem] border-l-4 border-red-500">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                    <i class="fa-solid fa-star text-red-500"></i>
+                </div>
+                <h4 class="text-sm font-black uppercase italic">Special Materials</h4>
+            </div>
+            <div id="specialList" class="space-y-2">
+                <p class="text-[9px] text-gray-600 italic">No special materials available yet.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10 z-50">
+        <a href="dashboard.html"><i class="fa-solid fa-house text-gray-500"></i></a>
+        <i class="fa-solid fa-book-open gold-glow"></i>
+        <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
+        <a href="profile.html"><i class="fa-solid fa-user-doctor text-gray-500"></i></a>
+    </nav>
 
     <script>
-        function setM(m) { document.getElementById('reader').className = `mode-${m} p-6 transition-all duration-500`; }
-        function playA() { const a = document.getElementById('audio'); a.paused ? a.play() : a.pause(); }
+        const firebaseConfig = {
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
+            authDomain: "mneet-spark.firebaseapp.com",
+            projectId: "mneet-spark",
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const userKey = localStorage.getItem('mUserEmail');
+
+        // Sync Coins and Special Materials
+        function syncStudy() {
+            if(!userKey) window.location.href = 'index.html';
+            
+            database.ref('users/' + userKey + '/coins').on('value', (s) => {
+                document.getElementById('uCoins').innerText = s.val() || 0;
+            });
+
+            database.ref('admin/special_materials').on('value', (snap) => {
+                const list = document.getElementById('specialList');
+                if(snap.exists()){
+                    list.innerHTML = "";
+                    snap.forEach(child => {
+                        const m = child.val();
+                        list.innerHTML += `<a href="${m.link}" class="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5">
+                            <span class="text-[10px] font-bold uppercase tracking-tighter">${m.title}</span>
+                            <i class="fa-solid fa-download text-[10px] text-gray-500"></i>
+                        </a>`;
+                    });
+                }
+            });
+        }
+        syncStudy();
     </script>
 </body>
 </html>
