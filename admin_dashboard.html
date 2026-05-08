@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0b1120] text-white p-6 pb-20">
+
+    <div class="mb-10 flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-black italic text-[#eab308]">ADMIN HUB</h1>
+            <p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Control Center: mi4286803</p>
+        </div>
+        <button onclick="localStorage.clear(); window.location.href='index.html'" class="bg-red-500/10 text-red-500 p-3 rounded-full text-xs font-black uppercase"><i class="fa-solid fa-power-off"></i></button>
+    </div>
+
+    <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 mb-6">
+        <h3 class="text-sm font-black uppercase mb-4 italic text-[#eab308]">Push Alert</h3>
+        <input id="notifMsg" placeholder="Type notification..." class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none text-sm mb-4">
+        <div class="flex gap-2">
+            <button onclick="updateNotif(true)" class="flex-1 bg-green-600 py-3 rounded-xl font-black uppercase text-[10px]">On</button>
+            <button onclick="updateNotif(false)" class="flex-1 bg-red-600 py-3 rounded-xl font-black uppercase text-[10px]">Off</button>
+        </div>
+    </div>
+
+    <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 mb-6">
+        <h3 class="text-sm font-black uppercase mb-4 italic text-[#eab308]">Upload Material</h3>
+        <input id="matTitle" placeholder="Title (e.g. Bio DPP 01)" class="w-full bg-[#0b1120] p-4 rounded-xl border border-gray-700 mb-2 text-xs">
+        <input id="matLink" placeholder="Paste Link (Google Drive/PDF)" class="w-full bg-[#0b1120] p-4 rounded-xl border border-gray-700 mb-4 text-xs">
+        <button onclick="uploadMaterial()" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase text-[10px]">Publish Material</button>
+    </div>
+
+    <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800">
+        <h3 class="text-sm font-black uppercase mb-4 italic text-[#eab308]">Students Overview</h3>
+        <div id="studentList" class="space-y-3"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
+            authDomain: "mneet-spark.firebaseapp.com",
+            projectId: "mneet-spark",
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function updateNotif(st) {
+            const m = document.getElementById('notifMsg').value;
+            database.ref('admin/notification').set({active: st, msg: m}).then(()=>alert("Notification Set!"));
+        }
+
+        function uploadMaterial() {
+            const t = document.getElementById('matTitle').value;
+            const l = document.getElementById('matLink').value;
+            if(!t || !l) return alert("Fill all!");
+            database.ref('materials').push({title: t, link: l, time: Date.now()}).then(()=>alert("Material Uploaded!"));
+        }
+
+        database.ref('users').on('value', (snap) => {
+            const list = document.getElementById('studentList');
+            list.innerHTML = "";
+            snap.forEach((c) => {
+                const u = c.val();
+                list.innerHTML += `<div class="bg-[#0b1120] p-4 rounded-2xl flex justify-between items-center border border-white/5">
+                    <div><p class="text-xs font-black uppercase italic">DR. ${u.name}</p><p class="text-[7px] text-gray-500">${u.email.replace('_','.')}</p></div>
+                    <div class="text-[8px] font-black text-[#eab308] uppercase bg-white/5 px-3 py-1 rounded-full">${u.rank}</div>
+                </div>`;
+            });
+        });
+    </script>
+</body>
+</html>
+
