@@ -3,48 +3,51 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <title>mNEET - Login</title>
 </head>
-<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6">
-    <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl text-white text-center">
-        <h1 class="text-4xl font-black italic uppercase mb-10 tracking-tighter">m<span class="text-[#eab308]">NEET</span></h1>
+<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6 font-sans text-white">
+    <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl">
+        <h1 class="text-4xl font-black italic uppercase text-center mb-2 tracking-tighter text-[#eab308]">mNEET</h1>
+        <p class="text-gray-500 text-center text-[10px] uppercase tracking-[0.3em] mb-10 font-black italic">Portal for Future Surgeons</p>
         
-        <input type="email" id="loginId" placeholder="Email Address" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none mb-4 focus:border-[#eab308]">
-        <input type="password" id="loginPass" placeholder="Password" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none mb-8 focus:border-[#eab308]">
+        <input type="email" id="email" placeholder="Email Address" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none mb-4 focus:border-[#eab308]">
+        <input type="password" id="pass" placeholder="Password" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none mb-8 focus:border-[#eab308]">
         
-        <button onclick="handleLogin()" id="logBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl transition-all active:scale-95">Sign In</button>
-        <p class="mt-6 text-gray-500 text-[10px] uppercase font-bold tracking-widest">New Surgeon? <a href="signup.html" class="text-[#eab308]">Sign Up</a></p>
+        <button onclick="handleLogin()" id="logBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Sign In</button>
+        <p class="text-center text-gray-500 text-[10px] mt-6 font-bold uppercase italic">New Aspirant? <a href="signup.html" class="text-[#eab308]">Register</a></p>
     </div>
 
     <script>
-        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxb3NhdG9pbXlpamNhaHB6YXVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzE5NDQsImV4cCI6MjA5MzcwNzk0NH0.F-CvTbRnr-2EI5UbvOycTMF_RR7xQCln0E95cwBUN6Y';
-        const supabase = supabase.createClient(SB_URL, SB_KEY);
+        const firebaseConfig = {
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
+            authDomain: "mneet-spark.firebaseapp.com",
+            projectId: "mneet-spark",
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        async function handleLogin() {
-            const email = document.getElementById('loginId').value.trim();
-            const pass = document.getElementById('loginPass').value.trim();
+        function handleLogin() {
             const btn = document.getElementById('logBtn');
+            const email = document.getElementById('email').value.replace(/\./g, '_');
+            const pass = document.getElementById('pass').value;
 
-            if(!email || !pass) return alert("Please fill both fields.");
+            if(!email) return alert("Enter Email!");
+            btn.innerText = "AUTHENTICATING...";
 
-            btn.innerText = "Verifying...";
-            
-            // Database search logic
-            const { data, error } = await supabase.from('users_profile')
-                .select('*')
-                .eq('email', email)
-                .eq('password', pass)
-                .single();
-
-            if (data) {
-                localStorage.setItem('mUserEmail', email);
-                window.location.href = 'dashboard.html';
-            } else {
-                console.error("Login Error:", error);
-                alert("Invalid Email or Password! Make sure RLS is disabled in Supabase.");
-                btn.innerText = "Sign In";
-            }
+            database.ref('users/' + email).once('value').then((snapshot) => {
+                const user = snapshot.val();
+                if(user && user.pass === pass) {
+                    localStorage.setItem('mUserEmail', email);
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert("Invalid Credentials!");
+                    btn.innerText = "SIGN IN";
+                }
+            });
         }
     </script>
 </body>
