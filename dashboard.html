@@ -5,66 +5,86 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-[#0b1120] text-white p-6 pb-32">
 
-    <div class="mb-10 text-center">
-        <h2 id="dispName" class="text-3xl font-black italic uppercase">Dr. Loading...</h2>
-        <div id="dispCollege" class="inline-block bg-[#eab308]/10 text-[#eab308] border border-[#eab308]/30 px-6 py-2 rounded-full text-[10px] font-black uppercase mt-2 tracking-widest">
-            AIIMS DELHI (DREAM)
+    <div class="mb-10 flex justify-between items-start px-2">
+        <div>
+            <h2 id="uName" class="text-2xl font-black italic uppercase">Dr. Loader</h2>
+            <p id="uCollege" class="text-[9px] text-gray-500 font-bold uppercase tracking-widest italic">Target: AIIMS</p>
+        </div>
+        <div class="text-right">
+            <div id="uRank" class="bg-[#eab308] text-black px-4 py-1 rounded-full text-[9px] font-black uppercase italic shadow-lg shadow-yellow-500/20">Aspirant</div>
+            <p class="text-[7px] text-gray-500 mt-1 uppercase font-black">Rank 1/10</p>
         </div>
     </div>
 
-    <div class="bg-[#16213e] p-8 rounded-[3rem] border border-gray-800 text-center mb-8">
-        <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mb-4">NEET 2026 Countdown</p>
-        <div id="timer" class="text-3xl font-black text-[#eab308] italic tabular-nums">00 : 00 : 00 : 00</div>
+    <div class="bg-[#16213e] p-8 rounded-[3rem] border border-gray-800 text-center mb-8 shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-4 -top-4 w-12 h-12 bg-red-600 rounded-full blur-2xl opacity-20"></div>
+        <p class="text-[8px] text-gray-500 uppercase font-black tracking-[0.2em] mb-4">NEET 2026 Battle Countdown</p>
+        <div id="timer" class="text-2xl font-black text-[#eab308] italic tabular-nums">00 : 00 : 00 : 00</div>
     </div>
 
     <div class="grid grid-cols-2 gap-4 mb-8">
-        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 text-center">
-            <h4 id="dispHours" class="text-2xl font-black">0.0h</h4>
-            <p class="text-[8px] text-gray-500 uppercase font-black">Study Hours</p>
+        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800">
+            <i class="fa-solid fa-hourglass-half text-blue-400 mb-3"></i>
+            <h4 id="uHours" class="text-xl font-black">0.0h</h4>
+            <p class="text-[8px] text-gray-500 uppercase font-black tracking-widest">Study Hours</p>
         </div>
-        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 text-center">
-            <h4 id="dispRank" class="text-[10px] font-black text-[#eab308] uppercase">Aspirant</h4>
-            <p class="text-[8px] text-gray-500 uppercase font-black">Current Rank</p>
+        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800">
+            <i class="fa-solid fa-microscope text-green-400 mb-3"></i>
+            <h4 id="uQs" class="text-xl font-black">0</h4>
+            <p class="text-[8px] text-gray-500 uppercase font-black tracking-widest">Questions</p>
         </div>
     </div>
 
-    <div class="bg-gradient-to-r from-yellow-500 to-orange-600 p-6 rounded-[2.5rem] text-black shadow-lg">
-        <p class="text-[10px] font-black uppercase tracking-tighter">Daily Dose</p>
-        <h3 class="text-lg font-black italic mt-1 leading-tight">"A surgeon is born in the library, not just the O.T."</h3>
+    <div class="bg-gradient-to-br from-indigo-600 to-blue-700 p-7 rounded-[2.5rem] shadow-xl">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fa-solid fa-bolt-lightning text-xs"></i></div>
+            <p class="text-[9px] font-black uppercase tracking-widest">Daily Quest</p>
+        </div>
+        <h3 class="text-sm font-bold italic leading-snug">"Your rank is the reflection of your silence in the library and noise in the exam hall."</h3>
     </div>
+
+    <nav class="fixed bottom-6 left-6 right-6 bg-[#16213e]/90 backdrop-blur-xl border border-white/5 p-4 rounded-full flex justify-around shadow-2xl">
+        <i class="fa-solid fa-house text-[#eab308]"></i>
+        <a href="study.html"><i class="fa-solid fa-book-open text-gray-500"></i></a>
+        <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
+        <a href="profile.html"><i class="fa-solid fa-user-doctor text-gray-500"></i></a>
+    </nav>
 
     <script>
-        // Firebase initialization (Same as above)
-        const firebaseConfig = { /* SAME AS ABOVE */ };
+        const firebaseConfig = {
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
+            authDomain: "mneet-spark.firebaseapp.com",
+            projectId: "mneet-spark",
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
+        };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const userKey = localStorage.getItem('mUserEmail');
 
-        // SYNC DATA FROM FIREBASE
-        function loadDashboard() {
+        function syncProfile() {
             if(!userKey) window.location.href = 'index.html';
-            
-            database.ref('users/' + userKey).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if(data) {
-                    document.getElementById('dispName').innerText = "Dr. " + data.name;
-                    document.getElementById('dispCollege').innerText = data.college + " (DREAM)";
-                    document.getElementById('dispHours').innerText = data.hours + "h";
-                    document.getElementById('dispRank').innerText = data.rank;
+            database.ref('users/' + userKey).on('value', (snap) => {
+                const d = snap.val();
+                if(d) {
+                    document.getElementById('uName').innerText = "Dr. " + d.name;
+                    document.getElementById('uCollege').innerText = "Target: " + d.college;
+                    document.getElementById('uRank').innerText = d.rank;
+                    document.getElementById('uHours').innerText = d.hours + "h";
+                    document.getElementById('uQs').innerText = d.questions;
                 }
             });
         }
-        loadDashboard();
+        syncProfile();
 
-        // COUNTDOWN TIMER LOGIC
+        // COUNTDOWN
         setInterval(() => {
-            const target = new Date("May 3, 2026 10:00:00").getTime();
-            const now = new Date().getTime();
-            const d = target - now;
-            const days = Math.floor(d / 86400000), hours = Math.floor((d % 86400000) / 3600000), mins = Math.floor((d % 3600000) / 60000), secs = Math.floor((d % 60000) / 1000);
+            const diff = new Date("May 3, 2026 10:00:00") - new Date();
+            const days = Math.floor(diff / 86400000), hours = Math.floor((diff/3600000)%24), mins = Math.floor((diff/60000)%60), secs = Math.floor((diff/1000)%60);
             document.getElementById('timer').innerText = `${days} : ${hours} : ${mins} : ${secs}`;
         }, 1000);
     </script>
