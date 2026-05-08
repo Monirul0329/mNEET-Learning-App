@@ -5,19 +5,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <title>mNEET - Join</title>
 </head>
-<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6">
-    <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl text-white">
-        <h2 class="text-3xl font-black italic uppercase text-center mb-8 text-[#eab308]">mNEET JOIN</h2>
+<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6 font-sans text-white">
+    <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl">
+        <h2 class="text-2xl font-black italic uppercase text-center mb-8 italic">CREATE <span class="text-[#eab308]">ACCOUNT</span></h2>
         
         <div class="space-y-4">
-            <input type="text" id="name" placeholder="Full Name" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
+            <input type="text" id="name" placeholder="Full Name" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308]">
             <input type="email" id="email" placeholder="Email Address" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
+            <input type="text" id="phone" placeholder="Phone Number" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
             <input type="text" id="college" placeholder="Dream Medical College" class="w-full bg-[#0b1120] p-4 rounded-2xl border-2 border-[#eab308]/20 outline-none">
-            <input type="password" id="pass" placeholder="Password" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
+            <input type="password" id="pass" placeholder="Set Password" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
         </div>
         
-        <button onclick="registerUser()" id="regBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl">Join Now</button>
+        <button onclick="register()" id="regBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl active:scale-95 transition-all">Join the Mission</button>
+        <p class="text-center text-[10px] mt-6 text-gray-500 uppercase font-bold tracking-widest">Already a Doctor? <a href="index.html" class="text-[#eab308]">Login</a></p>
     </div>
 
     <script>
@@ -25,30 +28,30 @@
             apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
             authDomain: "mneet-spark.firebaseapp.com",
             projectId: "mneet-spark",
-            storageBucket: "mneet-spark.firebasestorage.app",
-            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", // Replace with actual DB URL
-            messagingSenderId: "252201633700",
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
             appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        async function registerUser() {
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value.replace(/\./g, '_'); // Dots not allowed in Firebase keys
-            const college = document.getElementById('college').value;
-            const pass = document.getElementById('pass').value;
+        function register() {
+            const btn = document.getElementById('regBtn');
+            const email = document.getElementById('email').value.replace(/\./g, '_');
+            const data = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                college: document.getElementById('college').value,
+                pass: document.getElementById('pass').value,
+                xp: 0, hours: 0, questions: 0, rank: 'Aspirant', target: '2026'
+            };
 
-            if(!name || !email || !pass) return alert("All fields are mandatory!");
+            if(!data.name || !data.pass) return alert("Fill all fields!");
+            btn.innerText = "PROCESSING...";
 
-            database.ref('users/' + email).set({
-                name, email, college, pass,
-                xp: 0, hours: 0, coins: 0, rank: 'Aspirant', target_year: '2026'
-            }).then(() => {
-                alert("Account Created Successfully!");
-                localStorage.setItem('mUserEmail', email);
+            database.ref('users/' + email).set(data).then(() => {
+                alert("Account Created! Redirecting to Login.");
                 window.location.href = 'index.html';
-            }).catch(e => alert(e.message));
+            }).catch(e => { alert(e.message); btn.innerText = "JOIN THE MISSION"; });
         }
     </script>
 </body>
