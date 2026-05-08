@@ -6,46 +6,87 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style> .glass { background: rgba(22,33,62,0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); } </style>
+    <style>
+        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
+        body { background: #070b14; }
+    </style>
 </head>
-<body class="bg-[#0b1120] text-white p-5 pb-32 font-sans">
+<body class="text-white p-4 pb-28 font-sans">
 
-    <div id="notif-bar" class="hidden mb-6 bg-red-600/20 border border-red-500/30 p-4 rounded-3xl flex items-center gap-3">
-        <i class="fa-solid fa-bullhorn text-red-500 animate-bounce"></i>
-        <p id="notif-text" class="text-[10px] font-black uppercase tracking-tighter">ALERT MESSAGE</p>
-    </div>
-
-    <div class="flex justify-between items-center mb-8">
-        <div><h2 id="uName" class="text-xl font-black italic uppercase text-[#eab308]">DR. LOADER</h2><p id="uCollege" class="text-[8px] text-gray-500 font-black tracking-widest italic uppercase">AIIMS DELHI</p></div>
-        <div id="uRank" class="bg-[#eab308] text-black px-4 py-1 rounded-full text-[9px] font-black uppercase italic">Aspirant</div>
-    </div>
-
-    <div class="glass p-6 rounded-[2.5rem] mb-6 text-center border-yellow-500/20">
-        <p class="text-[7px] text-gray-500 uppercase font-black mb-2 tracking-[0.3em]">NEET 2026 BATTLE</p>
-        <div id="timer" class="text-xl font-black italic text-[#eab308]">00D : 00H : 00M : 00S</div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4 mb-8">
-        <div class="glass p-6 rounded-[2.5rem] text-center border-red-500/10">
-            <i class="fa-solid fa-satellite-dish text-red-500 mb-2"></i>
-            <h4 class="text-[10px] font-black uppercase italic">Live Now</h4>
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 id="uName" class="text-xl font-black italic gold-glow uppercase tracking-tighter leading-none">DR. MONIRUL ISLAM</h2>
+            <p id="uCollege" class="text-[11px] text-gray-400 font-bold mt-1">AIIMS DELHI (TARGET)</p>
         </div>
-        <div class="glass p-6 rounded-[2.5rem] text-center border-blue-500/10">
-            <i class="fa-solid fa-folder-open text-blue-400 mb-2"></i>
-            <h4 class="text-[10px] font-black uppercase italic">Notes</h4>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1 bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20">
+                <i class="fa-solid fa-coins text-[#eab308] text-xs"></i>
+                <span id="uCoins" class="text-xs font-black">500</span>
+            </div>
+            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center bg-red-500/10 text-red-500 rounded-full border border-red-500/20">
+                <i class="fa-solid fa-power-off text-sm"></i>
+            </button>
         </div>
     </div>
 
-    <h3 class="text-[10px] font-black uppercase mb-4 tracking-widest text-gray-500">Recent Materials</h3>
-    <div id="matList" class="space-y-3"></div>
+    <div class="mb-6">
+        <select id="batchSelect" class="w-full bg-[#16213e] border border-white/5 p-4 rounded-2xl text-xs font-black uppercase outline-none focus:border-[#eab308]">
+            <option>Select Your Batch</option>
+            <option value="neet2026">NEET 2026 Ultimate Batch</option>
+            <option value="bio_crash">Biology Crash Course</option>
+        </select>
+    </div>
 
-    <a href="https://wa.me/YOUR_NUM" class="fixed bottom-24 right-6 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-2xl z-50 animate-bounce"><i class="fa-brands fa-whatsapp text-white text-2xl"></i></a>
+    <div class="glass p-8 rounded-[3rem] text-center mb-6 border-b-4 border-[#eab308]/30">
+        <p class="text-[9px] text-gray-500 uppercase font-black tracking-[0.4em] mb-4">Countdown to Victory</p>
+        <div id="timer" class="text-3xl font-black italic gold-glow tabular-nums tracking-widest">
+            00D : 00H : 00M : 00S
+        </div>
+    </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/5">
-        <i class="fa-solid fa-house text-[#eab308]"></i>
-        <i class="fa-solid fa-book-open text-gray-500"></i>
-        <i class="fa-solid fa-vial text-gray-500"></i>
-        <i class="fa-solid fa-user-doctor text-gray-500"></i>
+    <div class="grid grid-cols-3 gap-3 mb-6">
+        <div class="glass p-4 rounded-3xl text-center">
+            <h4 id="uLectures" class="text-sm font-black text-blue-400">0.0h</h4>
+            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Lectures</p>
+        </div>
+        <div class="glass p-4 rounded-3xl text-center">
+            <h4 id="uStudy" class="text-sm font-black text-green-400">0.0h</h4>
+            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Self Study</p>
+        </div>
+        <div class="glass p-4 rounded-3xl text-center">
+            <h4 id="uQs" class="text-sm font-black text-[#eab308]">0</h4>
+            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">MCQs</p>
+        </div>
+    </div>
+
+    <div id="notifArea" class="hidden mb-6 bg-[#eab308]/10 border border-[#eab308]/20 p-4 rounded-3xl flex items-center gap-4">
+        <div class="relative">
+            <i class="fa-solid fa-broadcast-tower text-[#eab308] animate-pulse"></i>
+            <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+        </div>
+        <marquee id="notifText" class="text-[10px] font-black uppercase tracking-tighter">Welcome to mNEET Portal! Check New DPP for Chapter 1.</marquee>
+    </div>
+
+    <div class="glass p-6 rounded-[2.5rem] mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Syllabus Progress</h3>
+            <span class="text-[10px] font-black text-[#eab308]">45%</span>
+        </div>
+        <div class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-6">
+            <div class="bg-[#eab308] h-full rounded-full" style="width: 45%"></div>
+        </div>
+        <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+            <span class="text-[10px] font-black uppercase italic text-gray-400">Predicted AIR</span>
+            <span id="pAIR" class="text-sm font-black italic gold-glow">#2,450</span>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10 z-50">
+        <i class="fa-solid fa-house gold-glow"></i>
+        <a href="study.html"><i class="fa-solid fa-book-open text-gray-500"></i></a>
+        <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
+        <a href="profile.html"><i class="fa-solid fa-user-doctor text-gray-500"></i></a>
     </nav>
 
     <script>
@@ -62,42 +103,51 @@
 
         function sync() {
             if(!userKey) window.location.href = 'index.html';
-            
-            // Sync User
             database.ref('users/' + userKey).on('value', (s) => {
-                const d = s.val(); if(d){ 
+                const d = s.val();
+                if(d) {
                     document.getElementById('uName').innerText = "DR. " + d.name.toUpperCase();
-                    document.getElementById('uCollege').innerText = d.college.toUpperCase();
-                    document.getElementById('uRank').innerText = d.rank;
+                    document.getElementById('uCollege').innerText = d.college.toUpperCase() + " (TARGET)";
+                    document.getElementById('uCoins').innerText = d.coins || 0;
+                    document.getElementById('uStudy').innerText = (d.hours || 0).toFixed(1) + "h";
+                    document.getElementById('uLectures').innerText = (d.lectures || 0).toFixed(1) + "h";
+                    document.getElementById('uQs').innerText = d.questions || 0;
                 }
             });
 
-            // Sync Notif
+            // Notification sync
             database.ref('admin/notification').on('value', (s) => {
-                const v = s.val(); const b = document.getElementById('notif-bar');
-                if(v && v.active){ b.classList.remove('hidden'); document.getElementById('notif-text').innerText = v.msg; }
-                else b.classList.add('hidden');
-            });
-
-            // Sync Materials
-            database.ref('materials').limitToLast(5).on('value', (s) => {
-                const list = document.getElementById('matList'); list.innerHTML = "";
-                s.forEach(c => {
-                    const m = c.val();
-                    list.innerHTML += `<a href="${m.link}" class="glass p-4 rounded-2xl flex justify-between items-center border-white/5">
-                        <p class="text-[10px] font-black italic uppercase">${m.title}</p><i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i>
-                    </a>`;
-                });
+                const v = s.val();
+                if(v && v.active) {
+                    document.getElementById('notifArea').classList.remove('hidden');
+                    document.getElementById('notifText').innerText = v.msg;
+                } else {
+                    document.getElementById('notifArea').classList.add('hidden');
+                }
             });
         }
         sync();
 
-        // TIMER 2026
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        // TIMER Logic (Fixing Minus Issue)
         setInterval(() => {
-            const diff = new Date("May 3, 2026 10:00:00") - new Date();
+            const target = new Date("May 3, 2026 10:00:00").getTime();
+            const now = new Date().getTime();
+            let diff = target - now;
+
+            if (diff < 0) {
+                document.getElementById('timer').innerText = "EXAM DAY IS HERE!";
+                return;
+            }
+
             const d = Math.floor(diff/86400000), h = Math.floor((diff/3600000)%24), m = Math.floor((diff/60000)%60), s = Math.floor((diff/1000)%60);
             document.getElementById('timer').innerText = `${d}D : ${h}H : ${m}M : ${s}S`;
         }, 1000);
     </script>
 </body>
-</html>
+                </html>
+    
