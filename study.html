@@ -9,90 +9,70 @@
     <style>
         .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
-        body { background: #070b14; }
-        .tab-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
+        body { background: #070b14; color: white; }
     </style>
 </head>
-<body class="text-white p-4 pb-28 font-sans">
+<body class="p-4 pb-28">
 
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-2xl font-black italic gold-glow uppercase tracking-tighter">STUDY ZONE</h1>
         <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1 bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20">
-                <i class="fa-solid fa-coins text-[#eab308] text-xs"></i>
-                <span id="uCoins" class="text-xs font-black">0</span>
+            <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-xs font-black">
+                🪙 <span id="uCoins">0</span>
             </div>
-            <button onclick="window.location.href='index.html'" class="w-9 h-9 flex items-center justify-center bg-red-500/10 text-red-500 rounded-full border border-red-500/20">
-                <i class="fa-solid fa-power-off text-sm"></i>
+            <button onclick="localStorage.clear(); window.location.href='index.html'" class="w-8 h-8 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-power-off text-xs"></i></button>
+        </div>
+    </div>
+
+    <div class="glass p-6 rounded-[2.5rem] mb-4">
+        <div class="flex justify-around items-center">
+            <button onclick="startLecture()" class="flex flex-col items-center gap-2 group">
+                <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 group-active:scale-90 transition-all">
+                    <i class="fa-solid fa-play text-blue-500"></i>
+                </div>
+                <span class="text-[8px] font-black uppercase">Lecture</span>
+            </button>
+            <button class="flex flex-col items-center gap-2 group">
+                <div class="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center border border-yellow-500/20">
+                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
+                </div>
+                <span class="text-[8px] font-black uppercase">Notes</span>
+            </button>
+            <button class="flex flex-col items-center gap-2 group">
+                <div class="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center border border-green-500/20">
+                    <i class="fa-solid fa-file-pdf text-green-500"></i>
+                </div>
+                <span class="text-[8px] font-black uppercase">DPP</span>
             </button>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 mb-8">
-        
-        <div class="glass p-6 rounded-[2.5rem] border-l-4 border-blue-500">
-            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Core Resources</h3>
-            <div class="flex justify-between items-center">
-                <button class="tab-btn flex flex-col items-center gap-2 p-4 rounded-2xl w-[30%]">
-                    <i class="fa-solid fa-play text-blue-400"></i>
-                    <span class="text-[8px] font-black uppercase">Lecture</span>
-                </button>
-                <button class="tab-btn flex flex-col items-center gap-2 p-4 rounded-2xl w-[30%]">
-                    <i class="fa-solid fa-note-sticky text-yellow-400"></i>
-                    <span class="text-[8px] font-black uppercase">Notes</span>
-                </button>
-                <button class="tab-btn flex flex-col items-center gap-2 p-4 rounded-2xl w-[30%]">
-                    <i class="fa-solid fa-file-lines text-green-400"></i>
-                    <span class="text-[8px] font-black uppercase">DPP</span>
-                </button>
-            </div>
+    <a href="ncert_reading.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center mb-4 border-l-4 border-yellow-500">
+        <div class="flex items-center gap-4">
+            <i class="fa-solid fa-book-open text-yellow-500"></i>
+            <h4 class="text-sm font-black uppercase italic">NCERT Reading</h4>
         </div>
+        <i class="fa-solid fa-chevron-right text-gray-700"></i>
+    </a>
 
-        <a href="ncert_reader.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-[#eab308]">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-xl bg-[#eab308]/10 flex items-center justify-center">
-                    <i class="fa-solid fa-book-open text-[#eab308]"></i>
-                </div>
-                <div>
-                    <h4 class="text-sm font-black uppercase italic">NCERT Reading</h4>
-                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Audio & Highlighting</p>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-right text-gray-700"></i>
-        </a>
-
-        <a href="topic_quiz.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-purple-500">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                    <i class="fa-solid fa-vial text-purple-400"></i>
-                </div>
-                <div>
-                    <h4 class="text-sm font-black uppercase italic">Topic Wise Quiz</h4>
-                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Practice by concept</p>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-right text-gray-700"></i>
-        </a>
-
-        <div class="glass p-6 rounded-[2.5rem] border-l-4 border-red-500">
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                    <i class="fa-solid fa-star text-red-500"></i>
-                </div>
-                <h4 class="text-sm font-black uppercase italic">Special Materials</h4>
-            </div>
-            <div id="specialList" class="space-y-2">
-                <p class="text-[9px] text-gray-600 italic">No special materials available yet.</p>
-            </div>
+    <a href="topic_quiz.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center mb-4 border-l-4 border-purple-500">
+        <div class="flex items-center gap-4">
+            <i class="fa-solid fa-vial text-purple-400"></i>
+            <h4 class="text-sm font-black uppercase italic">Topic Wise Quiz</h4>
         </div>
+        <i class="fa-solid fa-chevron-right text-gray-700"></i>
+    </a>
 
+    <div class="glass p-6 rounded-[2.5rem] border-l-4 border-red-500">
+        <h4 class="text-xs font-black uppercase italic text-red-500 mb-4">Special Materials</h4>
+        <div id="specList" class="space-y-2 text-[10px] text-gray-500 italic">Restocking Materials...</div>
     </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10 z-50">
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10">
         <a href="dashboard.html"><i class="fa-solid fa-house text-gray-500"></i></a>
         <i class="fa-solid fa-book-open gold-glow"></i>
         <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
-        <a href="profile.html"><i class="fa-solid fa-user-doctor text-gray-500"></i></a>
+        <a href="mstore.html"><i class="fa-solid fa-store text-gray-500"></i></a>
     </nav>
 
     <script>
@@ -107,29 +87,20 @@
         const database = firebase.database();
         const userKey = localStorage.getItem('mUserEmail');
 
-        // Sync Coins and Special Materials
-        function syncStudy() {
-            if(!userKey) window.location.href = 'index.html';
-            
-            database.ref('users/' + userKey + '/coins').on('value', (s) => {
-                document.getElementById('uCoins').innerText = s.val() || 0;
-            });
-
-            database.ref('admin/special_materials').on('value', (snap) => {
-                const list = document.getElementById('specialList');
-                if(snap.exists()){
-                    list.innerHTML = "";
-                    snap.forEach(child => {
-                        const m = child.val();
-                        list.innerHTML += `<a href="${m.link}" class="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/5">
-                            <span class="text-[10px] font-bold uppercase tracking-tighter">${m.title}</span>
-                            <i class="fa-solid fa-download text-[10px] text-gray-500"></i>
-                        </a>`;
-                    });
-                }
-            });
+        function startLecture() {
+            alert("Lecture Started! Earning 4 BP Coins/min.");
+            setInterval(async () => {
+                const snap = await database.ref('users/' + userKey).get();
+                const d = snap.val();
+                database.ref('users/' + userKey).update({
+                    coins: (d.coins || 0) + 4,
+                    lectures: (d.lectures || 0) + (1/60)
+                });
+            }, 60000);
         }
-        syncStudy();
+
+        database.ref('users/' + userKey + '/coins').on('value', s => { document.getElementById('uCoins').innerText = s.val() || 0; });
     </script>
 </body>
-</html>
+        </html>
+        
