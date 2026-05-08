@@ -3,33 +3,137 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
+        body { background: #070b14; }
+        .product-card { transition: transform 0.3s ease; }
+        .product-card:active { transform: scale(0.95); }
+    </style>
 </head>
-<body class="bg-[#0b1120] text-white p-6 pb-32">
-    <div class="flex justify-between items-center mb-10 bg-[#16213e] p-6 rounded-[2rem] border border-gray-800">
-        <h2 class="text-xl font-black italic uppercase italic tracking-tighter italic text-[#eab308]">mStore</h2>
-        <div class="bg-black/40 px-4 py-2 rounded-xl flex items-center gap-2 border border-[#eab308]/20">
-            <i class="fa-solid fa-coins text-[#eab308]"></i>
-            <span id="storeCoins" class="font-black">1250</span>
-        </div>
-    </div>
+<body class="text-white p-4 pb-32 font-sans">
 
-    <div class="grid grid-cols-1 gap-6">
-        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 relative overflow-hidden group">
-            <div class="absolute -right-4 -top-4 w-20 h-20 bg-[#eab308] rotate-45 flex items-end justify-center pb-2">
-                <i class="fa-solid fa-bolt text-black text-xs -rotate-45"></i>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-black italic gold-glow uppercase tracking-tighter">mSTORE</h1>
+        <div class="flex items-center gap-3">
+            <button onclick="toggleAddress()" class="w-9 h-9 flex items-center justify-center glass rounded-full text-blue-400">
+                <i class="fa-solid fa-location-dot"></i>
+            </button>
+            <div class="flex items-center gap-1 bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20">
+                <i class="fa-solid fa-coins text-[#eab308] text-xs"></i>
+                <span id="uCoins" class="text-xs font-black">0</span>
             </div>
-            <h3 class="text-lg font-black italic uppercase">Legendary PYQ Bank</h3>
-            <p class="text-[9px] text-gray-500 font-bold mb-6">Last 35 Years Solved Papers</p>
-            <button class="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-[10px] shadow-lg active:scale-95 transition-all">Buy for 500 BP</button>
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 bg-[#16213e]/90 backdrop-blur-lg border border-white/5 p-4 rounded-full flex justify-around shadow-2xl">
+    <div id="addressBox" class="hidden glass p-6 rounded-[2.5rem] mb-6 border-blue-500/30">
+        <h3 class="text-[10px] font-black uppercase mb-4 text-blue-400">Delivery Address</h3>
+        <input id="uAddr" placeholder="House No, Village, City, Pincode" class="w-full bg-black/20 p-4 rounded-2xl border border-white/5 outline-none text-xs mb-4">
+        <button onclick="saveAddress()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-[10px]">Save Address</button>
+    </div>
+
+    <div class="relative mb-8">
+        <input type="text" placeholder="Search Books, Kits, Notes..." class="w-full glass p-5 rounded-2xl outline-none text-xs pl-12 border-none">
+        <i class="fa-solid fa-magnifying-glass absolute left-5 top-5 text-gray-500"></i>
+    </div>
+
+    <div id="productList" class="grid grid-cols-2 gap-4">
+        <p class="text-center col-span-2 text-gray-600 italic py-10">Restocking mStore...</p>
+    </div>
+
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10 z-50">
         <a href="dashboard.html"><i class="fa-solid fa-house text-gray-500"></i></a>
-        <a href="study.html"><i class="fa-solid fa-book text-gray-500"></i></a>
-        <i class="fa-solid fa-pen-nib text-gray-500"></i>
-        <i class="fa-solid fa-store text-[#eab308]"></i>
+        <a href="study.html"><i class="fa-solid fa-book-open text-gray-500"></i></a>
+        <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
+        <i class="fa-solid fa-store gold-glow"></i>
     </nav>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
+            authDomain: "mneet-spark.firebaseapp.com",
+            projectId: "mneet-spark",
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const userKey = localStorage.getItem('mUserEmail');
+
+        function toggleAddress() { document.getElementById('addressBox').classList.toggle('hidden'); }
+
+        async function saveAddress() {
+            const addr = document.getElementById('uAddr').value;
+            if(!addr) return alert("Enter full address!");
+            await database.ref('users/' + userKey).update({ address: addr });
+            alert("Address Saved!");
+            toggleAddress();
+        }
+
+        function loadStore() {
+            if(!userKey) window.location.href = 'index.html';
+
+            // Sync Coins
+            database.ref('users/' + userKey).on('value', (s) => {
+                const d = s.val();
+                document.getElementById('uCoins').innerText = d.coins || 0;
+                if(d.address) document.getElementById('uAddr').value = d.address;
+            });
+
+            // Sync Products (Universal for all)
+            database.ref('admin/products').on('value', (snap) => {
+                const list = document.getElementById('productList');
+                if(snap.exists()){
+                    list.innerHTML = "";
+                    snap.forEach(child => {
+                        const p = child.val();
+                        list.innerHTML += `
+                            <div class="glass p-4 rounded-[2rem] product-card border border-white/5 flex flex-col justify-between">
+                                <img src="${p.img}" class="w-full h-32 object-cover rounded-2xl mb-4 bg-black/20">
+                                <div>
+                                    <h4 class="text-[10px] font-black uppercase italic leading-tight">${p.name}</h4>
+                                    <div class="flex items-center gap-2 mt-2 mb-4">
+                                        <span class="text-sm font-black text-[#eab308]">₹${p.price}</span>
+                                        <span class="text-[8px] text-gray-500 line-through">₹${p.oldPrice}</span>
+                                    </div>
+                                </div>
+                                <button onclick="buyNow('${child.key}', '${p.name}', ${p.price})" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[9px] shadow-xl">Buy Now</button>
+                            </div>`;
+                    });
+                }
+            });
+        }
+
+        async function buyNow(pid, pname, price) {
+            const userSnap = await database.ref('users/' + userKey).get();
+            const user = userSnap.val();
+
+            if(!user.address) {
+                alert("Please add your delivery address first!");
+                toggleAddress();
+                return;
+            }
+
+            if(confirm(`Confirm order for ${pname}?`)) {
+                // Logic: Admin will see this order in their panel
+                database.ref('admin/orders').push({
+                    userEmail: userKey.replace('_', '.'),
+                    userName: user.name,
+                    product: pname,
+                    price: price,
+                    address: user.address,
+                    status: 'Pending',
+                    time: Date.now()
+                }).then(() => {
+                    alert("Order Placed! Our team will contact you soon.");
+                });
+            }
+        }
+
+        loadStore();
+    </script>
 </body>
 </html>
