@@ -3,52 +3,52 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
-<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6 font-sans">
+<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6">
     <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl text-white">
-        <h2 class="text-3xl font-black italic uppercase text-center mb-8">CREATE <span class="text-[#eab308]">ACCOUNT</span></h2>
+        <h2 class="text-3xl font-black italic uppercase text-center mb-8 text-[#eab308]">mNEET JOIN</h2>
         
         <div class="space-y-4">
-            <input type="text" id="newName" placeholder="Full Name" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-            <input type="email" id="newEmail" placeholder="Email Address" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-            <input type="text" id="newPhone" placeholder="Phone Number" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-            <input type="text" id="dreamCollege" placeholder="Dream Medical College" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-            <input type="password" id="newPass" placeholder="Set Password" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
+            <input type="text" id="name" placeholder="Full Name" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
+            <input type="email" id="email" placeholder="Email Address" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
+            <input type="text" id="college" placeholder="Dream Medical College" class="w-full bg-[#0b1120] p-4 rounded-2xl border-2 border-[#eab308]/20 outline-none">
+            <input type="password" id="pass" placeholder="Password" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
         </div>
         
-        <button onclick="handleSignup()" id="regBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl active:scale-95 transition-all">Register Now</button>
-        <p class="text-center text-gray-500 text-[10px] mt-6 font-bold uppercase tracking-widest">Already a member? <a href="index.html" class="text-[#eab308]">Login</a></p>
+        <button onclick="registerUser()" id="regBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs mt-10 shadow-xl">Join Now</button>
     </div>
 
     <script>
-        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxb3NhdG9pbXlpamNhaHB6YXVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzE5NDQsImV4cCI6MjA5MzcwNzk0NH0.F-CvTbRnr-2EI5UbvOycTMF_RR7xQCln0E95cwBUN6Y';
-        const supabase = supabase.createClient(SB_URL, SB_KEY);
+        const firebaseConfig = {
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
+            authDomain: "mneet-spark.firebaseapp.com",
+            projectId: "mneet-spark",
+            storageBucket: "mneet-spark.firebasestorage.app",
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", // Replace with actual DB URL
+            messagingSenderId: "252201633700",
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        async function handleSignup() {
-            const btn = document.getElementById('regBtn');
-            const userData = {
-                name: document.getElementById('newName').value,
-                email: document.getElementById('newEmail').value,
-                phone: document.getElementById('newPhone').value,
-                college: document.getElementById('dreamCollege').value,
-                password: document.getElementById('newPass').value,
-                xp: 0, hours: 0, coins: 0, rank: 'Aspirant'
-            };
+        async function registerUser() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value.replace(/\./g, '_'); // Dots not allowed in Firebase keys
+            const college = document.getElementById('college').value;
+            const pass = document.getElementById('pass').value;
 
-            if(!userData.email || !userData.password) return alert("Fill all details!");
+            if(!name || !email || !pass) return alert("All fields are mandatory!");
 
-            btn.innerText = "Creating Account...";
-            const { error } = await supabase.from('users_profile').insert([userData]);
-
-            if (error) {
-                alert("Error: " + error.message);
-                btn.innerText = "Register Now";
-            } else {
-                alert("Registration Successful! Now Login.");
+            database.ref('users/' + email).set({
+                name, email, college, pass,
+                xp: 0, hours: 0, coins: 0, rank: 'Aspirant', target_year: '2026'
+            }).then(() => {
+                alert("Account Created Successfully!");
+                localStorage.setItem('mUserEmail', email);
                 window.location.href = 'index.html';
-            }
+            }).catch(e => alert(e.message));
         }
     </script>
 </body>
