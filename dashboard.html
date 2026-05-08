@@ -9,84 +9,76 @@
     <style>
         .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
-        body { background: #070b14; }
+        body { background: #070b14; color: white; }
     </style>
 </head>
-<body class="text-white p-4 pb-28 font-sans">
+<body class="p-4 pb-28">
 
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h2 id="uName" class="text-xl font-black italic gold-glow uppercase tracking-tighter leading-none">DR. MONIRUL ISLAM</h2>
-            <p id="uCollege" class="text-[11px] text-gray-400 font-bold mt-1">AIIMS DELHI (TARGET)</p>
+            <h2 id="uName" class="text-xl font-black italic gold-glow uppercase tracking-tighter">DR. LOADING...</h2>
+            <p id="uCollege" class="text-[10px] text-gray-500 font-bold uppercase mt-1 italic">Target: AIIMS</p>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1 bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20">
+        <div class="flex items-center gap-2">
+            <a href="profile.html" class="flex items-center gap-1 bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20">
                 <i class="fa-solid fa-coins text-[#eab308] text-xs"></i>
-                <span id="uCoins" class="text-xs font-black">500</span>
-            </div>
-            <button onclick="logout()" class="w-9 h-9 flex items-center justify-center bg-red-500/10 text-red-500 rounded-full border border-red-500/20">
-                <i class="fa-solid fa-power-off text-sm"></i>
-            </button>
+                <span id="uCoins" class="text-xs font-black">0</span>
+            </a>
+            <button onclick="localStorage.clear(); window.location.href='index.html'" class="w-8 h-8 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-power-off text-xs"></i></button>
         </div>
     </div>
 
     <div class="mb-6">
-        <select id="batchSelect" class="w-full bg-[#16213e] border border-white/5 p-4 rounded-2xl text-xs font-black uppercase outline-none focus:border-[#eab308]">
-            <option>Select Your Batch</option>
-            <option value="neet2026">NEET 2026 Ultimate Batch</option>
-            <option value="bio_crash">Biology Crash Course</option>
+        <select class="w-full bg-[#16213e] border border-white/5 p-4 rounded-2xl text-[10px] font-black uppercase outline-none">
+            <option>NEET 2026 ULTIMATE BATCH</option>
+            <option>BIOLOGY PRO CRASH COURSE</option>
         </select>
     </div>
 
     <div class="glass p-8 rounded-[3rem] text-center mb-6 border-b-4 border-[#eab308]/30">
-        <p class="text-[9px] text-gray-500 uppercase font-black tracking-[0.4em] mb-4">Countdown to Victory</p>
-        <div id="timer" class="text-3xl font-black italic gold-glow tabular-nums tracking-widest">
-            00D : 00H : 00M : 00S
-        </div>
+        <p class="text-[8px] text-gray-500 uppercase font-black tracking-[0.4em] mb-4">NEET 2026 Victory Countdown</p>
+        <div id="timer" class="text-2xl font-black italic gold-glow tabular-nums">00D : 00H : 00M : 00S</div>
     </div>
 
     <div class="grid grid-cols-3 gap-3 mb-6">
         <div class="glass p-4 rounded-3xl text-center">
-            <h4 id="uLectures" class="text-sm font-black text-blue-400">0.0h</h4>
+            <h4 id="uLectures" class="text-xs font-black text-blue-400">0.0h</h4>
             <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Lectures</p>
         </div>
         <div class="glass p-4 rounded-3xl text-center">
-            <h4 id="uStudy" class="text-sm font-black text-green-400">0.0h</h4>
+            <h4 id="uStudy" class="text-xs font-black text-green-400">0.0h</h4>
             <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Self Study</p>
         </div>
         <div class="glass p-4 rounded-3xl text-center">
-            <h4 id="uQs" class="text-sm font-black text-[#eab308]">0</h4>
+            <h4 id="uQs" class="text-xs font-black gold-glow">0</h4>
             <p class="text-[7px] text-gray-500 uppercase font-black mt-1">MCQs</p>
         </div>
     </div>
 
-    <div id="notifArea" class="hidden mb-6 bg-[#eab308]/10 border border-[#eab308]/20 p-4 rounded-3xl flex items-center gap-4">
-        <div class="relative">
-            <i class="fa-solid fa-broadcast-tower text-[#eab308] animate-pulse"></i>
-            <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-        </div>
-        <marquee id="notifText" class="text-[10px] font-black uppercase tracking-tighter">Welcome to mNEET Portal! Check New DPP for Chapter 1.</marquee>
+    <div id="notifBox" class="hidden glass p-4 rounded-3xl mb-6 bg-[#eab308]/5 border-[#eab308]/20 flex items-center gap-3">
+        <i class="fa-solid fa-broadcast-tower text-[#eab308] animate-pulse"></i>
+        <marquee id="notifText" class="text-[10px] font-black uppercase tracking-tighter">New DPP Uploaded! Check Study Zone.</marquee>
     </div>
 
-    <div class="glass p-6 rounded-[2.5rem] mb-6">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Syllabus Progress</h3>
-            <span class="text-[10px] font-black text-[#eab308]">45%</span>
+    <div class="glass p-6 rounded-[2.5rem]">
+        <div class="flex justify-between mb-3 text-[10px] font-black uppercase italic">
+            <span class="text-gray-400 tracking-widest">Syllabus Progress</span>
+            <span class="gold-glow">45%</span>
         </div>
-        <div class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden mb-6">
-            <div class="bg-[#eab308] h-full rounded-full" style="width: 45%"></div>
+        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden mb-5">
+            <div class="bg-[#eab308] h-full" style="width: 45%"></div>
         </div>
         <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
-            <span class="text-[10px] font-black uppercase italic text-gray-400">Predicted AIR</span>
-            <span id="pAIR" class="text-sm font-black italic gold-glow">#2,450</span>
+            <span class="text-[10px] font-black uppercase italic text-gray-500">Predicted Rank</span>
+            <span id="uRank" class="text-[11px] font-black italic gold-glow uppercase">ASPIRANT</span>
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10 z-50">
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10">
         <i class="fa-solid fa-house gold-glow"></i>
         <a href="study.html"><i class="fa-solid fa-book-open text-gray-500"></i></a>
         <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
-        <a href="profile.html"><i class="fa-solid fa-user-doctor text-gray-500"></i></a>
+        <a href="mstore.html"><i class="fa-solid fa-store text-gray-500"></i></a>
     </nav>
 
     <script>
@@ -101,7 +93,7 @@
         const database = firebase.database();
         const userKey = localStorage.getItem('mUserEmail');
 
-        function sync() {
+        function syncData() {
             if(!userKey) window.location.href = 'index.html';
             database.ref('users/' + userKey).on('value', (s) => {
                 const d = s.val();
@@ -112,42 +104,28 @@
                     document.getElementById('uStudy').innerText = (d.hours || 0).toFixed(1) + "h";
                     document.getElementById('uLectures').innerText = (d.lectures || 0).toFixed(1) + "h";
                     document.getElementById('uQs').innerText = d.questions || 0;
+                    document.getElementById('uRank').innerText = d.rank || "ASPIRANT";
                 }
             });
 
-            // Notification sync
             database.ref('admin/notification').on('value', (s) => {
                 const v = s.val();
                 if(v && v.active) {
-                    document.getElementById('notifArea').classList.remove('hidden');
+                    document.getElementById('notifBox').classList.remove('hidden');
                     document.getElementById('notifText').innerText = v.msg;
-                } else {
-                    document.getElementById('notifArea').classList.add('hidden');
-                }
+                } else { document.getElementById('notifBox').classList.add('hidden'); }
             });
         }
-        sync();
+        syncData();
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-
-        // TIMER Logic (Fixing Minus Issue)
         setInterval(() => {
             const target = new Date("May 3, 2026 10:00:00").getTime();
             const now = new Date().getTime();
-            let diff = target - now;
-
-            if (diff < 0) {
-                document.getElementById('timer').innerText = "EXAM DAY IS HERE!";
-                return;
-            }
-
+            const diff = target - now;
+            if(diff < 0) { document.getElementById('timer').innerText = "EXAM DAY!"; return; }
             const d = Math.floor(diff/86400000), h = Math.floor((diff/3600000)%24), m = Math.floor((diff/60000)%60), s = Math.floor((diff/1000)%60);
             document.getElementById('timer').innerText = `${d}D : ${h}H : ${m}M : ${s}S`;
         }, 1000);
     </script>
 </body>
-                </html>
-    
+</html>
