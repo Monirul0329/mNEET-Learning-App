@@ -31,21 +31,28 @@
         const database = firebase.database();
 
         function handleLogin() {
-            const btn = document.getElementById('logBtn');
-            const email = document.getElementById('email').value.replace(/\./g, '_');
-            const pass = document.getElementById('pass').value;
+            const emailInput = document.getElementById('email').value.trim();
+            const pass = document.getElementById('pass').value.trim();
+            const emailKey = emailInput.replace(/\./g, '_');
+            const adminEmail = "mi4286803@gmail.com";
 
-            if(!email) return alert("Enter Email!");
-            btn.innerText = "AUTHENTICATING...";
+            if(!emailInput || !pass) return alert("Fill all details!");
 
-            database.ref('users/' + email).once('value').then((snapshot) => {
+            // 🟢 ADMIN LOGIN CHECK
+            if(emailInput === adminEmail && pass === "admin123") {
+                localStorage.setItem('mUserEmail', emailKey);
+                window.location.href = 'admin_dashboard.html';
+                return;
+            }
+
+            // 🔵 STUDENT LOGIN CHECK
+            database.ref('users/' + emailKey).once('value').then((snapshot) => {
                 const user = snapshot.val();
                 if(user && user.pass === pass) {
-                    localStorage.setItem('mUserEmail', email);
+                    localStorage.setItem('mUserEmail', emailKey);
                     window.location.href = 'dashboard.html';
                 } else {
-                    alert("Invalid Credentials!");
-                    btn.innerText = "SIGN IN";
+                    alert("User not found or Invalid credentials!");
                 }
             });
         }
