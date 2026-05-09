@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style> .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); } body { background: #070b14; color: white; } </style>
+</head>
+<body class="p-6">
+    <h1 class="text-xs font-black uppercase text-red-500 mb-8 italic">Special Material Hub</h1>
+    
+    <div class="glass p-6 rounded-[2.5rem] mb-10 border-b-4 border-red-500/30">
+        <input type="text" id="spTopic" placeholder="Special Topic Name" class="w-full p-4 rounded-2xl bg-[#0b1120] border border-gray-800 text-[10px] mb-3 text-white outline-none">
+        <select id="spType" class="w-full p-4 rounded-2xl bg-[#0b1120] border border-gray-800 text-[10px] mb-3 uppercase font-black text-gray-400">
+            <option value="pdf">PDF Material</option>
+            <option value="video">Secret Video</option>
+            <option value="img">Mindmap / Image</option>
+        </select>
+        <input type="text" id="spUrl" placeholder="Material URL" class="w-full p-4 rounded-2xl bg-[#0b1120] border border-gray-800 text-[10px] mb-4 text-white outline-none">
+        <button onclick="addSpecial()" class="w-full bg-red-600 py-4 rounded-2xl font-black uppercase text-[10px]">Upload Special Material</button>
+    </div>
+
+    <div id="spList" class="space-y-4"></div>
+
+    <script>
+        function addSpecial() {
+            const topic = document.getElementById('spTopic').value;
+            const type = document.getElementById('spType').value;
+            const url = document.getElementById('spUrl').value;
+            firebase.database().ref('study/special').push({ topic, type, url }).then(() => alert("Uploaded!"));
+        }
+    </script>
+</body>
+</html>
+
