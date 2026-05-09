@@ -9,8 +9,7 @@
     <style>
         .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         .gold-glow { color: #eab308; text-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
-        body { background: #070b14; color: white; overflow-x: hidden; }
-        .timer-unit { display: flex; flex-direction: column; align-items: center; }
+        body { background: #070b14; color: white; overflow-x: hidden; font-family: sans-serif; }
         .timer-val { font-size: 1.8rem; font-weight: 900; font-style: italic; color: #eab308; line-height: 1; }
         .timer-label { font-size: 7px; text-transform: uppercase; color: #6b7280; font-weight: 900; margin-top: 4px; }
     </style>
@@ -20,7 +19,7 @@
     <div class="flex justify-between items-start mb-6">
         <div>
             <h2 id="uName" class="text-xl font-black italic gold-glow uppercase leading-none tracking-tighter">DR. MONIRUL</h2>
-            <p id="uTarget" class="text-[9px] text-gray-500 font-bold mt-1 uppercase italic tracking-widest">AIIMS (TARGET)</p>
+            <p id="uTarget" class="text-[9px] text-gray-500 font-bold mt-1 uppercase italic tracking-widest">NEET 2026 ASPIRANT</p>
         </div>
         <div class="flex flex-col gap-2 items-end">
             <div class="flex gap-2">
@@ -32,57 +31,36 @@
         </div>
     </div>
 
+    <!-- Active Batch Selection -->
     <div class="mb-6">
-        <p class="text-[7px] text-gray-600 font-black uppercase mb-2 ml-2 tracking-widest">Switch Active Batch</p>
-        <select id="activeBatch" onchange="switchBatch(this.value)" class="w-full bg-[#16213e] border border-white/10 p-4 rounded-2xl text-[10px] font-black uppercase gold-glow outline-none italic">
+        <select id="activeBatch" onchange="syncBatchData(this.value)" class="w-full bg-[#16213e] border border-white/10 p-4 rounded-2xl text-[10px] font-black uppercase gold-glow outline-none italic">
             <option value="">-- NO BATCH SELECTED --</option>
         </select>
     </div>
 
+    <!-- Countdown Timer (Dynamic) -->
     <div class="glass p-8 rounded-[3rem] mb-6 border-b-4 border-[#eab308]/30 text-center relative overflow-hidden">
         <p class="text-[8px] text-gray-500 uppercase font-black tracking-[0.4em] mb-6 italic">COUNTDOWN TO VICTORY</p>
-        <div class="flex justify-around items-center">
+        <div id="countdownArea" class="flex justify-around items-center">
             <div class="timer-unit"><span id="d_d" class="timer-val">000</span><span class="timer-label">Days</span></div>
             <div class="timer-unit"><span id="d_h" class="timer-val">00</span><span class="timer-label">Hours</span></div>
-            <div class="timer-unit"><span id="d_m" class="timer-val">00</span><span class="timer-label">Minutes</span></div>
-            <div class="timer-unit"><span id="d_s" class="timer-val">00</span><span class="timer-label">Seconds</span></div>
+            <div class="timer-unit"><span id="d_m" class="timer-val">00</span><span class="timer-label">Mins</span></div>
+            <div class="timer-unit"><span id="d_s" class="timer-val">00</span><span class="timer-label">Secs</span></div>
         </div>
     </div>
 
-    <div class="glass p-5 rounded-3xl mb-6 flex items-center gap-4 border-l-4 border-blue-500">
-        <i class="fa-solid fa-bolt-lightning text-blue-500 animate-pulse"></i>
-        <div class="flex-1 overflow-hidden">
-            <p class="text-[7px] text-gray-500 font-black uppercase">Today's Content Updates</p>
-            <marquee id="studyUpdate" class="text-[10px] font-bold text-white uppercase italic tracking-tighter mt-1">Select a batch to sync your daily lecture feed...</marquee>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-3 gap-3 mb-8">
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-blue-600/50">
-            <h4 id="sLectures" class="text-xl font-black text-blue-400 italic">0.0h</h4>
-            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Lectures</p>
-        </div>
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-green-600/50">
-            <h4 id="sStudy" class="text-xl font-black text-green-400 italic">0.0h</h4>
-            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Self Study</p>
-        </div>
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-[#eab308]/50">
-            <h4 id="sMCQs" class="text-xl font-black gold-glow italic">0</h4>
-            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Total MCQs</p>
-        </div>
-    </div>
-
+    <!-- Course Completion Progress (Admin controlled %) -->
     <div class="glass p-6 rounded-[2.5rem] mb-10">
         <div class="flex justify-between items-center mb-3 px-1">
-            <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 italic">Course Completion</h3>
-            <span id="progPercent" class="text-[11px] font-black gold-glow">45%</span>
+            <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 italic">Course Progress</h3>
+            <span id="progPercent" class="text-[11px] font-black gold-glow">0%</span>
         </div>
-        <div class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden shadow-inner">
-            <div id="progBar" class="bg-[#eab308] h-full transition-all duration-1000 shadow-[0_0_15px_rgba(234,179,8,0.3)]" style="width: 45%"></div>
+        <div class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden shadow-inner border border-white/5">
+            <div id="progBar" class="bg-[#eab308] h-full transition-all duration-1000 shadow-[0_0_15px_rgba(234,179,8,0.3)]" style="width: 0%"></div>
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center shadow-2xl border-white/10 z-50">
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50">
         <i class="fa-solid fa-house gold-glow"></i>
         <a href="study.html"><i class="fa-solid fa-book-open text-gray-600"></i></a>
         <a href="all_batches.html"><div class="bg-blue-600 w-11 h-11 rounded-full flex items-center justify-center -mt-8 border-4 border-[#070b14] shadow-xl"><i class="fa-solid fa-layer-group text-white text-lg"></i></div></a>
@@ -90,6 +68,67 @@
         <a href="mstore.html"><i class="fa-solid fa-store text-gray-600"></i></a>
     </nav>
 
+    <script>
+        const firebaseConfig = { /* SAME AS YOUR INDEX.HTML */ };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const userEmail = localStorage.getItem('mUserEmail');
+
+        function loadDashboard() {
+            if(!userEmail) window.location.href = 'index.html';
+
+            // Load Enrolled Batches
+            database.ref('courses').on('value', snap => {
+                const select = document.getElementById('activeBatch');
+                select.innerHTML = '<option value="">-- SELECT YOUR BATCH --</option>';
+                snap.forEach(child => {
+                    if(!child.val().isHidden) {
+                        select.innerHTML += `<option value="${child.key}">${child.val().title}</option>`;
+                    }
+                });
+            });
+        }
+
+        let timerInterval;
+        function syncBatchData(batchId) {
+            if(!batchId) return;
+            database.ref('courses/' + batchId).on('value', snap => {
+                const b = snap.val();
+                // Update Progress Bar
+                document.getElementById('progPercent').innerText = b.progress + "%";
+                document.getElementById('progBar').style.width = b.progress + "%";
+                
+                // Start Countdown based on Admin's Exam Date
+                startCountdown(b.examDate);
+            });
+        }
+
+        function startCountdown(dateStr) {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const target = new Date(dateStr).getTime();
+                const diff = target - now;
+
+                if (diff < 0) {
+                    document.getElementById('countdownArea').innerHTML = "<p class='font-black text-red-500 italic'>EXAM DAY HAS ARRIVED!</p>";
+                    return;
+                }
+
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('d_d').innerText = d.toString().padStart(3, '0');
+                document.getElementById('d_h').innerText = h.toString().padStart(2, '0');
+                document.getElementById('d_m').innerText = m.toString().padStart(2, '0');
+                document.getElementById('d_s').innerText = s.toString().padStart(2, '0');
+            }, 1000);
+        }
+
+        loadDashboard();
+    </script>
 </body>
-                </html>
+    </html>
     
