@@ -10,16 +10,16 @@
         .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         .gold-glow { color: #eab308; text-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
         body { background: #070b14; color: white; overflow-x: hidden; font-family: sans-serif; }
-        /* Timer chapta (Compact) design */
-        .timer-card { padding: 15px 10px !important; border-radius: 2.5rem !important; }
         .timer-val { font-size: 1.5rem; font-weight: 900; font-style: italic; color: #eab308; }
-        .timer-label { font-size: 6px; text-transform: uppercase; color: #6b7280; font-weight: 900; margin-top: 2px; }
+        .timer-label { font-size: 6px; text-transform: uppercase; color: #6b7280; font-weight: 900; }
+        ::-webkit-scrollbar { width: 0px; }
+        .feed-card { min-width: 180px; border-radius: 1.5rem; }
     </style>
 </head>
-<body class="p-4 pb-40">
+<body class="p-4 pb-44">
 
-    <!-- Top Bar -->
-    <div class="flex justify-between items-start mb-6">
+    <!-- Top Profile & Coins -->
+    <div class="flex justify-between items-start mb-6 px-1">
         <div>
             <h2 id="uName" class="text-xl font-black italic gold-glow uppercase leading-none tracking-tighter">DR. MONIRUL</h2>
             <p id="uTarget" class="text-[9px] text-gray-500 font-bold mt-1 uppercase italic tracking-widest">AIIMS (TARGET)</p>
@@ -27,33 +27,31 @@
         <div class="flex flex-col gap-2 items-end">
             <div class="flex gap-2">
                 <button onclick="location.href='all_notifications.html'" class="w-9 h-9 glass rounded-full flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-bell"></i></button>
-                <button id="wpBtn" class="w-9 h-9 glass rounded-full flex items-center justify-center text-green-500"><i class="fa-brands fa-whatsapp text-lg"></i></button>
-                <button onclick="localStorage.clear(); location.href='index.html'" class="w-9 h-9 bg-red-500/10 text-red-500 rounded-full border border-red-500/20 flex items-center justify-center"><i class="fa-solid fa-power-off text-xs"></i></button>
+                <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-[10px] font-black italic">🪙 <span id="uCoins">0</span> BP</div>
             </div>
-            <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-[10px] font-black italic tracking-tighter">🪙 <span id="uCoins">0</span> BP</div>
         </div>
     </div>
 
-    <!-- Batch Switcher -->
+    <!-- Active Batch Selection -->
     <div class="mb-6">
         <select id="activeBatch" onchange="syncBatchData(this.value)" class="w-full bg-[#16213e] border border-white/10 p-4 rounded-2xl text-[10px] font-black uppercase gold-glow outline-none italic">
-            <option value="">-- SELECT YOUR BATCH --</option>
+            <option value="">-- SWITCH ACTIVE BATCH --</option>
         </select>
     </div>
 
-    <!-- Row 1: Course Completion (Moved Above Timer) -->
-    <div class="glass p-5 rounded-[2rem] mb-4 border border-white/5">
+    <!-- 1. Syllabus Progress (Admin Linked) -->
+    <div class="glass p-5 rounded-[2.5rem] mb-4 border border-white/5">
         <div class="flex justify-between items-center mb-2 px-1">
-            <h3 class="text-[8px] font-black uppercase tracking-[0.2em] text-gray-500 italic">Course Completion</h3>
+            <h3 class="text-[8px] font-black uppercase text-gray-500 italic">Syllabus Completion</h3>
             <span id="progPercent" class="text-[10px] font-black gold-glow">0%</span>
         </div>
-        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden border border-white/5">
+        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/10">
             <div id="progBar" class="bg-[#eab308] h-full transition-all duration-1000" style="width: 0%"></div>
         </div>
     </div>
 
-    <!-- Row 2: Compact Timer (Chapta Design) -->
-    <div class="glass timer-card mb-4 border-b-2 border-[#eab308]/30 text-center relative overflow-hidden">
+    <!-- 2. Compact Timer -->
+    <div class="glass p-4 rounded-[2.5rem] mb-6 border-b-2 border-[#eab308]/30 text-center relative overflow-hidden">
         <p class="text-[7px] text-gray-500 uppercase font-black tracking-[0.3em] mb-3 italic">COUNTDOWN TO VICTORY</p>
         <div id="countdownArea" class="flex justify-around items-center px-4">
             <div class="flex flex-col"><span id="d_d" class="timer-val">000</span><span class="timer-label">Days</span></div>
@@ -63,41 +61,45 @@
         </div>
     </div>
 
-    <!-- Row 3: Daily Study Updates (Lectures, Notes, DPP) -->
-    <div class="glass p-4 rounded-3xl mb-4 flex items-center gap-4 border-l-4 border-blue-500">
-        <i class="fa-solid fa-bolt-lightning text-blue-500 animate-pulse text-xs"></i>
-        <div class="flex-1 overflow-hidden">
-            <p class="text-[7px] text-gray-500 font-black uppercase">Study Feed (Today & Upcoming)</p>
-            <marquee id="studyUpdate" class="text-[9px] font-bold text-white uppercase italic tracking-tighter mt-1">Syncing today's lectures and dpp updates...</marquee>
+    <!-- 3. Study Feed (Cards) -->
+    <h3 class="text-[9px] font-black uppercase text-gray-500 mb-3 px-2 italic">Today's Study Updates</h3>
+    <div id="studyFeed" class="flex gap-4 overflow-x-auto pb-4 px-1">
+        <div class="feed-card glass p-4 border border-blue-500/20 text-center">
+            <p class="text-[8px] text-blue-400 font-bold uppercase">Lecture Hub</p>
+            <p class="text-[10px] font-black mt-1">Syncing Updates...</p>
         </div>
     </div>
 
-    <!-- Row 4: Motivational Media (Admin Sync) -->
-    <div id="motivationBox" class="mb-4 rounded-[2.5rem] overflow-hidden border border-white/5 relative group hidden">
-        <img id="mImg" src="" class="w-full h-32 object-cover opacity-60">
-        <video id="mVid" class="w-full h-32 object-cover hidden" muted loop></video>
-        <div class="absolute inset-0 flex items-center justify-center">
-            <p class="text-[10px] font-black uppercase italic tracking-widest text-white shadow-xl">Stay Focused Aspirant</p>
+    <!-- 4. Motivational Media -->
+    <div id="motivationBox" class="mb-8 rounded-[2.5rem] overflow-hidden border border-white/5 relative h-32 hidden">
+        <img id="mImg" src="" class="w-full h-full object-cover opacity-50">
+        <video id="mVid" class="w-full h-full object-cover hidden" muted loop></video>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <p class="text-xs font-black uppercase italic text-center text-white/80 tracking-widest">STAY FOCUSED MONIRUL!</p>
         </div>
     </div>
 
-    <!-- Row 5: User Stats Grid -->
-    <div class="grid grid-cols-3 gap-3 mb-8">
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-blue-600/50">
-            <h4 id="sLectures" class="text-xl font-black text-blue-400 italic">0h</h4>
-            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Lectures</p>
+    <!-- 5. Performance Analytics (Course History) -->
+    <div class="glass p-8 rounded-[3rem] mb-10 border border-white/5">
+        <h3 class="text-[10px] font-black uppercase text-yellow-500 mb-6 italic tracking-widest text-center border-b border-white/10 pb-4">Performance Analytics</h3>
+        
+        <div class="flex justify-between items-center mb-8 px-2">
+            <div class="text-center">
+                <p class="text-[7px] text-gray-500 font-bold uppercase">Est. Rank</p>
+                <h2 id="rankPred" class="text-2xl font-black italic gold-glow">#---</h2>
+            </div>
+            <div class="text-center">
+                <p class="text-[7px] text-gray-500 font-bold uppercase">Accuracy</p>
+                <h2 id="avgAcc" class="text-2xl font-black italic text-green-500">0%</h2>
+            </div>
         </div>
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-green-600/50">
-            <h4 id="sStudy" class="text-xl font-black text-green-400 italic">0.0h</h4>
-            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Self Study</p>
-        </div>
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-[#eab308]/50">
-            <h4 id="sMCQs" class="text-xl font-black gold-glow italic">0</h4>
-            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Total MCQs</p>
+
+        <div id="historyStats" class="space-y-3">
+            <!-- Dynamic Stats Rendered by JS -->
         </div>
     </div>
 
-    <!-- Bottom Nav Bar -->
+    <!-- Navigation -->
     <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50 shadow-2xl border-white/10">
         <i class="fa-solid fa-house gold-glow"></i>
         <a href="study.html"><i class="fa-solid fa-book-open text-gray-600"></i></a>
@@ -121,31 +123,41 @@
         function initDashboard() {
             if(!userKey) window.location.href = 'index.html';
 
-            // Sync User Data
+            // Sync User Performance & Profile
             database.ref('users/' + userKey).on('value', s => {
-                const u = s.val();
-                if(u) {
-                    document.getElementById('uCoins').innerText = u.coins || 0;
-                    document.getElementById('sLectures').innerText = (u.hours || 0) + 'h';
-                    document.getElementById('sMCQs').innerText = u.questions || 0;
-                    document.getElementById('sStudy').innerText = (u.selfStudy || 0.0) + 'h';
-                }
+                const u = s.val() || {};
+                document.getElementById('uName').innerText = (u.name || "Aspirant").toUpperCase();
+                document.getElementById('uCoins').innerText = u.coins || 0;
+                document.getElementById('rankPred').innerText = u.predictedRank || "#----";
+                document.getElementById('avgAcc').innerText = (u.accuracy || 0) + "%";
+                
+                // Analytics History Rows
+                const stats = [
+                    { label: "Lectures Done", val: u.lecturesDone || 0, total: u.totalLectures || 1, color: "text-blue-400" },
+                    { label: "Quiz Mastery", val: u.quizzesDone || 0, total: u.totalQuizzes || 1, color: "text-purple-400" },
+                    { label: "Mock Tests", val: u.testsDone || 0, total: u.totalTests || 1, color: "text-red-400" },
+                    { label: "DPP Solved", val: u.dppDone || 0, total: u.totalDPP || 1, color: "text-green-400" }
+                ];
+                
+                document.getElementById('historyStats').innerHTML = stats.map(s => {
+                    const perc = Math.round((s.val / s.total) * 100);
+                    return `
+                        <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                            <span class="text-[9px] font-black uppercase italic">${s.label}</span>
+                            <span class="text-[10px] font-black ${s.color}">${s.val}/${s.total} <span class="text-gray-600 ml-1">(${perc}%)</span></span>
+                        </div>`;
+                }).join('');
             });
 
-            // Sync Motivation from Admin
+            // Motivation Media Sync
             database.ref('admin/motivation').on('value', snap => {
                 if(snap.exists()){
                     const m = snap.val();
-                    document.getElementById('motivationBox').classList.remove('hidden');
-                    if(m.url.includes('.mp4')){
-                        document.getElementById('mVid').src = m.url;
-                        document.getElementById('mVid').classList.remove('hidden');
-                        document.getElementById('mImg').classList.add('hidden');
-                        document.getElementById('mVid').play();
+                    const box = document.getElementById('motivationBox'); box.classList.remove('hidden');
+                    if(m.url.includes('.mp4')) {
+                        const vid = document.getElementById('mVid'); vid.src = m.url; vid.classList.remove('hidden'); vid.play();
                     } else {
-                        document.getElementById('mImg').src = m.url;
-                        document.getElementById('mImg').classList.remove('hidden');
-                        document.getElementById('mVid').classList.add('hidden');
+                        document.getElementById('mImg').src = m.url; document.getElementById('mImg').classList.remove('hidden');
                     }
                 }
             });
@@ -153,29 +165,27 @@
             // Load Active Batches
             database.ref('courses').on('value', snap => {
                 const select = document.getElementById('activeBatch');
-                select.innerHTML = '<option value="">-- SWITCH ACTIVE BATCH --</option>';
-                snap.forEach(child => {
-                    if(!child.val().isHidden) select.innerHTML += `<option value="${child.key}">${child.val().title}</option>`;
-                });
+                select.innerHTML = '<option value="">-- SELECT YOUR BATCH --</option>';
+                snap.forEach(child => { if(!child.val().isHidden) select.innerHTML += `<option value="${child.key}">${child.val().title}</option>`; });
             });
         }
 
-        let timer;
-        function syncBatchData(id) {
-            if(!id) return;
-            database.ref('courses/' + id).on('value', s => {
-                const b = s.val();
+        let timerInt;
+        function syncBatchData(batchId) {
+            if(!batchId) return;
+            database.ref('courses/' + batchId).on('value', snap => {
+                const b = snap.val();
                 document.getElementById('progPercent').innerText = b.progress + "%";
                 document.getElementById('progBar').style.width = b.progress + "%";
-                if(b.examDate) startCountdown(b.examDate);
+                if(b.examDate) startTimer(b.examDate);
             });
         }
 
-        function startCountdown(target) {
-            clearInterval(timer);
-            timer = setInterval(() => {
+        function startTimer(target) {
+            clearInterval(timerInt);
+            timerInt = setInterval(() => {
                 const diff = new Date(target).getTime() - new Date().getTime();
-                if(diff <= 0) return clearInterval(timer);
+                if(diff <= 0) { clearInterval(timerInt); return; }
                 document.getElementById('d_d').innerText = Math.floor(diff/(1000*60*60*24)).toString().padStart(3,'0');
                 document.getElementById('d_h').innerText = Math.floor((diff%(1000*60*60*24))/(1000*60*60)).toString().padStart(2,'0');
                 document.getElementById('d_m').innerText = Math.floor((diff%(1000*60*60))/(1000*60)).toString().padStart(2,'0');
@@ -186,4 +196,5 @@
         initDashboard();
     </script>
 </body>
-</html>
+    </html>
+                                                                                     
