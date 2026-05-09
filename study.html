@@ -10,10 +10,13 @@
         body { background: #070b14; color: white; }
     </style>
 </head>
-<body class="p-4 pb-28 font-sans">
+<body class="p-4 pb-28">
 
     <div class="flex justify-between items-center mb-10">
-        <h1 class="text-2xl font-black italic gold-glow uppercase tracking-tighter">STUDY ZONE</h1>
+        <div class="flex items-center gap-4">
+            <button onclick="history.back()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90 transition-all"><i class="fa-solid fa-chevron-left"></i></button>
+            <h1 class="text-2xl font-black italic gold-glow uppercase tracking-tighter leading-none">STUDY ZONE</h1>
+        </div>
         <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-xs font-black">🪙 <span id="uCoins">0</span></div>
     </div>
 
@@ -21,10 +24,10 @@
         
         <a href="core_resources.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-blue-500">
             <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center"><i class="fa-solid fa-layer-group text-blue-500"></i></div>
+                <div class="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fa-solid fa-layer-group"></i></div>
                 <div>
                     <h4 class="text-sm font-black uppercase italic">Lectures, Notes & DPP</h4>
-                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Video lectures with integrated PDF materials</p>
+                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Study materials & recorded sessions</p>
                 </div>
             </div>
             <i class="fa-solid fa-chevron-right text-gray-800"></i>
@@ -32,10 +35,10 @@
 
         <a href="ncert_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-[#eab308]">
             <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-2xl bg-[#eab308]/10 flex items-center justify-center"><i class="fa-solid fa-book-open text-[#eab308]"></i></div>
+                <div class="w-10 h-10 rounded-2xl bg-[#eab308]/10 flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-book-open"></i></div>
                 <div>
                     <h4 class="text-sm font-black uppercase italic">NCERT Reading & PYQ Tags</h4>
-                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Line-by-line analysis with previous year questions</p>
+                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Interactive Book Analysis</p>
                 </div>
             </div>
             <i class="fa-solid fa-chevron-right text-gray-800"></i>
@@ -43,10 +46,10 @@
 
         <a href="quiz_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-purple-500">
             <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center"><i class="fa-solid fa-vial text-purple-400"></i></div>
+                <div class="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400"><i class="fa-solid fa-vial"></i></div>
                 <div>
-                    <h4 class="text-sm font-black uppercase italic">Chapter & Topic wise Quiz</h4>
-                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Concept building practice sessions</p>
+                    <h4 class="text-sm font-black uppercase italic">Chapter & Topic Wise Quiz</h4>
+                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Practice concept by concept</p>
                 </div>
             </div>
             <i class="fa-solid fa-chevron-right text-gray-800"></i>
@@ -54,7 +57,7 @@
 
         <div class="glass p-6 rounded-[2.5rem] border-l-4 border-red-500">
             <h4 class="text-[10px] font-black uppercase italic text-red-500 mb-4">Special Materials</h4>
-            <p class="text-[9px] text-gray-600 italic">No new materials uploaded by admin.</p>
+            <p class="text-[9px] text-gray-600 italic">No new materials uploaded.</p>
         </div>
 
     </div>
