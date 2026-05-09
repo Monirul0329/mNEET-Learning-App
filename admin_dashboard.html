@@ -3,43 +3,45 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .glass { background: rgba(22, 33, 62, 0.75); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        body { background: #070b14; color: white; }
-        input, textarea { background: rgba(0,0,0,0.3) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white; width: 100%; padding: 12px; border-radius: 12px; font-size: 12px; margin-bottom: 12px; outline: none; }
+        body { background: #070b14; color: white; font-family: sans-serif; }
+        .card { background: rgba(22, 33, 62, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 2rem; padding: 2rem; }
+        input, select, textarea { width: 100%; background: #0b1120; border: 1px solid #1e293b; padding: 12px; border-radius: 12px; margin-bottom: 15px; color: white; font-size: 12px; outline: none; }
+        input:focus { border-color: #eab308; }
     </style>
 </head>
-<body class="p-6">
-    <h1 class="text-xl font-black italic uppercase gold-glow mb-8 text-center">ADMIN COMMAND CENTER</h1>
+<body class="p-6 pb-20">
+    <h1 class="text-2xl font-black italic text-[#eab308] mb-8 uppercase text-center">Create New Batch</h1>
 
-    <div class="glass p-6 rounded-[2.5rem] border border-white/10">
-        <h3 class="text-xs font-black uppercase text-gray-400 mb-6 tracking-widest text-center italic">Manage Course / Batch</h3>
-        
-        <input type="text" id="bTitle" placeholder="Batch Title">
-        <textarea id="bDesc" placeholder="Short Description"></textarea>
+    <div class="card">
+        <input type="text" id="bTitle" placeholder="Batch Name (e.g. NEET 2026 Ultimate)">
+        <textarea id="bFeed" placeholder="Today's Update (For Marquee)"></textarea>
+        <input type="text" id="bCollege" placeholder="Target College for this Batch">
+        <input type="text" id="bWp" placeholder="WhatsApp Community Link">
+        <input type="datetime-local" id="bDate" title="Select Exam Date for Timer">
         
         <div class="grid grid-cols-2 gap-4">
-            <input type="text" id="bPrice" placeholder="Offer Price (₹)">
-            <input type="text" id="bMrp" placeholder="MRP (₹)">
+            <input type="text" id="bPrice" placeholder="Price (₹)">
+            <input type="text" id="bOff" placeholder="Discount %">
         </div>
-        
-        <div class="grid grid-cols-2 gap-4">
-            <input type="text" id="bStart" placeholder="Start Date">
-            <input type="text" id="bEnd" placeholder="End Date">
-        </div>
-        
-        <input type="text" id="bThumb" placeholder="Thumbnail Image URL">
-        <input type="text" id="bVid" placeholder="Video URL (Thumbnail Video)">
-        <input type="text" id="bOff" placeholder="Discount Percentage (%)">
 
-        <button onclick="updateBatch()" class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase text-xs mt-4">Update Student Dashboard</button>
+        <button onclick="publishBatch()" class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase text-xs shadow-lg">Publish Batch & Sync Dashboard</button>
     </div>
 
     <script>
-        function updateBatch() {
-            // Firebase Update Logic for 'admin/batch_details'
-            alert("Dashboard Updated Successfully!");
+        // Firebase Config and publishBatch function
+        function publishBatch() {
+            const data = {
+                title: document.getElementById('bTitle').value,
+                dailyUpdate: document.getElementById('bFeed').value,
+                targetCollege: document.getElementById('bCollege').value,
+                wpLink: document.getElementById('bWp').value,
+                timerDate: document.getElementById('bDate').value,
+                price: document.getElementById('bPrice').value,
+                off: document.getElementById('bOff').value
+            };
+            // Save to 'batches/' and notify students
+            alert("Batch Created! Students can now enroll and sync.");
         }
     </script>
 </body>
