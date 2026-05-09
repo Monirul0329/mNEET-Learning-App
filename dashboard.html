@@ -13,12 +13,13 @@
         .timer-val { font-size: 1.5rem; font-weight: 900; font-style: italic; color: #eab308; }
         .timer-label { font-size: 6px; text-transform: uppercase; color: #6b7280; font-weight: 900; }
         ::-webkit-scrollbar { width: 0px; }
-        .study-card { min-width: 240px; height: 120px; border-radius: 2rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        /* Big Card Style for Study Feed */
+        .study-card { min-width: 260px; height: 140px; border-radius: 2.5rem; display: flex; flex-direction: column; justify-content: center; padding: 20px; position: relative; overflow: hidden; }
     </style>
 </head>
 <body class="p-4 pb-44">
 
-    <!-- Row 1: Top Bar (Original Style) -->
+    <!-- Row 1: Top Bar (Name, WP, Logout) -->
     <div class="flex justify-between items-start mb-6 px-1">
         <div>
             <h2 id="uName" class="text-xl font-black italic gold-glow uppercase leading-none tracking-tighter">DR. MONIRUL</h2>
@@ -30,94 +31,106 @@
             <button onclick="localStorage.clear(); location.href='index.html'" class="w-9 h-9 bg-red-500/10 text-red-500 rounded-full border border-red-500/20 flex items-center justify-center"><i class="fa-solid fa-power-off text-xs"></i></button>
         </div>
     </div>
-    <!-- BP Coin Float -->
-    <div class="flex justify-end mb-4">
-        <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-[10px] font-black italic">🪙 <span id="uCoins">0</span> BP</div>
+    
+    <!-- BP Coin Floating Row -->
+    <div class="flex justify-end mb-6">
+        <div class="bg-yellow-500/10 px-4 py-2 rounded-full border border-yellow-500/20 text-xs font-black italic">🪙 <span id="uCoins">0</span> BP</div>
     </div>
 
-    <!-- Row 2: Syllabus Progress -->
+    <!-- Row 2: Batch Selection Bar (MISSING PART ADDED) -->
+    <div class="mb-6">
+        <p class="text-[7px] text-gray-600 font-black uppercase mb-2 ml-2 tracking-widest">Switch Active Batch</p>
+        <select id="activeBatch" onchange="syncBatchData(this.value)" class="w-full bg-[#16213e] border border-white/10 p-4 rounded-[1.5rem] text-[10px] font-black uppercase gold-glow outline-none italic">
+            <option value="">-- SELECT YOUR BATCH --</option>
+        </select>
+    </div>
+
+    <!-- Row 3: Syllabus Completion Bar -->
     <div class="glass p-5 rounded-[2.5rem] mb-4 border border-white/5">
         <div class="flex justify-between items-center mb-2 px-1">
-            <h3 class="text-[8px] font-black uppercase text-gray-500 italic">Syllabus Completion</h3>
-            <span id="progPercent" class="text-[10px] font-black gold-glow">0%</span>
+            <h3 class="text-[8px] font-black uppercase text-gray-500 italic tracking-widest">Syllabus Completion</h3>
+            <span id="progPercent" class="text-[11px] font-black gold-glow">0%</span>
         </div>
-        <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden border border-white/5">
             <div id="progBar" class="bg-[#eab308] h-full transition-all duration-1000" style="width: 0%"></div>
         </div>
     </div>
 
-    <!-- Row 3: Compact Timer -->
+    <!-- Row 4: Compact Countdown Timer -->
     <div class="glass p-4 rounded-[2.5rem] mb-6 border-b-2 border-[#eab308]/30 text-center relative overflow-hidden">
-        <p class="text-[7px] text-gray-500 uppercase font-black tracking-[0.3em] mb-3 italic">COUNTDOWN TO VICTORY</p>
+        <p class="text-[7px] text-gray-500 uppercase font-black tracking-[0.4em] mb-4 italic">COUNTDOWN TO VICTORY</p>
         <div id="countdownArea" class="flex justify-around items-center px-4">
             <div class="flex flex-col"><span id="d_d" class="timer-val">000</span><span class="timer-label">Days</span></div>
             <div class="flex flex-col"><span id="d_h" class="timer-val">00</span><span class="timer-label">Hours</span></div>
-            <div class="flex flex-col"><span id="d_m" class="timer-val">00</span><span class="timer-label">Mins</span></div>
-            <div class="flex flex-col"><span id="d_s" class="timer-val">00</span><span class="timer-label">Secs</span></div>
+            <div class="flex flex-col"><span id="d_m" class="timer-val">00</span><span class="timer-label">Minutes</span></div>
+            <div class="flex flex-col"><span id="d_s" class="timer-val">00</span><span class="timer-label">Seconds</span></div>
         </div>
     </div>
 
-    <!-- Row 4: Big Study Feed (Scrollable Cards) -->
-    <h3 class="text-[9px] font-black uppercase text-gray-500 mb-4 px-2 italic tracking-[0.2em]">Daily Study Feed</h3>
+    <!-- Row 5: Big Study Feed Update Cards -->
+    <h3 class="text-[9px] font-black uppercase text-gray-500 mb-4 px-2 italic tracking-[0.2em]">Latest Study Updates</h3>
     <div id="studyFeed" class="flex gap-4 overflow-x-auto pb-6 px-1">
-        <!-- New Lecture Card -->
+        <!-- Lecture Card -->
         <div class="study-card glass border-l-4 border-blue-500">
-            <i class="fa-solid fa-play text-blue-500 mb-2"></i>
-            <p class="text-[7px] text-gray-500 font-black uppercase">Lecture Update</p>
-            <h4 class="text-[10px] font-black uppercase italic px-4">Syncing from Admin...</h4>
+            <span class="absolute top-4 right-4 bg-blue-500/10 text-blue-500 text-[8px] px-2 py-1 rounded-full font-black uppercase italic">Video</span>
+            <i class="fa-solid fa-play-circle text-blue-500 text-2xl mb-2"></i>
+            <h4 class="text-[11px] font-black uppercase italic mb-1">New Lecture Uploaded</h4>
+            <p class="text-[8px] text-gray-500 font-bold uppercase italic">Cell: The Unit of Life - Lec 04</p>
         </div>
         <!-- DPP Card -->
         <div class="study-card glass border-l-4 border-green-500">
-            <i class="fa-solid fa-file-invoice text-green-500 mb-2"></i>
-            <p class="text-[7px] text-gray-500 font-black uppercase">DPP Added</p>
-            <h4 class="text-[10px] font-black uppercase italic px-4">Check Study Zone</h4>
+            <span class="absolute top-4 right-4 bg-green-500/10 text-green-500 text-[8px] px-2 py-1 rounded-full font-black uppercase italic">PDF</span>
+            <i class="fa-solid fa-file-signature text-green-500 text-2xl mb-2"></i>
+            <h4 class="text-[11px] font-black uppercase italic mb-1">New DPP Sheet</h4>
+            <p class="text-[8px] text-gray-500 font-bold uppercase italic">Practice Set - Physics 02</p>
+        </div>
+        <!-- Quiz Card -->
+        <div class="study-card glass border-l-4 border-purple-500">
+            <span class="absolute top-4 right-4 bg-purple-500/10 text-purple-500 text-[8px] px-2 py-1 rounded-full font-black uppercase italic">Quiz</span>
+            <i class="fa-solid fa-vial-circle-check text-purple-500 text-2xl mb-2"></i>
+            <h4 class="text-[11px] font-black uppercase italic mb-1">Chapter Quiz Live</h4>
+            <p class="text-[8px] text-gray-500 font-bold uppercase italic">Chemistry - Unit Test 01</p>
         </div>
     </div>
 
-    <!-- Row 5: Motivation Section -->
-    <div id="motivationBox" class="mb-6 rounded-[3rem] overflow-hidden border border-white/5 h-36 hidden relative">
-        <img id="mImg" src="" class="w-full h-full object-cover opacity-50">
+    <!-- Row 6: Motivational Media Hub -->
+    <div id="motivationBox" class="mb-8 rounded-[3rem] overflow-hidden border border-white/5 h-36 hidden relative shadow-2xl">
+        <img id="mImg" src="" class="w-full h-full object-cover opacity-60">
         <video id="mVid" class="w-full h-full object-cover hidden" muted loop></video>
-        <div class="absolute inset-0 flex items-center justify-center"><p class="text-[10px] font-black uppercase italic tracking-tighter shadow-2xl text-white/80">NEET 2026: Mission AIIMS</p></div>
+        <div class="absolute inset-0 flex items-center justify-center"><p class="text-[10px] font-black uppercase italic text-white/90">Mission AIIMS 2026</p></div>
     </div>
 
-    <!-- Row 6: Original 3-Column Stats (Lectures | Study | MCQs) -->
-    <div class="grid grid-cols-3 gap-3 mb-8">
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-blue-600/50">
+    <!-- Row 7: Original 3-Column Stats Row -->
+    <div class="grid grid-cols-3 gap-3 mb-10">
+        <div class="glass p-5 rounded-[2rem] text-center border-b-2 border-blue-600/50">
             <h4 id="sLectures" class="text-xl font-black text-blue-400 italic">0h</h4>
-            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Lectures</p>
+            <p class="text-[8px] text-gray-400 uppercase font-black mt-1">Lectures</p>
         </div>
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-green-600/50">
+        <div class="glass p-5 rounded-[2rem] text-center border-b-2 border-green-600/50">
             <h4 id="sStudy" class="text-xl font-black text-green-400 italic">0.0h</h4>
-            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Self Study</p>
+            <p class="text-[8px] text-gray-400 uppercase font-black mt-1">Self Study</p>
         </div>
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-[#eab308]/50">
+        <div class="glass p-5 rounded-[2rem] text-center border-b-2 border-[#eab308]/50">
             <h4 id="sMCQs" class="text-xl font-black gold-glow italic">0</h4>
-            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Total MCQs</p>
+            <p class="text-[8px] text-gray-400 uppercase font-black mt-1">Total MCQs</p>
         </div>
     </div>
 
-    <!-- Row 7: Course History / Analytics -->
-    <div class="glass p-8 rounded-[3.5rem] mb-10 border border-white/5">
-        <h3 class="text-[10px] font-black uppercase text-yellow-500 mb-6 italic text-center tracking-[0.2em] border-b border-white/10 pb-4">Performance Analytics</h3>
+    <!-- Row 8: Course Performance History -->
+    <div class="glass p-8 rounded-[3.5rem] mb-12 border border-white/5 shadow-2xl">
+        <h3 class="text-[10px] font-black uppercase text-yellow-500 mb-8 italic text-center tracking-[0.3em] border-b border-white/5 pb-4">Performance Analytics</h3>
         
-        <div class="flex justify-between items-center mb-8 px-2">
-            <div class="text-center">
-                <p class="text-[7px] text-gray-500 font-bold uppercase">Estimated Rank</p>
-                <h2 id="rankPred" class="text-2xl font-black italic gold-glow">#----</h2>
-            </div>
-            <div class="text-center">
-                <p class="text-[7px] text-gray-500 font-bold uppercase">Accuracy</p>
-                <h2 id="avgAcc" class="text-2xl font-black italic text-green-500">0%</h2>
-            </div>
+        <div class="flex justify-between items-center mb-8 px-4">
+            <div class="text-center"><p class="text-[7px] text-gray-500 font-bold uppercase mb-1">Rank</p><h2 id="rankPred" class="text-2xl font-black italic gold-glow">#----</h2></div>
+            <div class="text-center"><p class="text-[7px] text-gray-500 font-bold uppercase mb-1">Accuracy</p><h2 id="avgAcc" class="text-2xl font-black italic text-green-500">0%</h2></div>
         </div>
 
-        <div class="space-y-3">
-            <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl"><span class="text-[9px] font-black uppercase italic">Lectures Attend</span><span id="h_lectures" class="text-[10px] font-black text-blue-400">0/0 (0%)</span></div>
-            <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl"><span class="text-[9px] font-black uppercase italic">Chapter Complete</span><span id="h_chapters" class="text-[10px] font-black text-yellow-500">0/0 (0%)</span></div>
-            <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl"><span class="text-[9px] font-black uppercase italic">DPP Solved</span><span id="h_dpp" class="text-[10px] font-black text-green-400">0/0 (0%)</span></div>
-            <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl"><span class="text-[9px] font-black uppercase italic">Quiz Mastery</span><span id="h_quiz" class="text-[10px] font-black text-purple-400">0/0 (0%)</span></div>
-            <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl"><span class="text-[9px] font-black uppercase italic">Mock Test</span><span id="h_mock" class="text-[10px] font-black text-red-500">0/0 (0%)</span></div>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center bg-white/5 p-5 rounded-[1.5rem]"><span class="text-[10px] font-black uppercase italic">Lectures Attend</span><span id="h_lectures" class="text-[11px] font-black text-blue-400 italic">0/0 (0%)</span></div>
+            <div class="flex justify-between items-center bg-white/5 p-5 rounded-[1.5rem]"><span class="text-[10px] font-black uppercase italic">Chapters Done</span><span id="h_chapters" class="text-[11px] font-black text-yellow-500 italic">0/0 (0%)</span></div>
+            <div class="flex justify-between items-center bg-white/5 p-5 rounded-[1.5rem]"><span class="text-[10px] font-black uppercase italic">DPP Solved</span><span id="h_dpp" class="text-[11px] font-black text-green-400 italic">0/0 (0%)</span></div>
+            <div class="flex justify-between items-center bg-white/5 p-5 rounded-[1.5rem]"><span class="text-[10px] font-black uppercase italic">Quiz Score</span><span id="h_quiz" class="text-[11px] font-black text-purple-400 italic">0/0 (0%)</span></div>
+            <div class="flex justify-between items-center bg-white/5 p-5 rounded-[1.5rem]"><span class="text-[10px] font-black uppercase italic">Mock Results</span><span id="h_mock" class="text-[11px] font-black text-red-500 italic">0/0 (0%)</span></div>
         </div>
     </div>
 
@@ -125,13 +138,19 @@
     <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50 shadow-2xl">
         <i class="fa-solid fa-house gold-glow"></i>
         <a href="study.html"><i class="fa-solid fa-book-open text-gray-600"></i></a>
-        <a href="all_batches.html"><div class="bg-blue-600 w-11 h-11 rounded-full flex items-center justify-center -mt-8 border-4 border-[#070b14] shadow-xl"><i class="fa-solid fa-layer-group text-white text-lg"></i></div></a>
+        <a href="all_batches.html"><div class="bg-blue-600 w-11 h-11 rounded-full flex items-center justify-center -mt-8 border-4 border-[#070b14] shadow-xl active:scale-90 transition-all"><i class="fa-solid fa-layer-group text-white text-lg"></i></div></a>
         <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-600"></i></a>
         <a href="mstore.html"><i class="fa-solid fa-store text-gray-600"></i></a>
     </nav>
 
     <script>
-        const firebaseConfig = { /* SAME AS YOUR INDEX.HTML */ };
+        const firebaseConfig = {
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
+            authDomain: "mneet-spark.firebaseapp.com",
+            projectId: "mneet-spark",
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
+        };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const userKey = localStorage.getItem('mUserEmail');
@@ -139,15 +158,24 @@
         function init() {
             if(!userKey) window.location.href = 'index.html';
             
+            // Sync Core Data
             database.ref('users/' + userKey).on('value', s => {
                 const u = s.val() || {};
                 document.getElementById('uCoins').innerText = u.coins || 0;
                 document.getElementById('sLectures').innerText = (u.hours || 0) + 'h';
                 document.getElementById('sStudy').innerText = (u.selfStudy || 0.0) + 'h';
                 document.getElementById('sMCQs').innerText = u.questions || 0;
-                // Sync Rank/Acc/History... (Existing Logic)
+                // Add calculation logic here for analytics rows
             });
 
+            // Load All Active Batches
+            database.ref('courses').on('value', snap => {
+                const select = document.getElementById('activeBatch');
+                select.innerHTML = '<option value="">-- SWITCH ACTIVE BATCH --</option>';
+                snap.forEach(child => { if(!child.val().isHidden) select.innerHTML += `<option value="${child.key}">${child.val().title}</option>`; });
+            });
+
+            // Sync Motivation Hub
             database.ref('admin/motivation').on('value', snap => {
                 if(snap.exists()){
                     const m = snap.val(); document.getElementById('motivationBox').classList.remove('hidden');
@@ -156,8 +184,31 @@
                 }
             });
         }
+
+        let timer;
+        function syncBatchData(id) {
+            database.ref('courses/' + id).on('value', s => {
+                const b = s.val();
+                document.getElementById('progPercent').innerText = b.progress + "%";
+                document.getElementById('progBar').style.width = b.progress + "%";
+                if(b.examDate) startTimer(b.examDate);
+            });
+        }
+
+        function startTimer(target) {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                const diff = new Date(target).getTime() - new Date().getTime();
+                if(diff <= 0) return clearInterval(timer);
+                document.getElementById('d_d').innerText = Math.floor(diff/(1000*60*60*24)).toString().padStart(3,'0');
+                document.getElementById('d_h').innerText = Math.floor((diff%(1000*60*60*24))/(1000*60*60)).toString().padStart(2,'0');
+                document.getElementById('d_m').innerText = Math.floor((diff%(1000*60*60))/(1000*60)).toString().padStart(2,'0');
+                document.getElementById('d_s').innerText = Math.floor((diff%(1000*60))/1000).toString().padStart(2,'0');
+            }, 1000);
+        }
+
         init();
     </script>
 </body>
-                </html>
+                                                                                                                                                                           </html>
     
