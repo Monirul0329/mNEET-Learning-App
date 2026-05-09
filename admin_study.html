@@ -2,35 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style> .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); } </style>
 </head>
-<body class="bg-[#0b1120] p-6 text-white pb-32">
-    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 max-w-lg mx-auto shadow-2xl">
-        <h2 class="text-[#eab308] text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">NCERT Content Manager</h2>
-        
-        <input type="text" id="chTitle" placeholder="Chapter Name" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
-        <input type="text" id="audioUrl" placeholder="Audio Revision URL (MP3)" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-4 border border-gray-700 outline-none">
-        <textarea id="ncertContent" placeholder="Paste NCERT Text here for Highlighting..." class="w-full bg-[#0b1120] p-4 rounded-2xl mb-4 border border-gray-700 h-32 outline-none"></textarea>
-        <input type="text" id="pyqTag" placeholder="PYQ Tag (e.g. NEET 2023, Page 12)" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-8 border border-gray-700 outline-none">
-        
-        <button onclick="uploadStudy()" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95">Publish NCERT Study</button>
+<body class="bg-[#070b14] text-white p-4 pb-32">
+
+    <div class="flex justify-between items-center mb-10 px-1">
+        <div class="flex items-center gap-4">
+            <button onclick="location.href='admin_dashboard.html'" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-chevron-left"></i></button>
+            <h1 class="text-xl font-black italic gold-glow uppercase">ADMIN STUDY HUB</h1>
+        </div>
+        <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full text-[10px] font-black border border-yellow-500/20">🪙 MOD</div>
     </div>
 
-    <script>
-        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
-        const SB_KEY = 'YOUR_ANON_KEY';
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+    <div class="space-y-4">
+        <div onclick="openManager('lecture')" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-blue-500 cursor-pointer">
+            <div class="flex items-center gap-4">
+                <i class="fa-solid fa-clapperboard text-blue-500 text-xl"></i>
+                <h4 class="text-sm font-black uppercase italic">Manage Lectures & DPP</h4>
+            </div>
+            <i class="fa-solid fa-plus-circle text-[#eab308]"></i>
+        </div>
 
-        async function uploadStudy() {
-            const { error } = await supabaseClient.from('chapters').insert([{ 
-                name: document.getElementById('chTitle').value,
-                audio_url: document.getElementById('audioUrl').value,
-                content: document.getElementById('ncertContent').value,
-                pyq_info: document.getElementById('pyqTag').value
-            }]);
-            if(error) alert(error.message); else alert("NCERT Study Live! 📖");
+        <div onclick="openManager('ncert')" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-yellow-500 cursor-pointer">
+            <div class="flex items-center gap-4">
+                <i class="fa-solid fa-book-open text-yellow-500 text-xl"></i>
+                <h4 class="text-sm font-black uppercase italic">Manage NCERT & PYQ Tags</h4>
+            </div>
+            <i class="fa-solid fa-plus-circle text-[#eab308]"></i>
+        </div>
+
+        <div onclick="openManager('quiz')" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-purple-500 cursor-pointer">
+            <div class="flex items-center gap-4">
+                <i class="fa-solid fa-vial text-purple-400 text-xl"></i>
+                <h4 class="text-sm font-black uppercase italic">Manage Topic Wise Quiz</h4>
+            </div>
+            <i class="fa-solid fa-plus-circle text-[#eab308]"></i>
+        </div>
+
+        <div onclick="openManager('special')" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-red-500 cursor-pointer">
+            <div class="flex items-center gap-4">
+                <i class="fa-solid fa-star text-red-500 text-xl"></i>
+                <h4 class="text-sm font-black uppercase italic">Manage Special Materials</h4>
+            </div>
+            <i class="fa-solid fa-plus-circle text-[#eab308]"></i>
+        </div>
+    </div>
+
+    <div id="managerModal" class="fixed inset-0 bg-black/90 z-[100] hidden p-6 overflow-y-auto">
+        <button onclick="closeManager()" class="w-10 h-10 glass rounded-full mb-6 flex items-center justify-center text-red-500"><i class="fa-solid fa-xmark"></i></button>
+        <h2 id="modalTitle" class="text-xl font-black uppercase italic gold-glow mb-6">Create New Chapter</h2>
+        <div class="space-y-4">
+            <input type="text" id="chapterName" placeholder="Chapter Name" class="w-full bg-[#16213e] p-4 rounded-2xl outline-none border border-white/10 text-xs">
+            <input type="text" id="lectureLink" placeholder="Lecture Video URL" class="w-full bg-[#16213e] p-4 rounded-2xl outline-none border border-white/10 text-xs">
+            <input type="text" id="pdfLink" placeholder="PDF / DPP Link" class="w-full bg-[#16213e] p-4 rounded-2xl outline-none border border-white/10 text-xs">
+            <button class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase text-xs">Publish To Study Zone</button>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center shadow-2xl border-white/10 z-50">
+        <a href="admin_dashboard.html"><i class="fa-solid fa-house text-gray-500"></i></a>
+        <i class="fa-solid fa-book-open gold-glow"></i>
+        <a href="admin_batches.html"><i class="fa-solid fa-layer-group text-blue-500 text-xl"></i></a>
+        <a href="admin_test.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
+        <a href="admin_mstore.html"><i class="fa-solid fa-store text-gray-500"></i></a>
+    </nav>
+
+    <script>
+        function openManager(type) {
+            document.getElementById('managerModal').classList.remove('hidden');
+            document.getElementById('modalTitle').innerText = "Add To: " + type.toUpperCase();
         }
+        function closeManager() { document.getElementById('managerModal').classList.add('hidden'); }
     </script>
 </body>
 </html>
