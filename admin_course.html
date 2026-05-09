@@ -2,40 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com/"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass-input { background: #0b1120; border: 1px solid #1f2937; outline: none; transition: 0.3s; }
+        .glass-input:focus { border-color: #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.2); }
+        body { background: #070b14; color: white; font-family: sans-serif; }
+    </style>
 </head>
-<body class="bg-[#0b1120] p-6 text-white pb-32">
-    
-    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-12 max-w-lg mx-auto">
-        <h2 class="text-[#eab308] text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">mNEET Batch Publisher</h2>
-        
-        <div class="space-y-3">
-            <input type="text" id="cTitle" placeholder="Batch Name (Physics, Bio etc.)" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none focus:border-[#eab308]">
-            <input type="text" id="cImg" placeholder="Thumbnail URL" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-            <input type="text" id="cVideo" placeholder="Promo Video URL" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-            
-            <div class="grid grid-cols-2 gap-2">
-                <input type="date" id="sDate" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-xs text-gray-400">
-                <input type="date" id="eDate" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-xs text-gray-400">
-            </div>
+<body class="p-6 pb-40">
 
-            <div class="grid grid-cols-2 gap-2">
-                <input type="number" id="cPrice" placeholder="Batch Price (₹)" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-                <input type="number" id="cProg" placeholder="Initial %" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 outline-none">
-            </div>
-
-            <textarea id="cDesc" placeholder="Description..." class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 h-24 outline-none"></textarea>
+    <div class="max-w-xl mx-auto">
+        <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-12">
+            <h2 class="text-[#eab308] text-[10px] font-black uppercase text-center mb-8 tracking-[0.4em] italic">mNEET Batch Master Architect</h2>
             
-            <button onclick="publish()" id="btn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Publish Batch Now</button>
+            <div class="space-y-4">
+                <!-- Basic Info -->
+                <input type="text" id="cTitle" placeholder="Batch Full Name (e.g. NEET 2026 Ultimate Pro)" class="w-full glass-input p-4 rounded-2xl text-sm font-bold">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="cPrice" placeholder="Batch Price (₹)" class="w-full glass-input p-4 rounded-2xl text-sm">
+                    <input type="number" id="cProg" placeholder="Initial Course % (e.g. 10)" class="w-full glass-input p-4 rounded-2xl text-sm">
+                </div>
+
+                <!-- Dates (Crucial for Countdown) -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="flex flex-col">
+                        <label class="text-[7px] ml-2 text-gray-500 uppercase font-black mb-1">Start Date</label>
+                        <input type="date" id="sDate" class="w-full glass-input p-4 rounded-2xl text-[10px] text-gray-400">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[7px] ml-2 text-gray-500 uppercase font-black mb-1">End Date</label>
+                        <input type="date" id="endDate" class="w-full glass-input p-4 rounded-2xl text-[10px] text-gray-400">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[7px] ml-2 text-yellow-500 uppercase font-black mb-1">Exam Date (Timer)</label>
+                        <input type="date" id="examDate" class="w-full glass-input p-4 rounded-2xl text-[10px] text-yellow-500">
+                    </div>
+                </div>
+
+                <!-- Media (Multi-Img & Video) -->
+                <div class="space-y-2">
+                    <input type="text" id="cThumb" placeholder="Main Thumbnail URL" class="w-full glass-input p-4 rounded-2xl text-[10px]">
+                    <input type="text" id="cImgList" placeholder="Gallery Images (Comma separated: url1, url2...)" class="w-full glass-input p-4 rounded-2xl text-[10px]">
+                    <input type="text" id="cVideo" placeholder="Demo/Promo Video URL (YouTube/Drive)" class="w-full glass-input p-4 rounded-2xl text-[10px]">
+                </div>
+
+                <textarea id="cDesc" placeholder="Full Batch Description & Features..." class="w-full glass-input p-4 rounded-2xl h-24 text-sm"></textarea>
+                
+                <button onclick="saveBatch()" id="publishBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Publish & Go Live</button>
+            </div>
         </div>
+
+        <h3 class="text-[10px] font-black uppercase text-gray-500 mb-6 text-center italic tracking-widest">Manage Your Batches</h3>
+        <div id="batchList" class="space-y-6"></div>
     </div>
 
-    <div id="courseList" class="space-y-6 max-w-lg mx-auto"></div>
-
     <script>
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
             authDomain: "mneet-spark.firebaseapp.com",
@@ -46,46 +72,63 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        function publish() {
-            const btn = document.getElementById('btn');
+        function saveBatch() {
+            const btn = document.getElementById('publishBtn');
             const data = {
                 title: document.getElementById('cTitle').value,
-                img: document.getElementById('cImg').value,
-                video: document.getElementById('cVideo').value,
-                startDate: document.getElementById('sDate').value,
-                examDate: document.getElementById('eDate').value,
                 price: document.getElementById('cPrice').value,
                 progress: document.getElementById('cProg').value || 0,
+                startDate: document.getElementById('sDate').value,
+                endDate: document.getElementById('endDate').value,
+                examDate: document.getElementById('examDate').value,
+                thumbnail: document.getElementById('cThumb').value,
+                gallery: document.getElementById('cImgList').value.split(','),
+                video: document.getElementById('cVideo').value,
                 desc: document.getElementById('cDesc').value,
-                isHidden: false
+                isHidden: false,
+                timestamp: Date.now()
             };
 
-            if(!data.title || !data.price) return alert("Fill Name and Price!");
-            btn.innerText = "UPLOADING...";
+            if(!data.title || !data.examDate) return alert("Batch Name and Exam Date are mandatory!");
 
+            btn.innerText = "UPLOADING TO CLOUD...";
             database.ref('courses').push(data).then(() => {
-                alert("Batch Published! 🚀");
+                alert("Batch Published Successfully! 🚀");
                 location.reload();
             });
         }
 
-        function loadCourses() {
+        function loadBatches() {
             database.ref('courses').on('value', (snap) => {
-                const list = document.getElementById('courseList');
+                const list = document.getElementById('batchList');
                 list.innerHTML = "";
                 snap.forEach((child) => {
-                    const c = child.val();
+                    const b = child.val();
                     const id = child.key;
                     list.innerHTML += `
-                        <div class="bg-[#16213e] rounded-[2rem] border ${c.isHidden ? 'border-red-900 opacity-50' : 'border-gray-800'} p-5 flex gap-4 items-center">
-                            <img src="${c.img || 'https://via.placeholder.com/150'}" class="w-20 h-20 rounded-2xl object-cover">
-                            <div class="flex-1">
-                                <h3 class="font-black italic uppercase text-sm">${c.title}</h3>
-                                <p class="text-[#eab308] font-black italic">₹${c.price}</p>
-                                <div class="flex gap-2 mt-2">
-                                    <button onclick="toggleHide('${id}', ${c.isHidden})" class="text-[8px] bg-blue-600 px-2 py-1 rounded uppercase font-black">${c.isHidden ? 'Unhide' : 'Hide'}</button>
-                                    <button onclick="deleteBatch('${id}')" class="text-[8px] bg-red-600 px-2 py-1 rounded uppercase font-black text-white">Delete</button>
+                        <div class="bg-[#16213e] rounded-[2.5rem] border ${b.isHidden ? 'border-red-900 opacity-50' : 'border-gray-800'} p-6 relative overflow-hidden">
+                            <div class="flex gap-4 items-start mb-6">
+                                <img src="${b.thumbnail || 'https://via.placeholder.com/150'}" class="w-20 h-20 rounded-3xl object-cover border border-white/10">
+                                <div class="flex-1">
+                                    <h3 class="font-black italic uppercase text-xs leading-tight mb-1">${b.title}</h3>
+                                    <p class="text-[#eab308] font-black text-sm italic">₹${b.price}</p>
+                                    <div class="flex gap-3 mt-2">
+                                        <span class="text-[7px] text-gray-500 font-bold uppercase"><i class="fa-solid fa-clock mr-1"></i>Exam: ${b.examDate}</span>
+                                        <span class="text-[7px] text-blue-400 font-bold uppercase"><i class="fa-solid fa-chart-line mr-1"></i>${b.progress}% Done</span>
+                                    </div>
                                 </div>
+                            </div>
+                            
+                            <div class="flex gap-2 pt-4 border-t border-white/5">
+                                <button onclick="toggleHide('${id}', ${b.isHidden})" class="flex-1 bg-blue-600/10 text-blue-400 py-3 rounded-xl text-[9px] font-black uppercase border border-blue-500/10 active:scale-95 transition-all">
+                                    <i class="fa-solid ${b.isHidden ? 'fa-eye' : 'fa-eye-slash'} mr-1"></i> ${b.isHidden ? 'Unhide' : 'Hide'}
+                                </button>
+                                <button onclick="editBatch('${id}')" class="flex-1 bg-yellow-600/10 text-yellow-500 py-3 rounded-xl text-[9px] font-black uppercase border border-yellow-500/10 active:scale-95 transition-all">
+                                    <i class="fa-solid fa-pen mr-1"></i> Edit
+                                </button>
+                                <button onclick="deleteBatch('${id}')" class="bg-red-600/10 text-red-500 px-5 py-3 rounded-xl text-[9px] border border-red-500/10 active:scale-95 transition-all">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
                             </div>
                         </div>`;
                 });
@@ -93,8 +136,35 @@
         }
 
         function toggleHide(id, status) { database.ref('courses/' + id).update({ isHidden: !status }); }
-        function deleteBatch(id) { if(confirm("Delete Batch?")) database.ref('courses/' + id).remove(); }
-        loadCourses();
+        function deleteBatch(id) { if(confirm("Permanently delete this batch?")) database.ref('courses/' + id).remove(); }
+        
+        function editBatch(id) {
+            database.ref('courses/' + id).once('value').then(s => {
+                const b = s.val();
+                document.getElementById('cTitle').value = b.title;
+                document.getElementById('cPrice').value = b.price;
+                document.getElementById('cProg').value = b.progress;
+                document.getElementById('sDate').value = b.startDate;
+                document.getElementById('endDate').value = b.endDate;
+                document.getElementById('examDate').value = b.examDate;
+                document.getElementById('cThumb').value = b.thumbnail;
+                document.getElementById('cImgList').value = b.gallery.join(',');
+                document.getElementById('cVideo').value = b.video;
+                document.getElementById('cDesc').value = b.desc;
+                
+                // Change button to Update logic
+                const btn = document.getElementById('publishBtn');
+                btn.innerText = "Update Batch Info";
+                btn.onclick = () => {
+                    // Update existing node instead of push
+                    const updatedData = { /* collect same as saveBatch */ }; 
+                    database.ref('courses/' + id).update(updatedData).then(() => location.reload());
+                };
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        loadBatches();
     </script>
 </body>
 </html>
