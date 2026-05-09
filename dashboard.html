@@ -9,35 +9,57 @@
     <style>
         .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
-        body { background: #070b14; color: white; }
+        body { background: #070b14; color: white; overflow-x: hidden; }
+        .batch-img { background: linear-gradient(45deg, #16213e, #0b1120); }
     </style>
 </head>
 <body class="p-4 pb-32">
 
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-start mb-6">
         <div>
             <h2 id="uName" class="text-xl font-black gold-glow uppercase italic">DR. LOADING...</h2>
             <p id="uCollege" class="text-[10px] text-gray-500 font-bold uppercase italic">AIIMS (TARGET)</p>
         </div>
-        <div class="flex gap-2">
-            <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-xs font-black">🪙 <span id="uCoins">0</span></div>
-            <button onclick="localStorage.clear(); location.href='index.html'" class="w-9 h-9 bg-red-500/10 text-red-500 rounded-full border border-red-500/20"><i class="fa-solid fa-power-off"></i></button>
+        <div class="flex flex-col gap-2 items-end">
+            <div class="flex gap-2">
+                <button onclick="location.href='notifications.html'" class="w-9 h-9 glass rounded-full flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-bell text-sm"></i></button>
+                <button onclick="window.open('https://chat.whatsapp.com/YOUR_LINK')" class="w-9 h-9 glass rounded-full flex items-center justify-center text-green-500"><i class="fa-brands fa-whatsapp text-lg"></i></button>
+                <button onclick="localStorage.clear(); location.href='index.html'" class="w-9 h-9 bg-red-500/10 text-red-500 rounded-full border border-red-500/20"><i class="fa-solid fa-power-off"></i></button>
+            </div>
+            <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-[10px] font-black">🪙 <span id="uCoins">0</span> BP</div>
         </div>
     </div>
 
-    <div class="glass p-8 rounded-[3rem] text-center mb-8 border-b-4 border-[#eab308]/30">
+    <div class="glass p-8 rounded-[3rem] text-center mb-6 border-b-4 border-[#eab308]/30">
         <p class="text-[8px] text-gray-500 uppercase font-black tracking-[0.4em] mb-4">COUNTDOWN TO VICTORY</p>
         <div id="timer" class="text-2xl font-black italic gold-glow">00D : 00H : 00M : 00S</div>
     </div>
 
+    <div class="grid grid-cols-3 gap-3 mb-8">
+        <div class="glass p-4 rounded-3xl text-center">
+            <h4 id="uLectures" class="text-sm font-black text-blue-400">0.0h</h4>
+            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Lectures</p>
+        </div>
+        <div class="glass p-4 rounded-3xl text-center">
+            <h4 id="uStudy" class="text-sm font-black text-green-400">0.0h</h4>
+            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Self Study</p>
+        </div>
+        <div class="glass p-4 rounded-3xl text-center">
+            <h4 id="uQs" class="text-sm font-black gold-glow">0</h4>
+            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">MCQs</p>
+        </div>
+    </div>
+
     <h3 class="text-[11px] font-black uppercase mb-4 tracking-widest text-gray-400 italic px-2">Available Batches</h3>
-    <div id="batchList" class="space-y-6">
-        <div class="glass rounded-[2.5rem] overflow-hidden border border-white/5 relative">
-            <div class="absolute top-4 right-4 bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-full z-10">60% OFF</div>
-            <img src="https://via.placeholder.com/400x200" class="w-full h-44 object-cover opacity-60">
+    <div id="batchList" class="space-y-6 mb-10">
+        <div class="glass rounded-[2.5rem] overflow-hidden border border-white/5">
+            <div class="h-44 batch-img relative">
+                <img id="batchThumb" src="https://img.freepik.com/free-vector/medical-education-rehabilitation-webinar-training-biology-lesson-college-lecture-doctor-university-student-with-microscope-telescope_335657-2517.jpg" class="w-full h-full object-cover opacity-80">
+                <div class="absolute top-4 right-4 bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-full">60% OFF</div>
+            </div>
             <div class="p-6">
-                <h4 class="text-lg font-black uppercase italic italic mb-1">NEET 2026 Ultimate Pro</h4>
-                <p class="text-[10px] text-gray-400 mb-4">Complete NCERT coverage with Daily DPP and Mock Tests.</p>
+                <h4 class="text-lg font-black uppercase italic mb-1">NEET 2026 Ultimate Pro</h4>
+                <p class="text-[10px] text-gray-400 mb-4 leading-relaxed">Daily Live Classes, Integrated DPP & NCERT Solutions.</p>
                 <div class="flex justify-between items-end">
                     <div>
                         <p class="text-[8px] text-gray-500 font-bold uppercase">Starts: 15 May | Ends: April 2026</p>
@@ -60,8 +82,8 @@
     </nav>
 
     <script>
-        // ... (Ager Firebase Sync & Timer Code thakbe)
+        // Use your existing Firebase & Timer logic here
     </script>
 </body>
-        </html>
-    
+                                  </html>
+                                  
