@@ -3,25 +3,95 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style> .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); } </style>
+    <style>
+        .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
+        body { background: #070b14; color: white; font-family: sans-serif; }
+    </style>
 </head>
-<body class="bg-[#070b14] text-white p-4 pb-32">
-    <div class="glass p-6 rounded-[2.5rem] mb-10 border border-[#eab308]/20">
-        <h3 class="text-xs font-black uppercase italic gold-glow mb-6 text-[#eab308]">Create New Mock Exam</h3>
-        <input type="text" placeholder="Mock Test Name" class="w-full bg-[#16213e] p-4 rounded-2xl mb-3 outline-none text-[10px] text-white border border-gray-700">
-        <button class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase text-[10px]">Create Folder</button>
+<body class="p-6 pb-36">
+
+    <!-- Row 1: Top Bar -->
+    <div class="flex justify-between items-center mb-10">
+        <button onclick="history.back()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <h2 class="text-sm font-black gold-glow uppercase italic tracking-widest">Study Zone Control</h2>
+        <button onclick="logout()" class="w-10 h-10 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center border border-red-500/20 active:scale-90">
+            <i class="fa-solid fa-power-off"></i>
+        </button>
     </div>
 
-    <h4 class="text-[10px] font-black uppercase text-gray-500 mb-4 italic px-2">Active Mock Folders</h4>
-    <div id="mockFolders" class="space-y-4">
-        <div class="glass p-5 rounded-[2rem] flex justify-between items-center border border-white/5">
-            <div>
-                <h5 class="text-xs font-black italic uppercase">MOCK TEST - 01</h5>
-                <p class="text-[8px] text-gray-500 uppercase mt-1">Status: Open</p>
+    <div class="space-y-4">
+        <!-- Row 2: Lecture Notes & DPP Hub -->
+        <div onclick="location.href='admin_lecture_chapters.html'" class="glass p-6 rounded-[2rem] flex items-center justify-between border-l-4 border-blue-500 active:scale-95 transition-all cursor-pointer">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fa-solid fa-clapperboard"></i></div>
+                <h3 class="text-[11px] font-black uppercase italic">Lecture, Notes & DPP Hub</h3>
             </div>
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[8px] font-black uppercase">+ Questions</button>
+            <i class="fa-solid fa-plus text-blue-500"></i>
+        </div>
+
+        <!-- Row 3: NCERT Reading & PYQ Tags -->
+        <div onclick="location.href='admin_ncert_chapters.html'" class="glass p-6 rounded-[2rem] flex items-center justify-between border-l-4 border-yellow-500 active:scale-95 transition-all cursor-pointer">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center text-yellow-500"><i class="fa-solid fa-book-open"></i></div>
+                <h3 class="text-[11px] font-black uppercase italic">NCERT Reading & PYQ Tags</h3>
+            </div>
+            <i class="fa-solid fa-plus text-yellow-500"></i>
+        </div>
+
+        <!-- Row 4: Chapter & Topic Wise Quiz -->
+        <div onclick="location.href='admin_quiz_chapters.html'" class="glass p-6 rounded-[2rem] flex items-center justify-between border-l-4 border-purple-500 active:scale-95 transition-all cursor-pointer">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500"><i class="fa-solid fa-vial-circle-check"></i></div>
+                <h3 class="text-[11px] font-black uppercase italic">Chapter & Topic Wise Quiz</h3>
+            </div>
+            <i class="fa-solid fa-plus text-purple-500"></i>
+        </div>
+
+        <!-- Row 5: Special Material Hub -->
+        <div onclick="location.href='admin_special_materials.html'" class="glass p-6 rounded-[2rem] flex items-center justify-between border-l-4 border-red-500 active:scale-95 transition-all cursor-pointer">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500"><i class="fa-solid fa-folder-plus"></i></div>
+                <h3 class="text-[11px] font-black uppercase italic">Special Material Hub</h3>
+            </div>
+            <i class="fa-solid fa-plus text-red-500"></i>
+        </div>
+
+        <!-- Row 6: Student Doubt & Complain Hub -->
+        <div onclick="location.href='admin_doubts.html'" class="glass p-6 rounded-[2.5rem] mt-6 border-l-4 border-green-500 active:scale-95 transition-all cursor-pointer">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500"><i class="fa-solid fa-headset"></i></div>
+                    <div>
+                        <h3 class="text-[11px] font-black uppercase italic">Doubt & Complain Box</h3>
+                        <p class="text-[7px] text-gray-500 font-bold uppercase">View Student Details & Reply</p>
+                    </div>
+                </div>
+                <span class="bg-green-600 px-3 py-1 rounded-full text-[8px] font-black">NEW</span>
+            </div>
         </div>
     </div>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50">
+        <a href="admin_dashboard.html"><i class="fa-solid fa-house text-gray-600"></i></a>
+        <i class="fa-solid fa-book-open gold-glow"></i>
+        <a href="admin_course.html"><i class="fa-solid fa-layer-group text-gray-600"></i></a>
+        <a href="admin_test.html"><i class="fa-solid fa-pen-nib text-gray-600"></i></a>
+        <a href="admin_mstore.html"><i class="fa-solid fa-store text-gray-600"></i></a>
+    </nav>
+
+    <script>
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
 </body>
-</html>
+                        </html>
+                        
