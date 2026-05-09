@@ -7,88 +7,66 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
-        body { background: #070b14; color: white; overflow-x: hidden; }
-        .batch-card { transition: all 0.3s ease; }
-        .batch-card:hover { transform: translateY(-5px); border-color: #eab308; }
+        .glass { background: rgba(22, 33, 62, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+        .gold-glow { color: #eab308; text-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
+        body { background: #070b14; color: white; }
+        .timer-box { display: flex; flex-direction: column; align-items: center; }
+        .timer-label { font-size: 7px; text-transform: uppercase; margin-bottom: 4px; color: #6b7280; font-weight: 900; }
     </style>
 </head>
-<body class="p-4 pb-32">
+<body class="p-4 pb-36">
 
     <div class="flex justify-between items-start mb-6">
         <div>
-            <h2 id="uName" class="text-xl font-black gold-glow uppercase italic">DR. MONIRUL</h2>
-            <p id="uCollege" class="text-[10px] text-gray-500 font-bold uppercase mt-1 italic">Target: AIIMS</p>
+            <h2 id="uName" class="text-xl font-black italic gold-glow uppercase">DR. MONIRUL</h2>
+            <p class="text-[10px] text-gray-500 font-bold uppercase italic">AIIMS (TARGET)</p>
         </div>
-        <div class="flex flex-col gap-2 items-end">
-            <div class="flex gap-2">
-                <button onclick="location.href='notifications.html'" class="w-9 h-9 glass rounded-full flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-bell text-sm"></i></button>
-                <button onclick="window.open('https://chat.whatsapp.com/YOUR_COMMUNITY_LINK')" class="w-9 h-9 glass rounded-full flex items-center justify-center text-green-500"><i class="fa-brands fa-whatsapp text-lg"></i></button>
-                <button onclick="logout()" class="w-9 h-9 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-power-off text-sm"></i></button>
-            </div>
-            <a href="profile.html" class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-[10px] font-black">🪙 <span id="uCoins">0</span> BP</a>
+        <div class="flex gap-2">
+            <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-xs font-black">🪙 <span id="uCoins">0</span> BP</div>
+            <button onclick="logout()" class="w-9 h-9 bg-red-500/10 text-red-500 rounded-full border border-red-500/20"><i class="fa-solid fa-power-off text-sm"></i></button>
         </div>
     </div>
 
-    <div class="glass p-8 rounded-[3rem] text-center mb-6 border-b-4 border-[#eab308]/30">
-        <p class="text-[8px] text-gray-500 uppercase font-black tracking-[0.4em] mb-4">COUNTDOWN TO VICTORY</p>
-        <div class="flex justify-center gap-1 text-3xl font-black italic gold-glow tabular-nums tracking-widest">
-            <div id="uDays">00</div><div class="text-lg opacity-40">D</div><div class="text-lg opacity-40">:</div>
-            <div id="uHours">00</div><div class="text-lg opacity-40">H</div><div class="text-lg opacity-40">:</div>
-            <div id="uMins">00</div><div class="text-lg opacity-40">M</div><div class="text-lg opacity-40">:</div>
-            <div id="uSecs">00</div><div class="text-lg opacity-40">S</div>
+    <div class="glass p-8 rounded-[3rem] mb-6 border-b-4 border-[#eab308]/30">
+        <p class="text-[8px] text-gray-500 uppercase font-black tracking-[0.4em] mb-6 text-center">COUNTDOWN TO VICTORY</p>
+        <div class="flex justify-around items-center">
+            <div class="timer-box"><span class="timer-label">Days</span><span id="d_d" class="text-2xl font-black italic gold-glow">000</span></div>
+            <span class="text-xl opacity-20 font-black">:</span>
+            <div class="timer-box"><span class="timer-label">Hours</span><span id="d_h" class="text-2xl font-black italic gold-glow">00</span></div>
+            <span class="text-xl opacity-20 font-black">:</span>
+            <div class="timer-box"><span class="timer-label">Minutes</span><span id="d_m" class="text-2xl font-black italic gold-glow">00</span></div>
+            <span class="text-xl opacity-20 font-black">:</span>
+            <div class="timer-box"><span class="timer-label">Seconds</span><span id="d_s" class="text-2xl font-black italic gold-glow">00</span></div>
         </div>
     </div>
 
     <div class="grid grid-cols-3 gap-3 mb-8">
-        <div class="glass p-4 rounded-3xl text-center">
-            <i class="fa-solid fa-stopwatch text-blue-400 text-xs mb-1"></i>
-            <h4 id="sLectures" class="text-sm font-black text-blue-400">0.0h</h4>
-            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Lectures</p>
+        <div class="glass p-4 rounded-3xl text-center border-b-2 border-blue-500">
+            <h4 id="sLectures" class="text-lg font-black text-blue-400 drop-shadow-md">0.0h</h4>
+            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Lectures</p>
         </div>
-        <div class="glass p-4 rounded-3xl text-center">
-            <i class="fa-solid fa-book text-green-400 text-xs mb-1"></i>
-            <h4 id="sStudy" class="text-sm font-black text-green-400">0.0h</h4>
-            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Self Study</p>
+        <div class="glass p-4 rounded-3xl text-center border-b-2 border-green-500">
+            <h4 id="sStudy" class="text-lg font-black text-green-400 drop-shadow-md">0.0h</h4>
+            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Self Study</p>
         </div>
-        <div class="glass p-4 rounded-3xl text-center">
-            <i class="fa-solid fa-check-double text-[#eab308] text-xs mb-1"></i>
-            <h4 id="sMCQs" class="text-sm font-black gold-glow">0</h4>
-            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">MCQs</p>
+        <div class="glass p-4 rounded-3xl text-center border-b-2 border-yellow-500">
+            <h4 id="sMCQs" class="text-lg font-black gold-glow">0</h4>
+            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Total MCQs</p>
         </div>
     </div>
 
-    <div class="glass p-6 rounded-[2.5rem] mb-8">
-        <div class="flex justify-between items-center mb-3">
-            <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400">Main Syllabus Progress</h3>
-            <span class="text-[11px] font-black gold-glow">45%</span>
+    <div class="glass rounded-[2.5rem] overflow-hidden border border-white/5 mb-8">
+        <div class="h-48 relative bg-black">
+            <img id="thumbImg" src="https://via.placeholder.com/400x200/16213e/FFFFFF?text=NEET+2026+PRO" class="w-full h-full object-cover">
+            <video id="thumbVid" class="hidden w-full h-full object-cover" loop muted playsinline>
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+            </video>
         </div>
-        <div class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden">
-            <div class="bg-[#eab308] h-full" style="width: 45%"></div>
-        </div>
-    </div>
-
-    <h3 class="text-[11px] font-black uppercase mb-4 tracking-widest text-gray-400 italic px-2">Your Enrollment</h3>
-    <div id="batchList" class="space-y-6">
-        <div class="glass rounded-[2.5rem] overflow-hidden border border-white/5 batch-card">
-            <div class="h-44 bg-[#16213e]/20 relative">
-                <img id="batchThumb" src="https://via.placeholder.com/400x200" class="w-full h-full object-cover opacity-80">
-                <div class="absolute top-4 right-4 bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-full z-10">60% OFF</div>
-            </div>
-            <div class="p-6">
-                <h4 class="text-lg font-black uppercase italic mb-1">NEET 2026 Ultimate Pro</h4>
-                <p class="text-[10px] text-gray-400 mb-4 leading-relaxed">Integrated Lecture-PDF-DPP hub for Physics, Chemistry & Biology.</p>
-                <div class="flex justify-between items-end">
-                    <div>
-                        <p class="text-[8px] text-gray-500 font-bold uppercase">Starts: 15 May | Ends: April 2026</p>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-xl font-black gold-glow">₹4,999</span>
-                            <span class="text-xs text-gray-600 line-through">₹12,000</span>
-                        </div>
-                    </div>
-                    <button class="bg-[#eab308] text-black px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase shadow-lg">Start Learning</button>
-                </div>
+        <div class="p-6">
+            <h4 class="text-lg font-black uppercase italic italic mb-1">NEET 2026 Ultimate Pro</h4>
+            <div class="flex justify-between items-center mt-4">
+                <span class="text-xl font-black gold-glow">₹4,999</span>
+                <button class="bg-[#eab308] text-black px-8 py-3 rounded-2xl text-[10px] font-black uppercase">Start Learning</button>
             </div>
         </div>
     </div>
@@ -101,7 +79,23 @@
     </nav>
 
     <script>
-        // Use existing Firebase Syncing & Timer Logic here
+        // 5s Image to Video Logic
+        setTimeout(() => {
+            document.getElementById('thumbImg').classList.add('hidden');
+            const v = document.getElementById('thumbVid');
+            v.classList.remove('hidden');
+            v.play();
+        }, 5000);
+
+        // Vertical Timer Logic
+        setInterval(() => {
+            const diff = new Date("May 3, 2026 10:00:00") - new Date();
+            if(diff <= 0) return;
+            document.getElementById('d_d').innerText = Math.floor(diff/86400000);
+            document.getElementById('d_h').innerText = Math.floor((diff/3600000)%24);
+            document.getElementById('d_m').innerText = Math.floor((diff/60000)%60);
+            document.getElementById('d_s').innerText = Math.floor((diff/1000)%60);
+        }, 1000);
     </script>
 </body>
     </html>
