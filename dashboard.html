@@ -9,37 +9,38 @@
     <style>
         .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         .gold-glow { color: #eab308; text-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
-        body { background: #070b14; color: white; }
-        .timer-unit { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
-        .timer-val { font-size: 1.8rem; font-weight: 900; font-style: italic; color: #eab308; }
-        .timer-label { font-size: 7px; text-transform: uppercase; color: #6b7280; font-weight: 900; margin-top: 2px; }
+        body { background: #070b14; color: white; overflow-x: hidden; }
+        .timer-unit { display: flex; flex-direction: column; align-items: center; }
+        .timer-val { font-size: 1.8rem; font-weight: 900; font-style: italic; color: #eab308; line-height: 1; }
+        .timer-label { font-size: 7px; text-transform: uppercase; color: #6b7280; font-weight: 900; margin-top: 4px; }
     </style>
 </head>
-<body class="p-4 pb-40">
+<body class="p-4 pb-36">
 
     <div class="flex justify-between items-start mb-6">
         <div>
-            <h2 id="uName" class="text-xl font-black gold-glow uppercase italic">DR. LOADING...</h2>
-            <p id="uTarget" class="text-[10px] text-gray-500 font-bold uppercase italic">SELECT BATCH TO SYNC</p>
+            <h2 id="uName" class="text-xl font-black italic gold-glow uppercase leading-none tracking-tighter">DR. MONIRUL</h2>
+            <p id="uTarget" class="text-[9px] text-gray-500 font-bold mt-1 uppercase italic tracking-widest">AIIMS (TARGET)</p>
         </div>
         <div class="flex flex-col gap-2 items-end">
             <div class="flex gap-2">
+                <button onclick="location.href='all_notifications.html'" class="w-9 h-9 glass rounded-full flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-bell"></i></button>
                 <button id="wpBtn" class="w-9 h-9 glass rounded-full flex items-center justify-center text-green-500"><i class="fa-brands fa-whatsapp text-lg"></i></button>
-                <button onclick="logout()" class="w-9 h-9 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-power-off text-sm"></i></button>
+                <button onclick="localStorage.clear(); location.href='index.html'" class="w-9 h-9 bg-red-500/10 text-red-500 rounded-full border border-red-500/20 flex items-center justify-center"><i class="fa-solid fa-power-off text-xs"></i></button>
             </div>
             <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-[10px] font-black italic tracking-tighter">🪙 <span id="uCoins">0</span> BP</div>
         </div>
     </div>
 
     <div class="mb-6">
-        <p class="text-[8px] text-gray-600 font-black uppercase mb-2 ml-2">Currently Active Batch</p>
-        <select id="activeBatch" onchange="switchBatch(this.value)" class="w-full bg-[#16213e] border border-white/10 p-4 rounded-2xl text-[10px] font-black uppercase gold-glow outline-none">
-            <option value="">-- Choose Your Enrolled Batch --</option>
+        <p class="text-[7px] text-gray-600 font-black uppercase mb-2 ml-2 tracking-widest">Switch Active Batch</p>
+        <select id="activeBatch" onchange="switchBatch(this.value)" class="w-full bg-[#16213e] border border-white/10 p-4 rounded-2xl text-[10px] font-black uppercase gold-glow outline-none italic">
+            <option value="">-- NO BATCH SELECTED --</option>
         </select>
     </div>
 
-    <div class="glass p-8 rounded-[3rem] mb-6 border-b-4 border-[#eab308]/30">
-        <p class="text-[8px] text-gray-500 uppercase font-black tracking-[0.4em] mb-6 text-center">COUNTDOWN TO VICTORY</p>
+    <div class="glass p-8 rounded-[3rem] mb-6 border-b-4 border-[#eab308]/30 text-center relative overflow-hidden">
+        <p class="text-[8px] text-gray-500 uppercase font-black tracking-[0.4em] mb-6 italic">COUNTDOWN TO VICTORY</p>
         <div class="flex justify-around items-center">
             <div class="timer-unit"><span id="d_d" class="timer-val">000</span><span class="timer-label">Days</span></div>
             <div class="timer-unit"><span id="d_h" class="timer-val">00</span><span class="timer-label">Hours</span></div>
@@ -49,82 +50,46 @@
     </div>
 
     <div class="glass p-5 rounded-3xl mb-6 flex items-center gap-4 border-l-4 border-blue-500">
-        <i class="fa-solid fa-bolt text-blue-500 animate-pulse"></i>
+        <i class="fa-solid fa-bolt-lightning text-blue-500 animate-pulse"></i>
         <div class="flex-1 overflow-hidden">
-            <p class="text-[8px] text-gray-500 font-black uppercase">Today's Updates</p>
-            <marquee id="batchFeed" class="text-[10px] font-bold text-white mt-1 uppercase">Select a batch to see updates...</marquee>
+            <p class="text-[7px] text-gray-500 font-black uppercase">Today's Content Updates</p>
+            <marquee id="studyUpdate" class="text-[10px] font-bold text-white uppercase italic tracking-tighter mt-1">Select a batch to sync your daily lecture feed...</marquee>
         </div>
     </div>
 
     <div class="grid grid-cols-3 gap-3 mb-8">
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-blue-500">
-            <h4 id="sLectures" class="text-lg font-black text-blue-400">0.0h</h4>
-            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Lectures</p>
+        <div class="glass p-4 rounded-3xl text-center border-b-2 border-blue-600/50">
+            <h4 id="sLectures" class="text-xl font-black text-blue-400 italic">0.0h</h4>
+            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Lectures</p>
         </div>
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-green-500">
-            <h4 id="sStudy" class="text-lg font-black text-green-400">0.0h</h4>
-            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">Self Study</p>
+        <div class="glass p-4 rounded-3xl text-center border-b-2 border-green-600/50">
+            <h4 id="sStudy" class="text-xl font-black text-green-400 italic">0.0h</h4>
+            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Self Study</p>
         </div>
-        <div class="glass p-4 rounded-3xl text-center border-b-2 border-yellow-500">
-            <h4 id="sMCQs" class="text-lg font-black gold-glow">0</h4>
-            <p class="text-[7px] text-gray-500 uppercase font-black mt-1">MCQs</p>
+        <div class="glass p-4 rounded-3xl text-center border-b-2 border-[#eab308]/50">
+            <h4 id="sMCQs" class="text-xl font-black gold-glow italic">0</h4>
+            <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Total MCQs</p>
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-4 right-4 glass p-4 rounded-full flex justify-around items-center shadow-2xl border-white/10 z-50">
+    <div class="glass p-6 rounded-[2.5rem] mb-10">
+        <div class="flex justify-between items-center mb-3 px-1">
+            <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 italic">Course Completion</h3>
+            <span id="progPercent" class="text-[11px] font-black gold-glow">45%</span>
+        </div>
+        <div class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden shadow-inner">
+            <div id="progBar" class="bg-[#eab308] h-full transition-all duration-1000 shadow-[0_0_15px_rgba(234,179,8,0.3)]" style="width: 45%"></div>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center shadow-2xl border-white/10 z-50">
         <i class="fa-solid fa-house gold-glow"></i>
         <a href="study.html"><i class="fa-solid fa-book-open text-gray-600"></i></a>
-        <a href="all_batches.html"><i class="fa-solid fa-layer-group text-blue-500 text-xl"></i></a>
+        <a href="all_batches.html"><div class="bg-blue-600 w-11 h-11 rounded-full flex items-center justify-center -mt-8 border-4 border-[#070b14] shadow-xl"><i class="fa-solid fa-layer-group text-white text-lg"></i></div></a>
         <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-600"></i></a>
         <a href="mstore.html"><i class="fa-solid fa-store text-gray-600"></i></a>
     </nav>
 
-    <script>
-        const firebaseConfig = { /* Your Config Here */ };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const userEmail = localStorage.getItem('mUserEmail');
-        let timerInterval;
-
-        async function init() {
-            // Load User Profile
-            database.ref('users/' + userEmail).on('value', snap => {
-                const d = snap.val();
-                document.getElementById('uName').innerText = "DR. " + d.name.toUpperCase();
-                document.getElementById('uCoins').innerText = d.coins || 0;
-                
-                // Load Enrolled Batches into Dropdown
-                const select = document.getElementById('activeBatch');
-                select.innerHTML = '<option value="">-- Choose Your Batch --</option>';
-                if(d.my_batches) {
-                    Object.keys(d.my_batches).forEach(key => {
-                        select.innerHTML += `<option value="${key}">${d.my_batches[key].title}</option>`;
-                    });
-                }
-            });
-        }
-
-        function switchBatch(batchId) {
-            if(!batchId) return;
-            database.ref('batches/' + batchId).on('value', snap => {
-                const b = snap.val();
-                document.getElementById('uTarget').innerText = b.targetCollege + " (TARGET)";
-                document.getElementById('batchFeed').innerText = b.dailyUpdate || "No updates for today.";
-                document.getElementById('wpBtn').onclick = () => window.open(b.wpLink);
-                
-                // Reset & Start Dynamic Timer
-                if(timerInterval) clearInterval(timerInterval);
-                timerInterval = setInterval(() => {
-                    const diff = new Date(b.timerDate) - new Date();
-                    if(diff <= 0) return;
-                    document.getElementById('d_d').innerText = String(Math.floor(diff/86400000)).padStart(3,'0');
-                    document.getElementById('d_h').innerText = String(Math.floor((diff/3600000)%24)).padStart(2,'0');
-                    document.getElementById('d_m').innerText = String(Math.floor((diff/60000)%60)).padStart(2,'0');
-                    document.getElementById('d_s').innerText = String(Math.floor((diff/1000)%60)).padStart(2,'0');
-                }, 1000);
-            });
-        }
-        init();
-    </script>
 </body>
-</html>
+                </html>
+    
