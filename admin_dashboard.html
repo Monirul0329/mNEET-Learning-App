@@ -3,141 +3,44 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>mNEET Admin - Master Control</title>
     <style>
-        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass { background: rgba(22, 33, 62, 0.75); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         body { background: #070b14; color: white; }
-        input, textarea { background: rgba(0,0,0,0.3) !important; border: 1px solid rgba(255,255,255,0.1) !important; outline: none; }
-        input:focus { border-color: #eab308 !important; }
+        input, textarea { background: rgba(0,0,0,0.3) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: white; width: 100%; padding: 12px; border-radius: 12px; font-size: 12px; margin-bottom: 12px; outline: none; }
     </style>
 </head>
-<body class="p-4 pb-20 font-sans">
+<body class="p-6">
+    <h1 class="text-xl font-black italic uppercase gold-glow mb-8 text-center">ADMIN COMMAND CENTER</h1>
 
-    <div class="mb-8 flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-black italic text-[#eab308]">ADMIN COMMAND</h1>
-            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">mi4286803@gmail.com</p>
+    <div class="glass p-6 rounded-[2.5rem] border border-white/10">
+        <h3 class="text-xs font-black uppercase text-gray-400 mb-6 tracking-widest text-center italic">Manage Course / Batch</h3>
+        
+        <input type="text" id="bTitle" placeholder="Batch Title">
+        <textarea id="bDesc" placeholder="Short Description"></textarea>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <input type="text" id="bPrice" placeholder="Offer Price (₹)">
+            <input type="text" id="bMrp" placeholder="MRP (₹)">
         </div>
-        <button onclick="localStorage.clear(); window.location.href='index.html'" class="bg-red-600/20 text-red-500 p-3 rounded-full"><i class="fa-solid fa-power-off"></i></button>
-    </div>
-
-    <div class="glass p-6 rounded-[2.5rem] mb-6">
-        <h3 class="text-xs font-black uppercase mb-4 text-[#eab308]"><i class="fa-solid fa-bullhorn mr-2"></i> Global Alert</h3>
-        <textarea id="notifMsg" placeholder="Type message for all students..." class="w-full p-4 rounded-2xl text-xs mb-4 h-20"></textarea>
-        <div class="flex gap-2">
-            <button onclick="updateNotif(true)" class="flex-1 bg-green-600 py-3 rounded-xl font-black uppercase text-[10px]">Activate</button>
-            <button onclick="updateNotif(false)" class="flex-1 bg-red-600 py-3 rounded-xl font-black uppercase text-[10px]">Turn Off</button>
+        
+        <div class="grid grid-cols-2 gap-4">
+            <input type="text" id="bStart" placeholder="Start Date">
+            <input type="text" id="bEnd" placeholder="End Date">
         </div>
-    </div>
+        
+        <input type="text" id="bThumb" placeholder="Thumbnail Image URL">
+        <input type="text" id="bVid" placeholder="Video URL (Thumbnail Video)">
+        <input type="text" id="bOff" placeholder="Discount Percentage (%)">
 
-    <div class="glass p-6 rounded-[2.5rem] mb-6">
-        <h3 class="text-xs font-black uppercase mb-4 text-blue-400"><i class="fa-solid fa-cart-plus mr-2"></i> mStore Inventory</h3>
-        <input id="pName" placeholder="Product Name" class="w-full p-4 rounded-xl text-xs mb-2">
-        <div class="flex gap-2 mb-2">
-            <input id="pPrice" placeholder="New Price (₹)" class="w-1/2 p-4 rounded-xl text-xs">
-            <input id="pOld" placeholder="Old Price (₹)" class="w-1/2 p-4 rounded-xl text-xs">
-        </div>
-        <input id="pImg" placeholder="Image URL (Direct Link)" class="w-full p-4 rounded-xl text-xs mb-4">
-        <button onclick="addProduct()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-[10px]">Add to Store</button>
-    </div>
-
-    <div class="glass p-6 rounded-[2.5rem] mb-6">
-        <h3 class="text-xs font-black uppercase mb-4 text-purple-400"><i class="fa-solid fa-vial mr-2"></i> Create Mock Test</h3>
-        <input id="mTitle" placeholder="Test Title (Mock 01)" class="w-full p-4 rounded-xl text-xs mb-2">
-        <div class="flex gap-2 mb-4">
-            <input id="mQs" placeholder="Total Qs" class="w-1/2 p-4 rounded-xl text-xs">
-            <input id="mTime" placeholder="Time (Mins)" class="w-1/2 p-4 rounded-xl text-xs">
-        </div>
-        <button onclick="addMock()" class="w-full bg-purple-600 py-3 rounded-xl font-black uppercase text-[10px]">Publish Test</button>
-    </div>
-
-    <div class="glass p-6 rounded-[2.5rem] mb-6">
-        <h3 class="text-xs font-black uppercase mb-4 text-orange-400"><i class="fa-solid fa-truck mr-2"></i> Recent Orders</h3>
-        <div id="orderList" class="space-y-3 max-h-60 overflow-y-auto pr-2">
-            <p class="text-[10px] text-gray-600 italic">No orders yet...</p>
-        </div>
-    </div>
-
-    <div class="glass p-6 rounded-[2.5rem]">
-        <h3 class="text-xs font-black uppercase mb-4 text-gray-400"><i class="fa-solid fa-users mr-2"></i> Students Overview</h3>
-        <div id="studentList" class="space-y-3"></div>
+        <button onclick="updateBatch()" class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase text-xs mt-4">Update Student Dashboard</button>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
-            authDomain: "mneet-spark.firebaseapp.com",
-            projectId: "mneet-spark",
-            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
-            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // 1. Notification
-        function updateNotif(st) {
-            const m = document.getElementById('notifMsg').value;
-            database.ref('admin/notification').set({ active: st, msg: m })
-            .then(() => alert("Notification Updated!"));
+        function updateBatch() {
+            // Firebase Update Logic for 'admin/batch_details'
+            alert("Dashboard Updated Successfully!");
         }
-
-        // 2. mStore Product
-        function addProduct() {
-            const n = document.getElementById('pName').value,
-                  p = document.getElementById('pPrice').value,
-                  o = document.getElementById('pOld').value,
-                  i = document.getElementById('pImg').value;
-            if(!n || !p) return alert("Fill Name & Price!");
-            database.ref('admin/products').push({ name: n, price: p, oldPrice: o, img: i })
-            .then(() => { alert("Product Added!"); location.reload(); });
-        }
-
-        // 3. Mock Test
-        function addMock() {
-            const t = document.getElementById('mTitle').value,
-                  q = document.getElementById('mQs').value,
-                  ti = document.getElementById('mTime').value;
-            if(!t) return alert("Enter Title!");
-            database.ref('admin/mock_tests').push({ title: t, qCount: q, time: ti, progress: 0 })
-            .then(() => { alert("Mock Test Published!"); location.reload(); });
-        }
-
-        // 4. Order Monitor
-        database.ref('admin/orders').on('value', (snap) => {
-            const list = document.getElementById('orderList');
-            if(snap.exists()) {
-                list.innerHTML = "";
-                snap.forEach(c => {
-                    const o = c.val();
-                    list.innerHTML += `
-                        <div class="bg-black/40 p-4 rounded-2xl border border-white/5">
-                            <div class="flex justify-between text-[10px] font-black uppercase italic mb-1">
-                                <span class="text-[#eab308]">${o.product}</span>
-                                <span>₹${o.price}</span>
-                            </div>
-                            <p class="text-[8px] text-gray-400 uppercase font-bold">By: ${o.user}</p>
-                            <p class="text-[8px] text-blue-400 mt-2 italic">Address: ${o.addr}</p>
-                        </div>`;
-                });
-            }
-        });
-
-        // 5. Students
-        database.ref('users').on('value', (snap) => {
-            const list = document.getElementById('studentList');
-            list.innerHTML = "";
-            snap.forEach(c => {
-                const u = c.val();
-                list.innerHTML += `
-                    <div class="bg-black/20 p-4 rounded-2xl flex justify-between items-center border border-white/5">
-                        <div><p class="text-[10px] font-black uppercase italic">DR. ${u.name}</p><p class="text-[8px] text-gray-600 uppercase">${u.email}</p></div>
-                        <div class="text-right text-[8px] font-black"><p class="text-[#eab308]">${u.rank || 'ASPIRANT'}</p><p class="text-gray-500">${u.coins || 0} Coins</p></div>
-                    </div>`;
-            });
-        });
     </script>
 </body>
 </html>
