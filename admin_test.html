@@ -1,38 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-[#0b1120] p-6 text-white pb-32">
-    <div class="bg-[#16213e] p-8 rounded-[2.5rem] border border-gray-800 max-w-lg mx-auto shadow-2xl">
-        <h2 class="text-blue-400 text-[10px] font-black uppercase text-center mb-8 tracking-[0.3em] italic">Quiz & NEET Simulator Builder</h2>
-        
-        <input type="text" id="qText" placeholder="Enter Question" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-3 border border-gray-700 outline-none">
-        <input type="text" id="optA" placeholder="Option A" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-2 border border-gray-700 outline-none">
-        <input type="text" id="optB" placeholder="Option B" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-2 border border-gray-700 outline-none">
-        <input type="text" id="correctOpt" placeholder="Correct Option (A or B)" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-4 border border-blue-500 outline-none text-blue-400">
-        <input type="number" id="ncertPage" placeholder="NCERT Page Number for Solution" class="w-full bg-[#0b1120] p-4 rounded-2xl mb-8 border border-gray-700 outline-none">
-        
-        <button onclick="addQuiz()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95">Link to Question Bank</button>
+<body class="bg-[#070b14] text-white p-4 pb-32">
+    <div class="glass p-6 rounded-[2.5rem] mb-10 border border-[#eab308]/20">
+        <h3 class="text-xs font-black uppercase italic gold-glow mb-6">Create New Mock Exam</h3>
+        <input type="text" id="mockName" placeholder="Mock Test Name (e.g. Full Syllabus 01)" class="w-full bg-[#16213e] p-4 rounded-2xl mb-3 outline-none text-[10px]">
+        <button class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase text-[10px]">Create Mock Test Folder</button>
     </div>
 
-    <script>
-        const SB_URL = 'https://aqosatoimyijcahpzauh.supabase.co';
-        const SB_KEY = 'YOUR_ANON_KEY';
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-
-        async function addQuiz() {
-            const { error } = await supabaseClient.from('quizzes').insert([{ 
-                question: document.getElementById('qText').value,
-                a: document.getElementById('optA').value,
-                b: document.getElementById('optB').value,
-                correct: document.getElementById('correctOpt').value,
-                page_link: document.getElementById('ncertPage').value
-            }]);
-            if(error) alert(error.message); else alert("Question Added! 📝");
-        }
-    </script>
+    <h4 class="text-[10px] font-black uppercase text-gray-500 mb-4 italic px-2">Active Mock Folders</h4>
+    <div id="mockFolders" class="space-y-4">
+        <div class="glass p-5 rounded-[2rem] flex justify-between items-center border border-white/5">
+            <div>
+                <h5 class="text-xs font-black italic">MOCK TEST - 01</h5>
+                <p class="text-[8px] text-gray-500 uppercase mt-1">Status: Open for students</p>
+            </div>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[8px] font-black uppercase">+ Add Questions</button>
+        </div>
+    </div>
 </body>
-</html>
