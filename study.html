@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
@@ -12,95 +10,61 @@
         body { background: #070b14; color: white; }
     </style>
 </head>
-<body class="p-4 pb-28">
+<body class="p-4 pb-28 font-sans">
 
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex justify-between items-center mb-10">
         <h1 class="text-2xl font-black italic gold-glow uppercase tracking-tighter">STUDY ZONE</h1>
-        <div class="flex items-center gap-3">
-            <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-xs font-black">
-                🪙 <span id="uCoins">0</span>
+        <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-xs font-black">🪙 <span id="uCoins">0</span></div>
+    </div>
+
+    <div class="space-y-4">
+        
+        <a href="core_resources.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-blue-500">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center"><i class="fa-solid fa-layer-group text-blue-500"></i></div>
+                <div>
+                    <h4 class="text-sm font-black uppercase italic">Lectures, Notes & DPP</h4>
+                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Video lectures with integrated PDF materials</p>
+                </div>
             </div>
-            <button onclick="localStorage.clear(); window.location.href='index.html'" class="w-8 h-8 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-power-off text-xs"></i></button>
+            <i class="fa-solid fa-chevron-right text-gray-800"></i>
+        </a>
+
+        <a href="ncert_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-[#eab308]">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-2xl bg-[#eab308]/10 flex items-center justify-center"><i class="fa-solid fa-book-open text-[#eab308]"></i></div>
+                <div>
+                    <h4 class="text-sm font-black uppercase italic">NCERT Reading & PYQ Tags</h4>
+                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Line-by-line analysis with previous year questions</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-800"></i>
+        </a>
+
+        <a href="quiz_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-purple-500">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center"><i class="fa-solid fa-vial text-purple-400"></i></div>
+                <div>
+                    <h4 class="text-sm font-black uppercase italic">Chapter & Topic wise Quiz</h4>
+                    <p class="text-[8px] text-gray-500 font-bold uppercase mt-1">Concept building practice sessions</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-gray-800"></i>
+        </a>
+
+        <div class="glass p-6 rounded-[2.5rem] border-l-4 border-red-500">
+            <h4 class="text-[10px] font-black uppercase italic text-red-500 mb-4">Special Materials</h4>
+            <p class="text-[9px] text-gray-600 italic">No new materials uploaded by admin.</p>
         </div>
+
     </div>
 
-    <div class="glass p-6 rounded-[2.5rem] mb-4">
-        <div class="flex justify-around items-center">
-            <button onclick="startLecture()" class="flex flex-col items-center gap-2 group">
-                <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 group-active:scale-90 transition-all">
-                    <i class="fa-solid fa-play text-blue-500"></i>
-                </div>
-                <span class="text-[8px] font-black uppercase">Lecture</span>
-            </button>
-            <button class="flex flex-col items-center gap-2 group">
-                <div class="w-12 h-12 bg-yellow-500/10 rounded-2xl flex items-center justify-center border border-yellow-500/20">
-                    <i class="fa-solid fa-note-sticky text-yellow-500"></i>
-                </div>
-                <span class="text-[8px] font-black uppercase">Notes</span>
-            </button>
-            <button class="flex flex-col items-center gap-2 group">
-                <div class="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center border border-green-500/20">
-                    <i class="fa-solid fa-file-pdf text-green-500"></i>
-                </div>
-                <span class="text-[8px] font-black uppercase">DPP</span>
-            </button>
-        </div>
-    </div>
-
-    <a href="ncert_reading.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center mb-4 border-l-4 border-yellow-500">
-        <div class="flex items-center gap-4">
-            <i class="fa-solid fa-book-open text-yellow-500"></i>
-            <h4 class="text-sm font-black uppercase italic">NCERT Reading</h4>
-        </div>
-        <i class="fa-solid fa-chevron-right text-gray-700"></i>
-    </a>
-
-    <a href="topic_quiz.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center mb-4 border-l-4 border-purple-500">
-        <div class="flex items-center gap-4">
-            <i class="fa-solid fa-vial text-purple-400"></i>
-            <h4 class="text-sm font-black uppercase italic">Topic Wise Quiz</h4>
-        </div>
-        <i class="fa-solid fa-chevron-right text-gray-700"></i>
-    </a>
-
-    <div class="glass p-6 rounded-[2.5rem] border-l-4 border-red-500">
-        <h4 class="text-xs font-black uppercase italic text-red-500 mb-4">Special Materials</h4>
-        <div id="specList" class="space-y-2 text-[10px] text-gray-500 italic">Restocking Materials...</div>
-    </div>
-
-    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10">
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10 z-50">
         <a href="dashboard.html"><i class="fa-solid fa-house text-gray-500"></i></a>
         <i class="fa-solid fa-book-open gold-glow"></i>
         <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-500"></i></a>
         <a href="mstore.html"><i class="fa-solid fa-store text-gray-500"></i></a>
     </nav>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
-            authDomain: "mneet-spark.firebaseapp.com",
-            projectId: "mneet-spark",
-            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
-            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const userKey = localStorage.getItem('mUserEmail');
-
-        function startLecture() {
-            alert("Lecture Started! Earning 4 BP Coins/min.");
-            setInterval(async () => {
-                const snap = await database.ref('users/' + userKey).get();
-                const d = snap.val();
-                database.ref('users/' + userKey).update({
-                    coins: (d.coins || 0) + 4,
-                    lectures: (d.lectures || 0) + (1/60)
-                });
-            }, 60000);
-        }
-
-        database.ref('users/' + userKey + '/coins').on('value', s => { document.getElementById('uCoins').innerText = s.val() || 0; });
-    </script>
 </body>
-        </html>
-        
+</html>
