@@ -9,14 +9,16 @@
     <style>
         .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         .gold-glow { color: #eab308; text-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
-        body { background: #070b14; color: white; overflow-x: hidden; }
-        .timer-unit { display: flex; flex-direction: column; align-items: center; }
-        .timer-val { font-size: 1.8rem; font-weight: 900; font-style: italic; color: #eab308; line-height: 1; }
-        .timer-label { font-size: 7px; text-transform: uppercase; color: #6b7280; font-weight: 900; margin-top: 4px; }
+        body { background: #070b14; color: white; overflow-x: hidden; font-family: sans-serif; }
+        /* Timer chapta (Compact) design */
+        .timer-card { padding: 15px 10px !important; border-radius: 2.5rem !important; }
+        .timer-val { font-size: 1.5rem; font-weight: 900; font-style: italic; color: #eab308; }
+        .timer-label { font-size: 6px; text-transform: uppercase; color: #6b7280; font-weight: 900; margin-top: 2px; }
     </style>
 </head>
-<body class="p-4 pb-36">
+<body class="p-4 pb-40">
 
+    <!-- Top Bar -->
     <div class="flex justify-between items-start mb-6">
         <div>
             <h2 id="uName" class="text-xl font-black italic gold-glow uppercase leading-none tracking-tighter">DR. MONIRUL</h2>
@@ -32,26 +34,57 @@
         </div>
     </div>
 
+    <!-- Batch Switcher -->
     <div class="mb-6">
-        <p class="text-[7px] text-gray-600 font-black uppercase mb-2 ml-2 tracking-widest">Switch Active Batch</p>
-        <select id="activeBatch" onchange="switchBatch(this.value)" class="w-full bg-[#16213e] border border-white/10 p-4 rounded-2xl text-[10px] font-black uppercase gold-glow outline-none italic">
-            <option value="">-- NO BATCH SELECTED --</option>
+        <select id="activeBatch" onchange="syncBatchData(this.value)" class="w-full bg-[#16213e] border border-white/10 p-4 rounded-2xl text-[10px] font-black uppercase gold-glow outline-none italic">
+            <option value="">-- SELECT YOUR BATCH --</option>
         </select>
     </div>
 
-    <div class="glass p-8 rounded-[3rem] mb-6 border-b-4 border-[#eab308]/30 text-center relative overflow-hidden">
-        <p class="text-[8px] text-gray-500 uppercase font-black tracking-[0.4em] mb-6 italic">COUNTDOWN TO VICTORY</p>
-        <div class="flex justify-around items-center">
-            <div class="timer-unit"><span id="d_d" class="timer-val">000</span><span class="timer-label">Days</span></div>
-            <div class="timer-unit"><span id="d_h" class="timer-val">00</span><span class="timer-label">Hours</span></div>
-            <div class="timer-unit"><span id="d_m" class="timer-val">00</span><span class="timer-label">Minutes</span></div>
-            <div class="timer-unit"><span id="d_s" class="timer-val">00</span><span class="timer-label">Seconds</span></div>
+    <!-- Row 1: Course Completion (Moved Above Timer) -->
+    <div class="glass p-5 rounded-[2rem] mb-4 border border-white/5">
+        <div class="flex justify-between items-center mb-2 px-1">
+            <h3 class="text-[8px] font-black uppercase tracking-[0.2em] text-gray-500 italic">Course Completion</h3>
+            <span id="progPercent" class="text-[10px] font-black gold-glow">0%</span>
+        </div>
+        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden border border-white/5">
+            <div id="progBar" class="bg-[#eab308] h-full transition-all duration-1000" style="width: 0%"></div>
         </div>
     </div>
 
+    <!-- Row 2: Compact Timer (Chapta Design) -->
+    <div class="glass timer-card mb-4 border-b-2 border-[#eab308]/30 text-center relative overflow-hidden">
+        <p class="text-[7px] text-gray-500 uppercase font-black tracking-[0.3em] mb-3 italic">COUNTDOWN TO VICTORY</p>
+        <div id="countdownArea" class="flex justify-around items-center px-4">
+            <div class="flex flex-col"><span id="d_d" class="timer-val">000</span><span class="timer-label">Days</span></div>
+            <div class="flex flex-col"><span id="d_h" class="timer-val">00</span><span class="timer-label">Hours</span></div>
+            <div class="flex flex-col"><span id="d_m" class="timer-val">00</span><span class="timer-label">Mins</span></div>
+            <div class="flex flex-col"><span id="d_s" class="timer-val">00</span><span class="timer-label">Secs</span></div>
+        </div>
+    </div>
+
+    <!-- Row 3: Daily Study Updates (Lectures, Notes, DPP) -->
+    <div class="glass p-4 rounded-3xl mb-4 flex items-center gap-4 border-l-4 border-blue-500">
+        <i class="fa-solid fa-bolt-lightning text-blue-500 animate-pulse text-xs"></i>
+        <div class="flex-1 overflow-hidden">
+            <p class="text-[7px] text-gray-500 font-black uppercase">Study Feed (Today & Upcoming)</p>
+            <marquee id="studyUpdate" class="text-[9px] font-bold text-white uppercase italic tracking-tighter mt-1">Syncing today's lectures and dpp updates...</marquee>
+        </div>
+    </div>
+
+    <!-- Row 4: Motivational Media (Admin Sync) -->
+    <div id="motivationBox" class="mb-4 rounded-[2.5rem] overflow-hidden border border-white/5 relative group hidden">
+        <img id="mImg" src="" class="w-full h-32 object-cover opacity-60">
+        <video id="mVid" class="w-full h-32 object-cover hidden" muted loop></video>
+        <div class="absolute inset-0 flex items-center justify-center">
+            <p class="text-[10px] font-black uppercase italic tracking-widest text-white shadow-xl">Stay Focused Aspirant</p>
+        </div>
+    </div>
+
+    <!-- Row 5: User Stats Grid -->
     <div class="grid grid-cols-3 gap-3 mb-8">
         <div class="glass p-4 rounded-3xl text-center border-b-2 border-blue-600/50">
-            <h4 id="sLectures" class="text-xl font-black text-blue-400 italic">0.0h</h4>
+            <h4 id="sLectures" class="text-xl font-black text-blue-400 italic">0h</h4>
             <p class="text-[7px] text-gray-400 uppercase font-black mt-1">Lectures</p>
         </div>
         <div class="glass p-4 rounded-3xl text-center border-b-2 border-green-600/50">
@@ -64,17 +97,8 @@
         </div>
     </div>
 
-    <div class="glass p-6 rounded-[2.5rem] mb-10">
-        <div class="flex justify-between items-center mb-3 px-1">
-            <h3 class="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 italic">Course Completion</h3>
-            <span id="progPercent" class="text-[11px] font-black gold-glow">0%</span>
-        </div>
-        <div class="w-full bg-white/5 h-2.5 rounded-full overflow-hidden">
-            <div id="progBar" class="bg-[#eab308] h-full transition-all duration-1000" style="width: 0%"></div>
-        </div>
-    </div>
-
-    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50">
+    <!-- Bottom Nav Bar -->
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50 shadow-2xl border-white/10">
         <i class="fa-solid fa-house gold-glow"></i>
         <a href="study.html"><i class="fa-solid fa-book-open text-gray-600"></i></a>
         <a href="all_batches.html"><div class="bg-blue-600 w-11 h-11 rounded-full flex items-center justify-center -mt-8 border-4 border-[#070b14] shadow-xl"><i class="fa-solid fa-layer-group text-white text-lg"></i></div></a>
@@ -94,39 +118,60 @@
         const database = firebase.database();
         const userKey = localStorage.getItem('mUserEmail');
 
-        // Initial Data Load
-        database.ref('users/' + userKey).on('value', s => {
-            const u = s.val();
-            if(u) {
-                document.getElementById('uCoins').innerText = u.coins || 0;
-                document.getElementById('sLectures').innerText = (u.hours || 0) + 'h';
-                document.getElementById('sMCQs').innerText = u.questions || 0;
-            }
-        });
+        function initDashboard() {
+            if(!userKey) window.location.href = 'index.html';
 
-        // Load Batches in Select
-        database.ref('courses').on('value', snap => {
-            const select = document.getElementById('activeBatch');
-            select.innerHTML = '<option value="">-- NO BATCH SELECTED --</option>';
-            snap.forEach(child => {
-                if(!child.val().isHidden) select.innerHTML += `<option value="${child.key}">${child.val().title}</option>`;
+            // Sync User Data
+            database.ref('users/' + userKey).on('value', s => {
+                const u = s.val();
+                if(u) {
+                    document.getElementById('uCoins').innerText = u.coins || 0;
+                    document.getElementById('sLectures').innerText = (u.hours || 0) + 'h';
+                    document.getElementById('sMCQs').innerText = u.questions || 0;
+                    document.getElementById('sStudy').innerText = (u.selfStudy || 0.0) + 'h';
+                }
             });
-        });
 
-        let timer;
-        function switchBatch(id) {
-            if(!id) return;
-            database.ref('courses/' + id).on('value', s => {
-                const b = s.val();
-                // Link Admin Progress %
-                document.getElementById('progPercent').innerText = b.progress + "%";
-                document.getElementById('progBar').style.width = b.progress + "%";
-                // Link Admin Exam Date to Timer
-                if(b.examDate) startTimer(b.examDate);
+            // Sync Motivation from Admin
+            database.ref('admin/motivation').on('value', snap => {
+                if(snap.exists()){
+                    const m = snap.val();
+                    document.getElementById('motivationBox').classList.remove('hidden');
+                    if(m.url.includes('.mp4')){
+                        document.getElementById('mVid').src = m.url;
+                        document.getElementById('mVid').classList.remove('hidden');
+                        document.getElementById('mImg').classList.add('hidden');
+                        document.getElementById('mVid').play();
+                    } else {
+                        document.getElementById('mImg').src = m.url;
+                        document.getElementById('mImg').classList.remove('hidden');
+                        document.getElementById('mVid').classList.add('hidden');
+                    }
+                }
+            });
+
+            // Load Active Batches
+            database.ref('courses').on('value', snap => {
+                const select = document.getElementById('activeBatch');
+                select.innerHTML = '<option value="">-- SWITCH ACTIVE BATCH --</option>';
+                snap.forEach(child => {
+                    if(!child.val().isHidden) select.innerHTML += `<option value="${child.key}">${child.val().title}</option>`;
+                });
             });
         }
 
-        function startTimer(target) {
+        let timer;
+        function syncBatchData(id) {
+            if(!id) return;
+            database.ref('courses/' + id).on('value', s => {
+                const b = s.val();
+                document.getElementById('progPercent').innerText = b.progress + "%";
+                document.getElementById('progBar').style.width = b.progress + "%";
+                if(b.examDate) startCountdown(b.examDate);
+            });
+        }
+
+        function startCountdown(target) {
             clearInterval(timer);
             timer = setInterval(() => {
                 const diff = new Date(target).getTime() - new Date().getTime();
@@ -137,6 +182,8 @@
                 document.getElementById('d_s').innerText = Math.floor((diff%(1000*60))/1000).toString().padStart(2,'0');
             }, 1000);
         }
+
+        initDashboard();
     </script>
 </body>
 </html>
