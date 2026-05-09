@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
@@ -12,62 +10,43 @@
         body { background: #070b14; color: white; }
     </style>
 </head>
-<body class="p-6 pb-36">
+<body class="p-4 pb-36">
 
-    <div class="flex justify-between items-start mb-10">
+    <div class="flex justify-between items-start mb-6">
         <div>
             <h2 class="text-xl font-black gold-glow uppercase italic">ADMIN COMMAND</h2>
-            <p id="adminEmailDisplay" class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">mi4286803@gmail.com</p>
+            <p class="text-[9px] text-gray-500 font-bold">mi4286803@gmail.com</p>
         </div>
         <div class="flex gap-2">
-            <button onclick="location.href='admin_notifications.html'" class="w-10 h-10 glass rounded-full flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-bullhorn"></i></button>
-            <button onclick="logout()" class="w-10 h-10 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-power-off"></i></button>
+            <button onclick="location.href='admin_notifications.html'" class="w-9 h-9 glass rounded-full flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-bullhorn text-sm"></i></button>
+            <button onclick="logout()" class="w-9 h-9 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center border border-red-500/20"><i class="fa-solid fa-power-off"></i></button>
         </div>
     </div>
 
-    <!-- Stats Overview -->
-    <div class="grid grid-cols-2 gap-4 mb-8">
-        <div class="glass p-6 rounded-[2rem] border-l-4 border-blue-500">
-            <p class="text-[8px] font-black text-gray-500 uppercase mb-1">Total Batches</p>
-            <h2 id="totalBatches" class="text-2xl font-black italic">0</h2>
-        </div>
-        <div class="glass p-6 rounded-[2rem] border-l-4 border-green-500">
-            <p class="text-[8px] font-black text-gray-500 uppercase mb-1">Total Students</p>
-            <h2 id="totalUsers" class="text-2xl font-black italic">0</h2>
-        </div>
+    <div class="mb-6">
+        <select id="adminBatchSelect" class="w-full bg-[#16213e] border border-yellow-500/30 p-4 rounded-2xl text-[10px] font-black uppercase gold-glow outline-none">
+            <option value="">-- ALL BATCHES --</option>
+        </select>
     </div>
 
-    <!-- Quick Action Section -->
-    <div class="glass p-6 rounded-[2.5rem] mb-6">
-        <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6 italic">Batch Management</h3>
-        <button onclick="location.href='admin_course.html'" class="w-full bg-[#eab308] text-black py-4 rounded-2xl font-black uppercase text-[10px] shadow-xl active:scale-95 transition-all">
-            <i class="fa-solid fa-plus mr-2"></i> Create New Batch
-        </button>
+    <div class="glass p-5 rounded-3xl mb-6 flex items-center justify-between border-l-4 border-blue-500">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-paper-plane text-blue-500"></i>
+            <span class="text-[10px] font-black uppercase tracking-tighter">Global Notification</span>
+        </div>
+        <button class="bg-blue-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase">Push</button>
     </div>
+
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50">
+        <i class="fa-solid fa-house gold-glow"></i>
+        <a href="admin_study.html"><i class="fa-solid fa-book-open text-gray-600"></i></a>
+        <a href="admin_course.html"><i class="fa-solid fa-layer-group text-blue-500 text-xl"></i></a>
+        <a href="admin_test.html"><i class="fa-solid fa-pen-nib text-gray-600"></i></a>
+        <a href="admin_mstore.html"><i class="fa-solid fa-store text-gray-600"></i></a>
+    </nav>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
-            authDomain: "mneet-spark.firebaseapp.com",
-            projectId: "mneet-spark",
-            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
-            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // Sync Dashboard Stats
-        database.ref('courses').on('value', (snap) => {
-            document.getElementById('totalBatches').innerText = snap.numChildren();
-        });
-        database.ref('users').on('value', (snap) => {
-            document.getElementById('totalUsers').innerText = snap.numChildren();
-        });
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
     </script>
 </body>
 </html>
