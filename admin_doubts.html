@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style> .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); } body { background: #070b14; color: white; } </style>
+</head>
+<body class="p-6">
+    <div class="flex items-center gap-4 mb-8">
+        <button onclick="history.back()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400"><i class="fa-solid fa-chevron-left"></i></button>
+        <h1 class="text-sm font-black italic uppercase text-green-500">Doubt & Support Hub</h1>
+    </div>
+
+    <div id="doubtList" class="space-y-4">
+        <!-- Doubts will load here -->
+    </div>
+
+    <script>
+        // Firebase initialization (Same as above)
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function loadDoubts() {
+            database.ref('admin/supports').on('value', (snap) => {
+                const list = document.getElementById('doubtList');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const d = child.val();
+                    list.innerHTML += `
+                        <div class="glass p-6 rounded-[2rem] border-l-4 ${d.status === 'Unread' ? 'border-red-500' : 'border-green-500'}">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 class="text-[10px] font-black uppercase text-blue-400">${d.user}</h4>
+                                    <p class="text-[8px] text-gray-500 font-bold uppercase">${new Date(d.time).toLocaleString()}</p>
+                                </div>
+                                <span class="text-[8px] bg-white/5 px-2 py-1 rounded font-black">${d.status}</span>
+                            </div>
+                            <h3 class="text-[11px] font-black uppercase italic mb-2">${d.subject}</h3>
+                            <p class="text-xs text-gray-400 leading-relaxed mb-6">${d.message}</p>
+                            
+                            <div class="flex gap-2">
+                                <input id="reply-${child.key}" type="text" placeholder="Type your reply or link..." class="flex-1 bg-black/20 border border-white/5 p-3 rounded-xl text-[10px] outline-none">
+                                <button onclick="sendReply('${child.key}')" class="bg-green-600 px-4 rounded-xl text-[10px] font-black uppercase">Send</button>
+                            </div>
+                        </div>`;
+                });
+            });
+        }
+        function sendReply(id) {
+            const reply = document.getElementById('reply-' + id).value;
+            if(!reply) return alert("Type something!");
+            database.ref(`admin/supports/${id}`).update({ status: 'Replied', adminReply: reply }).then(() => alert("Reply Sent!"));
+        }
+        loadDoubts();
+    </script>
+</body>
+</html>
+
