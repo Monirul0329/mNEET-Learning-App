@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f3f4f6; color: #1f2937; overflow-x: hidden; }
+        .page-container { background: white; min-height: 100vh; width: 100%; max-width: 800px; margin: 0 auto; box-shadow: 0 0 20px rgba(0,0,0,0.1); padding: 40px 20px; position: relative; }
+        .pyq-tag { background: #fee2e2; color: #dc2626; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; cursor: pointer; border: 1px solid #fecaca; margin-left: 5px; }
+        .audio-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; background: #1e293b; border-radius: 2rem; padding: 15px; color: white; display: flex; align-items: center; gap: 10px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .highlight { background: rgba(254, 240, 138, 0.6); transition: all 0.3s; }
+        .locked { pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md p-4 flex justify-between items-center z-50 border-b">
+        <button onclick="history.back()" class="text-gray-600"><i class="fa-solid fa-chevron-left text-xl"></i></button>
+        <h2 id="chapterTitle" class="text-[10px] font-black uppercase italic tracking-widest">NCERT Reader</h2>
+        <button onclick="toggleLock()" id="lockBtn" class="text-blue-500"><i class="fa-solid fa-lock-open"></i></button>
+    </div>
+
+    <div id="bookPage" class="page-container mt-16 pb-32 content-editable">
+        <p class="mb-4">Loading NCERT AI Experience...</p>
+    </div>
+
+    <div class="audio-bar">
+        <button onclick="playAudio()" id="pBtn"><i class="fa-solid fa-play"></i></button>
+        <div class="flex-1 text-[8px] font-bold">REVISION AUDIO</div>
+        <select id="speed" onchange="changeSpeed()" class="bg-white/10 text-[9px] rounded p-1 outline-none">
+            <option value="1">1.0x</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2.0x</option>
+            <option value="0.75">0.75x</option>
+        </select>
+        <audio id="mainAudio" src=""></audio>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const chapterId = urlParams.get('id');
+
+        function loadContent() {
+            // Firebase theke data niye ashar logic
+            // Chapter specific content, PDF text extraction (ba manual html) boshabo
+            document.getElementById('bookPage').innerHTML = `
+                <p class="text-lg leading-relaxed">
+                    Biology is the science of life forms and living processes. 
+                    <span class="pyq-tag" onclick="openQuiz('NEET 2021')">PYQ 2021</span>
+                    The living world comprises an amazing diversity of living organisms.
+                    <span class="highlight">Early man could easily perceive the difference between inanimate matter and living organisms.</span>
+                </p>
+            `;
+        }
+
+        let isLocked = false;
+        function toggleLock() {
+            isLocked = !isLocked;
+            const page = document.getElementById('bookPage');
+            const btn = document.getElementById('lockBtn');
+            if(isLocked) {
+                page.contentEditable = "false";
+                btn.innerHTML = '<i class="fa-solid fa-lock text-red-500"></i>';
+            } else {
+                page.contentEditable = "true";
+                btn.innerHTML = '<i class="fa-solid fa-lock-open"></i>';
+            }
+        }
+
+        const audio = document.getElementById('mainAudio');
+        function playAudio() {
+            if(audio.paused) { audio.play(); document.getElementById('pBtn').innerHTML = '<i class="fa-solid fa-pause"></i>'; }
+            else { audio.pause(); document.getElementById('pBtn').innerHTML = '<i class="fa-solid fa-play"></i>'; }
+        }
+
+        function changeSpeed() {
+            audio.playbackRate = document.getElementById('speed').value;
+        }
+
+        function openQuiz(year) {
+            alert("Opening Quiz for " + year);
+            // Ekhane tumi tomar quiz system link kore dite paro
+        }
+
+        loadContent();
+    </script>
+</body>
+</html>
+
