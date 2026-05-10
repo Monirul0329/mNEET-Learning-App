@@ -7,143 +7,185 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .glass-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); outline: none; color: white; }
-        body { background: #070b14; color: white; font-family: sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 120px; scroll-behavior: smooth; }
-        ::-webkit-scrollbar { width: 0px; }
+        body { background: #070b14; color: white; font-family: sans-serif; min-height: 100vh; }
         .gold-text { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.3); }
+        .btn-active:active { transform: scale(0.95); }
     </style>
 </head>
-<body>
+<body class="pb-24">
 
-    <div class="flex justify-between items-center p-6 bg-[#16213e] border-b border-white/5 shadow-xl">
-        <button onclick="handleBack()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400">
-            <i class="fa-solid fa-chevron-left"></i>
+    <div class="sticky top-0 z-50 p-6 glass border-b border-white/5 flex justify-between items-center">
+        <button onclick="handleBack()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 btn-active">
+            <i class="fa-solid fa-arrow-left"></i>
         </button>
-        <h2 id="pageTitle" class="text-sm font-black gold-text uppercase italic tracking-[0.2em]">NCERT Chapters</h2>
-        <button onclick="logout()" class="w-10 h-10 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center border border-red-500/20">
-            <i class="fa-solid fa-power-off text-xs"></i>
-        </button>
+        <h2 id="titleText" class="text-xs font-black gold-text uppercase italic tracking-widest">NCERT Hub</h2>
+        <div class="w-10"></div>
     </div>
 
-    <div class="p-4 bg-[#070b14]">
-        <div class="relative">
-            <input type="text" id="mainSearch" onkeyup="searchChapter()" placeholder="Search NCERT Chapter..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none text-white">
-            <i class="fa-solid fa-magnifying-glass absolute left-5 top-4 text-gray-500"></i>
-        </div>
-    </div>
-
-    <div class="scroll-area p-4" id="mainScroll">
-        <div id="formSection" class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 mb-10 shadow-2xl">
-            <p id="formStatus" class="text-[8px] font-black uppercase text-gray-500 mb-6 text-center italic tracking-widest">Create New NCERT Chapter</p>
+    <div class="p-4 max-w-lg mx-auto space-y-6">
+        
+        <div id="mainForm" class="bg-[#16213e] p-6 rounded-[2.5rem] border border-white/5 shadow-2xl">
+            <p id="formLabel" class="text-[8px] font-black uppercase text-gray-500 mb-4 italic tracking-widest text-center">Step 1: Create Chapter</p>
+            
             <div class="space-y-3">
                 <input type="hidden" id="editId">
-                <input type="text" id="itemName" placeholder="Chapter Name (e.g. Genetics)" class="w-full glass-input p-4 rounded-xl text-xs font-bold">
+                <input type="text" id="itemName" placeholder="Chapter Name..." class="w-full glass-input p-4 rounded-xl text-xs font-bold">
                 
-                <div id="contentFields" class="hidden space-y-3">
-                    <input type="text" id="pdfUrl" placeholder="NCERT PDF Direct Link" class="w-full glass-input p-4 rounded-xl text-[10px]">
-                    <input type="text" id="audioUrl" placeholder="Revision Audio Link (.mp3)" class="w-full glass-input p-4 rounded-xl text-[10px]">
+                <div id="contentSection" class="hidden space-y-3 pt-2">
+                    <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+                        <p class="text-[7px] font-black text-yellow-500 uppercase mb-2">Upload Material Links</p>
+                        <input type="text" id="pdfLink" placeholder="PDF Direct URL" class="w-full glass-input p-3 rounded-lg text-[10px] mb-2">
+                        <input type="text" id="audioLink" placeholder="Audio Revision URL" class="w-full glass-input p-3 rounded-lg text-[10px]">
+                    </div>
+                    
+                    <button onclick="goToMapper()" class="w-full py-3 border border-dashed border-blue-500/50 text-blue-400 rounded-xl text-[9px] font-black uppercase italic">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Open Interactive Mapper
+                    </button>
                 </div>
 
-                <button onclick="saveItem()" id="saveBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs active:scale-95 shadow-lg">Save To Hub</button>
+                <button onclick="saveData()" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs btn-active shadow-lg">Confirm & Save</button>
             </div>
         </div>
 
-        <h3 class="text-[10px] font-black uppercase text-gray-500 mb-6 px-2 italic tracking-widest">Available Materials</h3>
-        <div id="itemList" class="space-y-4"></div>
+        <div class="space-y-4" id="listArea">
+            <p class="text-center text-gray-600 text-[9px] font-black uppercase italic">Loading Chapters...</p>
+        </div>
+
     </div>
 
     <script>
-        const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
+        // Firebase Configuration (Directly linked for testing)
+        const firebaseConfig = { 
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", 
+            authDomain: "mneet-spark.firebaseapp.com", 
+            projectId: "mneet-spark", 
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", 
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" 
+        };
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const batchId = localStorage.getItem('selectedBatchId');
+        const db = firebase.database();
+        const batchId = localStorage.getItem('selectedBatchId') || "B001"; // Fallback batch
 
-        let currentLevel = 'chapters';
-        let currentChapterId = '';
-        let allChapters = [];
+        let viewMode = "LIST"; // LIST or CHAPTER_EDIT
+        let activeChapterId = "";
 
-        function init() {
-            if(!batchId) { alert("Select Batch First!"); location.href='admin_dashboard.html'; return; }
-            loadChapters();
-        }
+        // Load Data
+        function loadData() {
+            db.ref(`courses/${batchId}/ncert`).on('value', snap => {
+                const listArea = document.getElementById('listArea');
+                listArea.innerHTML = "";
+                
+                if(!snap.exists()) {
+                    listArea.innerHTML = `<p class="text-center text-gray-700 text-[10px] py-10 uppercase">No Chapters Found</p>`;
+                    return;
+                }
 
-        function loadChapters() {
-            currentLevel = 'chapters';
-            document.getElementById('pageTitle').innerText = "NCERT Chapters";
-            document.getElementById('contentFields').classList.add('hidden');
-            database.ref(`courses/${batchId}/ncert`).on('value', snap => {
-                allChapters = [];
-                const list = document.getElementById('itemList');
-                list.innerHTML = "";
                 snap.forEach(child => {
-                    const c = child.val();
-                    allChapters.push({id: child.key, ...c});
-                    list.innerHTML += `
-                        <div class="glass p-5 rounded-[2rem] border ${c.isHidden ? 'border-red-900 opacity-50' : 'border-white/5'}">
-                            <div class="flex justify-between items-center" onclick="openChapter('${child.key}', '${c.name}')">
-                                <h4 class="text-xs font-black uppercase italic">${c.name}</h4>
-                                <i class="fa-solid fa-chevron-right text-[#eab308] text-xs"></i>
+                    const data = child.val();
+                    listArea.innerHTML += `
+                        <div class="glass p-5 rounded-[2rem] border ${data.isHidden ? 'border-red-900/50 opacity-60' : 'border-white/5'}">
+                            <div class="flex justify-between items-center" onclick="enterChapter('${child.key}', '${data.name}')">
+                                <h4 class="text-xs font-black uppercase italic">${data.name}</h4>
+                                <i class="fa-solid fa-chevron-right text-yellow-500 text-[10px]"></i>
                             </div>
-                            <div class="flex gap-2 border-t border-white/5 pt-4 mt-4">
-                                <button onclick="editChapter('${child.key}')" class="flex-1 bg-white/5 text-[8px] font-black py-2 rounded-xl">Edit</button>
-                                <button onclick="toggleHide('${child.key}', ${c.isHidden})" class="flex-1 bg-blue-500/10 text-blue-400 text-[8px] font-black py-2 rounded-xl">${c.isHidden ? 'Unhide' : 'Hide'}</button>
-                                <button onclick="deleteChapter('${child.key}')" class="bg-red-600/10 text-red-500 px-4 py-2 rounded-xl"><i class="fa-solid fa-trash text-[8px]"></i></button>
+                            <div class="flex gap-2 mt-4 pt-4 border-t border-white/5">
+                                <button onclick="quickEdit('${child.key}', '${data.name}')" class="flex-1 py-2 bg-white/5 rounded-lg text-[8px] font-black uppercase">Edit Name</button>
+                                <button onclick="toggleHide('${child.key}', ${data.isHidden})" class="flex-1 py-2 bg-blue-500/10 text-blue-400 rounded-lg text-[8px] font-black uppercase">${data.isHidden ? 'Show' : 'Hide'}</button>
+                                <button onclick="deleteItem('${child.key}')" class="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg"><i class="fa-solid fa-trash text-[8px]"></i></button>
                             </div>
-                        </div>`;
+                        </div>
+                    `;
                 });
             });
         }
 
-        function openChapter(id, name) {
-            currentLevel = 'content';
-            currentChapterId = id;
-            document.getElementById('pageTitle').innerText = name;
-            document.getElementById('contentFields').classList.remove('hidden');
-            document.getElementById('formStatus').innerText = "Upload PDF & Audio for " + name;
+        function enterChapter(id, name) {
+            viewMode = "CHAPTER_EDIT";
+            activeChapterId = id;
+            document.getElementById('titleText').innerText = name;
+            document.getElementById('formLabel').innerText = "Step 2: Edit Material";
+            document.getElementById('itemName').value = name;
+            document.getElementById('contentSection').classList.remove('hidden');
             
-            // Fetch current data for this chapter
-            database.ref(`courses/${batchId}/ncert/${id}`).once('value', s => {
-                const c = s.val();
-                document.getElementById('pdfUrl').value = c.pdf || "";
-                document.getElementById('audioUrl').value = c.audio || "";
-                // Button to jump to Interactive Mapper
-                document.getElementById('itemList').innerHTML = `
-                    <button onclick="location.href='admin_ncert_mapper.html?id=${id}'" class="w-full glass p-6 rounded-3xl border border-yellow-500/30 flex items-center justify-between group active:scale-95">
-                        <div class="flex items-center gap-4">
-                            <i class="fa-solid fa-wand-magic-sparkles text-yellow-500"></i>
-                            <span class="text-[10px] font-black uppercase italic">Open Interactive PYQ Mapper</span>
-                        </div>
-                        <i class="fa-solid fa-arrow-right text-xs text-gray-700"></i>
-                    </button>
-                `;
+            // Get current links
+            db.ref(`courses/${batchId}/ncert/${id}`).once('value', s => {
+                const d = s.val();
+                document.getElementById('pdfLink').value = d.pdf || "";
+                document.getElementById('audioLink').value = d.audio || "";
             });
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        function saveItem() {
-            const name = document.getElementById('itemName').value;
-            const pdf = document.getElementById('pdfUrl').value;
-            const audio = document.getElementById('audioUrl').value;
-            const editId = document.getElementById('editId').value;
-            if(!name) return;
-
-            const path = `courses/${batchId}/ncert`;
-            const data = { name: name, isHidden: false, timestamp: Date.now() };
-            if(currentLevel === 'content') { data.pdf = pdf; data.audio = audio; }
-
-            if(editId || currentLevel === 'content') {
-                database.ref(path + '/' + (editId || currentChapterId)).update(data).then(() => alert("Saved!"));
+        function handleBack() {
+            if(viewMode === "CHAPTER_EDIT") {
+                viewMode = "LIST";
+                document.getElementById('titleText').innerText = "NCERT Hub";
+                document.getElementById('formLabel').innerText = "Step 1: Create Chapter";
+                document.getElementById('contentSection').classList.add('hidden');
+                resetForm();
             } else {
-                database.ref(path).push(data).then(() => alert("Chapter Created!"));
+                history.back();
             }
         }
 
-        function handleBack() { currentLevel === 'content' ? loadChapters() : history.back(); }
-        function logout() { localStorage.clear(); location.href='index.html'; }
-        
-        init();
+        function saveData() {
+            const name = document.getElementById('itemName').value;
+            const pdf = document.getElementById('pdfLink').value;
+            const audio = document.getElementById('audioLink').value;
+            const editId = document.getElementById('editId').value;
+
+            if(!name) return alert("Enter Name");
+
+            const path = `courses/${batchId}/ncert/` + (viewMode === "CHAPTER_EDIT" ? activeChapterId : (editId || ""));
+            const payload = { name: name };
+
+            if(viewMode === "CHAPTER_EDIT") {
+                payload.pdf = pdf;
+                payload.audio = audio;
+            }
+
+            if(viewMode === "CHAPTER_EDIT" || editId) {
+                db.ref(path).update(payload).then(() => {
+                    if(viewMode !== "CHAPTER_EDIT") resetForm();
+                    alert("Updated Successfully");
+                });
+            } else {
+                db.ref(`courses/${batchId}/ncert`).push({
+                    name: name,
+                    isHidden: false,
+                    timestamp: Date.now()
+                }).then(() => resetForm());
+            }
+        }
+
+        function quickEdit(id, name) {
+            document.getElementById('editId').value = id;
+            document.getElementById('itemName').value = name;
+            document.getElementById('itemName').focus();
+        }
+
+        function toggleHide(id, status) {
+            db.ref(`courses/${batchId}/ncert/${id}`).update({ isHidden: !status });
+        }
+
+        function deleteItem(id) {
+            if(confirm("Confirm Delete?")) db.ref(`courses/${batchId}/ncert/${id}`).remove();
+        }
+
+        function resetForm() {
+            document.getElementById('itemName').value = "";
+            document.getElementById('editId').value = "";
+            document.getElementById('pdfLink').value = "";
+            document.getElementById('audioLink').value = "";
+        }
+
+        function goToMapper() {
+            location.href = `admin_ncert_mapper.html?id=${activeChapterId}`;
+        }
+
+        loadData();
     </script>
 </body>
-    </html>
-    
+</html>
