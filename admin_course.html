@@ -29,16 +29,16 @@
 
     <div class="p-6 pb-2">
         <div class="relative">
-            <input type="text" id="courseSearch" oninput="searchBatch()" placeholder="Search batch to edit or delete..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none">
+            <input type="text" id="courseSearch" oninput="searchBatch()" placeholder="Search batch by name..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none">
             <i class="fa-solid fa-magnifying-glass absolute left-5 top-4 text-gray-500"></i>
         </div>
     </div>
 
     <div class="scroll-area">
-        
         <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-10">
-            <p class="text-[8px] font-black uppercase text-gray-500 mb-6 text-center italic tracking-widest">Publish New Batch</p>
+            <p id="formTitle" class="text-[8px] font-black uppercase text-gray-500 mb-6 text-center italic tracking-widest">Publish New Batch</p>
             <div class="space-y-3">
+                <input type="hidden" id="editBatchId">
                 <input type="text" id="cTitle" placeholder="Batch Name" class="w-full glass-input p-4 rounded-xl text-xs font-bold">
                 
                 <div class="grid grid-cols-2 gap-2">
@@ -48,30 +48,28 @@
 
                 <div class="grid grid-cols-3 gap-2">
                     <div class="flex flex-col gap-1">
-                        <label class="text-[7px] text-gray-500 font-black ml-1 uppercase italic">Start Date</label>
+                        <label class="text-[7px] text-gray-500 uppercase italic">Start Date</label>
                         <input type="date" id="sDate" class="w-full glass-input p-3 rounded-xl text-[9px]">
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="text-[7px] text-gray-500 font-black ml-1 uppercase italic">End Date</label>
+                        <label class="text-[7px] text-gray-500 uppercase italic">End Date</label>
                         <input type="date" id="endDate" class="w-full glass-input p-3 rounded-xl text-[9px]">
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="text-[7px] text-yellow-500 font-black ml-1 uppercase italic">Exam Date</label>
+                        <label class="text-[7px] text-yellow-500 uppercase italic">Exam Date</label>
                         <input type="date" id="examDate" class="w-full glass-input p-3 rounded-xl text-[9px] text-yellow-500 border-yellow-500/20">
                     </div>
                 </div>
 
-                <input type="text" id="cThumb" placeholder="Thumbnail URL (Image or Video Link)" class="w-full glass-input p-4 rounded-xl text-[10px]">
+                <input type="text" id="cThumb" placeholder="Thumbnail URL (Image or Video)" class="w-full glass-input p-4 rounded-xl text-[10px]">
                 <textarea id="cDesc" placeholder="Course Description..." class="w-full glass-input p-4 rounded-xl h-20 text-xs"></textarea>
                 
-                <button onclick="saveBatch()" id="publishBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs shadow-xl active:scale-95">Publish Batch Now</button>
+                <button onclick="saveBatch()" id="publishBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs active:scale-95">Publish Batch Now</button>
             </div>
         </div>
 
         <h3 class="text-[10px] font-black uppercase text-gray-500 mb-6 px-2 italic">Active Batches List</h3>
-        <div id="batchList" class="space-y-4">
-            </div>
-
+        <div id="batchList" class="space-y-4"></div>
     </div>
 
     <script>
@@ -87,7 +85,7 @@
         let allBatches = [];
 
         function saveBatch() {
-            const btn = document.getElementById('publishBtn');
+            const editId = document.getElementById('editBatchId').value;
             const data = {
                 title: document.getElementById('cTitle').value,
                 price: document.getElementById('cPrice').value,
@@ -101,13 +99,26 @@
                 timestamp: Date.now()
             };
 
-            if(!data.title || !data.examDate) return alert("Batch Name and Exam Date are required for the Timer!");
+            if(!data.title || !data.examDate) return alert("Fill Name and Exam Date!");
 
-            btn.innerText = "Publishing...";
-            database.ref('courses').push(data).then(() => {
-                alert("Batch Created Successfully!");
-                location.reload();
-            });
+            if(editId) {
+                database.ref('courses/' + editId).update(data).then(() => {
+                    alert("Batch Updated!");
+                    resetForm();
+                });
+            } else {
+                database.ref('courses').push(data).then(() => {
+                    alert("Batch Created!");
+                    resetForm();
+                });
+            }
+        }
+
+        function resetForm() {
+            document.querySelectorAll('input, textarea').forEach(el => el.value = "");
+            document.getElementById('editBatchId').value = "";
+            document.getElementById('publishBtn').innerText = "Publish Batch Now";
+            document.getElementById('formTitle').innerText = "Publish New Batch";
         }
 
         function loadBatches() {
@@ -125,23 +136,40 @@
             list.innerHTML = data.map(b => `
                 <div class="glass p-5 rounded-[2rem] border ${b.isHidden ? 'border-red-900 opacity-50' : 'border-white/5'}">
                     <div class="flex gap-4 items-center mb-4">
-                        <img src="${b.thumbnail || 'https://via.placeholder.com/150'}" class="w-14 h-14 rounded-xl object-cover bg-black/20">
+                        <img src="${b.thumbnail || 'https://via.placeholder.com/150'}" class="w-14 h-14 rounded-xl object-cover bg-black">
                         <div class="flex-1">
                             <h4 class="text-[10px] font-black uppercase italic">${b.title}</h4>
-                            <p class="text-[#eab308] font-black text-xs">₹${b.price} <span class="text-gray-500 text-[7px] ml-1">(-${b.discount}%)</span></p>
+                            <p class="text-[#eab308] font-black text-xs">₹${b.price} <span class="text-gray-500 text-[7px]">(-${b.discount}%)</span></p>
                         </div>
                     </div>
                     <div class="flex gap-2 border-t border-white/5 pt-4">
-                        <button onclick="editBatch('${b.id}')" class="flex-1 bg-white/5 text-white py-3 rounded-xl text-[8px] font-black uppercase border border-white/5">Edit</button>
-                        <button onclick="toggleHide('${b.id}', ${b.isHidden})" class="flex-1 bg-blue-600/10 text-blue-400 py-3 rounded-xl text-[8px] font-black uppercase border border-blue-500/10">
+                        <button onclick="editBatch('${b.id}')" class="flex-1 bg-white/5 text-white py-3 rounded-xl text-[8px] font-black uppercase">Edit</button>
+                        <button onclick="toggleHide('${b.id}', ${b.isHidden})" class="flex-1 bg-blue-600/10 text-blue-400 py-3 rounded-xl text-[8px] font-black uppercase">
                             ${b.isHidden ? 'Unhide' : 'Hide'}
                         </button>
-                        <button onclick="deleteBatch('${b.id}')" class="bg-red-600/10 text-red-500 px-4 py-3 rounded-xl text-[8px] border border-red-500/10">
+                        <button onclick="deleteBatch('${b.id}')" class="bg-red-600/10 text-red-500 px-4 py-3 rounded-xl text-[8px]">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        function editBatch(id) {
+            const b = allBatches.find(x => x.id === id);
+            document.getElementById('editBatchId').value = b.id;
+            document.getElementById('cTitle').value = b.title;
+            document.getElementById('cPrice').value = b.price;
+            document.getElementById('cDiscount').value = b.discount;
+            document.getElementById('sDate').value = b.startDate;
+            document.getElementById('endDate').value = b.endDate;
+            document.getElementById('examDate').value = b.examDate;
+            document.getElementById('cThumb').value = b.thumbnail;
+            document.getElementById('cDesc').value = b.desc;
+            
+            document.getElementById('publishBtn').innerText = "Update Batch Now";
+            document.getElementById('formTitle').innerText = "Editing Batch: " + b.title;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function searchBatch() {
@@ -151,7 +179,7 @@
         }
 
         function toggleHide(id, status) { database.ref('courses/' + id).update({ isHidden: !status }); }
-        function deleteBatch(id) { if(confirm("Confirm permanent delete?")) database.ref('courses/' + id).remove(); }
+        function deleteBatch(id) { if(confirm("Confirm Delete?")) database.ref('courses/' + id).remove(); }
         function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
         loadBatches();
