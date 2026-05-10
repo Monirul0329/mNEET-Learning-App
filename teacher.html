@@ -1,68 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mNEET Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background-color: #0b1120; color: white; margin: 0; overflow: hidden; height: 100vh; }
-        .header { height: 70px; background-color: #16213e; border-bottom: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
-        .nav-bar { height: 80px; background: rgba(22, 33, 62, 0.98); backdrop-filter: blur(10px); border-top: 1px solid #1f2937; display: flex; align-items: center; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; }
-        .main-container { padding-top: 70px; padding-bottom: 80px; height: 100vh; width: 100%; }
-        iframe { width: 100%; height: 100%; border: none; transition: opacity 0.3s; }
-        .nav-btn { color: #6b7280; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 4px; border: none; background: none; cursor: pointer; }
-        .active-btn { color: #eab308 !important; }
-    </style>
-</head>
-<body>
-
-    <div class="header shadow-2xl">
-        <div>
-            <h1 class="text-xl font-black text-[#eab308] italic tracking-tighter">mNEET ADMIN</h1>
-            <p class="text-[8px] uppercase font-bold text-gray-500">System Controller</p>
-        </div>
-        <button onclick="window.location.href='index.html'" class="text-red-500 text-xl active:scale-90 transition-all">
-            <i class="fa-solid fa-power-off"></i>
-        </button>
-    </div>
-
-    <div class="main-container">
-        <!-- Default page load: admin_course.html -->
-        <iframe id="adminFrame" src="admin_course.html"></iframe>
-    </div>
-
-    <div class="nav-bar">
-        <button onclick="nav('admin_course.html', 'c')" id="tab-c" class="nav-btn active-btn">
-            <i class="fa-solid fa-layer-group text-xl"></i>
-            <span class="text-[9px] font-bold uppercase">Course</span>
-        </button>
-        <button onclick="nav('admin_study.html', 's')" id="tab-s" class="nav-btn">
-            <i class="fa-solid fa-book-medical text-xl"></i>
-            <span class="text-[9px] font-bold uppercase">Study</span>
-        </button>
-        <button onclick="nav('admin_test.html', 't')" id="tab-t" class="nav-btn">
-            <i class="fa-solid fa-vial-circle-check text-xl"></i>
-            <span class="text-[9px] font-bold uppercase">Test</span>
-        </button>
-        <button onclick="nav('admin_mstore.html', 'm')" id="tab-m" class="nav-btn">
-            <i class="fa-solid fa-shop text-xl"></i>
-            <span class="text-[9px] font-bold uppercase">mStore</span>
-        </button>
-    </div>
-
-    <script>
-        function nav(file, id) {
-            const frame = document.getElementById('adminFrame');
-            frame.style.opacity = '0';
-            setTimeout(() => {
-                frame.src = file;
-                frame.style.opacity = '1';
-            }, 150);
-
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-btn'));
-            document.getElementById('tab-' + id).classList.add('active-btn');
-        }
-    </script>
-</body>
-</html>
+<script>
+    function nav(file, id) {
+        const frame = document.getElementById('adminFrame');
+        frame.src = file;
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-btn'));
+        document.getElementById('tab-' + id).classList.add('active-btn');
+    }
+</script>
