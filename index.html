@@ -5,9 +5,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <title>mNEET - Login</title>
 </head>
-<body class="bg-[#070b14] flex items-center justify-center min-h-screen p-6 font-sans text-white">
+<body class="bg-[#070b14] flex items-center justify-center min-h-screen p-6 text-white font-sans">
     <div class="bg-[#16213e] p-10 rounded-[3rem] border border-gray-800 w-full max-w-md shadow-2xl">
         <h1 class="text-4xl font-black italic uppercase text-center mb-2 tracking-tighter text-[#eab308]">mNEET</h1>
         <p class="text-gray-500 text-center text-[10px] uppercase tracking-[0.3em] mb-10 font-black italic">The Surgeon's Portal</p>
@@ -15,18 +14,12 @@
         <input type="email" id="email" placeholder="Email Address" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none mb-4 focus:border-[#eab308]">
         <input type="password" id="pass" placeholder="Password" class="w-full bg-[#0b1120] p-5 rounded-2xl border border-gray-700 outline-none mb-8 focus:border-[#eab308]">
         
-        <button onclick="handleLogin()" id="logBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Sign In</button>
+        <button onclick="handleLogin()" id="logBtn" class="w-full bg-[#eab308] text-black py-5 rounded-2xl font-black uppercase text-xs active:scale-95 transition-all">Sign In</button>
         <p class="text-center text-gray-500 text-[10px] mt-6 font-bold uppercase italic">New Aspirant? <a href="signup.html" class="text-[#eab308]">Register</a></p>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
-            authDomain: "mneet-spark.firebaseapp.com",
-            projectId: "mneet-spark",
-            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
-            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -38,15 +31,18 @@
 
             if(!emailInput || !pass) return alert("Fill all details!");
 
+            // Admin Login logic
             if(emailInput === adminEmail && pass === "admin123") {
                 localStorage.setItem('mUserEmail', emailKey);
                 window.location.href = 'admin_dashboard.html';
                 return;
             }
 
+            // Student Login logic
             database.ref('users/' + emailKey).once('value').then((snapshot) => {
                 const user = snapshot.val();
                 if(user && user.pass === pass) {
+                    if(user.isBlocked) return alert("Your account is blocked!");
                     localStorage.setItem('mUserEmail', emailKey);
                     window.location.href = 'dashboard.html';
                 } else { alert("Invalid credentials!"); }
