@@ -4,131 +4,185 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #070b14; color: white; user-select: none; }
-        .reader-container { position: relative; width: 100%; height: 80vh; overflow-y: auto; background: #111; }
-        #pdf-canvas { width: 100%; display: block; margin: 0 auto; }
-        .annotation-layer { position: absolute; top: 0; left: 0; pointer-events: none; }
+        .glass { background: rgba(22, 33, 62, 0.9); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.1); }
+        body { background: #070b14; color: white; font-family: sans-serif; overflow: hidden; height: 100vh; }
+        .reader-viewport { flex: 1; overflow: auto; position: relative; background: #000; }
+        #pdf-canvas { display: block; margin: 0 auto; transition: transform 0.2s; }
         
-        /* Interactive Tools UI */
-        .tool-bar { background: rgba(22, 33, 62, 0.9); backdrop-filter: blur(10px); }
-        .audio-player { background: #16213e; border-top: 2px solid #eab308; }
-        
-        /* Highlight & Sync Effect */
-        .sync-highlight { position: absolute; background: rgba(234, 179, 8, 0.3); border-radius: 4px; transition: all 0.2s ease; }
-        .pyq-tag { position: absolute; width: 20px; height: 20px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; pointer-events: auto; animation: pulse 1.5s infinite; }
-        
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); box-shadow: 0 0 10px #ef4444; } 100% { transform: scale(1); } }
+        /* The Moving Highlight Box */
+        #sync-box { 
+            position: absolute; pointer-events: none; 
+            background: rgba(234, 179, 8, 0.3); 
+            border: 1px solid rgba(234, 179, 8, 0.6);
+            border-radius: 4px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.2);
+            z-index: 10; display: none;
+        }
+
+        /* PYQ Pulse Tag */
+        .pyq-tag { 
+            position: absolute; width: 22px; height: 22px; 
+            background: #ef4444; color: white; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 10px; font-weight: 900; cursor: pointer; 
+            z-index: 20; animation: pulse 1.5s infinite;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
     </style>
 </head>
-<body class="flex flex-col h-screen">
+<body class="flex flex-col">
 
-    <div class="p-4 flex justify-between items-center bg-[#16213e]">
-        <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
-        <h2 class="text-xs font-black uppercase italic gold-text">NCERT Smart Reader</h2>
+    <div class="h-[70px] bg-[#16213e] flex justify-between items-center px-6 border-b border-white/5 z-50">
+        <div class="flex items-center gap-4">
+            <button onclick="history.back()" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-gray-400 active:scale-90"><i class="fa-solid fa-chevron-left"></i></button>
+            <div>
+                <h1 id="chName" class="text-[10px] font-black uppercase text-yellow-500 italic leading-none">NCERT Reader</h1>
+                <p class="text-[7px] text-gray-500 uppercase font-bold mt-1">Smart Audio Sync Mode</p>
+            </div>
+        </div>
         <div class="flex gap-3">
-            <button class="text-blue-400"><i class="fa-solid fa-highlighter"></i></button>
-            <button class="text-green-400"><i class="fa-solid fa-note-sticky"></i></button>
+            <button onclick="toggleLock()" id="lockBtn" class="text-blue-400 text-xs"><i class="fa-solid fa-lock-open"></i></button>
+            <button class="text-gray-400 text-xs"><i class="fa-solid fa-highlighter"></i></button>
         </div>
     </div>
 
-    <div class="reader-container flex-1" id="reader">
-        <canvas id="pdf-canvas"></canvas>
-        <div id="overlay" class="annotation-layer">
-            </div>
+    <div class="reader-viewport" id="viewport">
+        <div class="relative" id="render-wrap">
+            <canvas id="pdf-canvas"></canvas>
+            <div id="sync-box"></div>
+            <div id="tag-layer"></div>
+        </div>
     </div>
 
-    <div class="audio-player p-6 space-y-4">
+    <div class="glass p-6 space-y-4 z-50">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <button onclick="togglePlay()" id="playBtn" class="w-12 h-12 bg-[#eab308] text-black rounded-full flex items-center justify-center text-xl"><i class="fa-solid fa-play"></i></button>
-                <div>
-                    <p class="text-[10px] font-black uppercase italic">Line-by-Line Audio Sync</p>
-                    <p class="text-[8px] text-gray-500 uppercase font-bold">Currently Reading: Page 126</p>
+                <button onclick="toggleAudio()" id="playBtn" class="w-12 h-12 bg-[#eab308] text-black rounded-full flex items-center justify-center text-xl shadow-lg active:scale-90">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+                <div class="flex flex-col">
+                    <span id="currentTime" class="text-[10px] font-black text-white">00:00</span>
+                    <span class="text-[7px] text-gray-500 uppercase font-bold">Auto-Scrolling Active</span>
                 </div>
             </div>
-            
-            <select onchange="changeSpeed(this.value)" class="bg-black/40 text-[10px] p-2 rounded-lg border border-white/10 outline-none text-[#eab308] font-black">
-                <option value="0.75">0.75x</option>
-                <option value="1" selected>1.0x</option>
-                <option value="1.5">1.5x</option>
-                <option value="2">2.0x</option>
-            </select>
+
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gauge-high text-[10px] text-gray-500"></i>
+                <select onchange="setSpeed(this.value)" class="bg-black/40 text-[10px] p-2 rounded-lg border border-white/10 text-yellow-500 font-black outline-none">
+                    <option value="0.5">0.5x</option>
+                    <option value="1" selected>1.0x</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2">2.0x</option>
+                </select>
+            </div>
         </div>
 
         <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-            <div id="audioProg" class="bg-[#eab308] h-full" style="width: 0%"></div>
-        </div>
-    </div>
-
-    <div id="quizModal" class="fixed inset-0 bg-black/90 hidden z-[100] p-6 flex flex-col justify-center">
-        <div class="bg-white rounded-[2.5rem] p-8 text-black relative">
-            <button onclick="closeQuiz()" class="absolute top-4 right-6 text-2xl">&times;</button>
-            <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-[8px] font-black uppercase mb-4 inline-block">PYQ Question (NEET 2024)</span>
-            <h3 class="text-lg font-bold mb-6">Which of the following is true for Mitochondria based on the highlighted line?</h3>
-            <div class="space-y-3">
-                <button onclick="solve(true)" class="w-full text-left p-4 border border-gray-200 rounded-2xl hover:bg-green-50 transition-all font-bold">A. It is double membrane bound</button>
-                <button onclick="solve(false)" class="w-full text-left p-4 border border-gray-200 rounded-2xl hover:bg-red-50 transition-all font-bold">B. It is single membrane bound</button>
-            </div>
+            <div id="progress" class="bg-[#eab308] h-full transition-all duration-300" style="width: 0%"></div>
         </div>
     </div>
 
     <script>
-        const pdfUrl = 'YOUR_NCERT_PDF_URL';
-        const audio = new Audio('YOUR_REVISION_AUDIO_URL');
-        let isPlaying = false;
+        // Init Config
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const batchId = localStorage.getItem('selectedBatchId');
+        const chapterId = new URLSearchParams(window.location.search).get('id');
 
-        // PDF.js Logic
+        let audio = new Audio();
+        let mapData = [];
+        let isLocked = false;
+
+        async function initReader() {
+            // Fetch Chapter Info (PDF & Audio Links)
+            database.ref(`courses/${batchId}/ncert/${chapterId}`).once('value', async (snap) => {
+                const data = snap.val();
+                document.getElementById('chName').innerText = data.name;
+                audio.src = data.audio;
+                mapData = data.map || []; // The points mapped by Admin
+                
+                await renderPDF(data.pdf);
+                renderTags();
+            });
+        }
+
+        // PDF Rendering Logic
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-
-        async function renderPDF() {
-            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        async function renderPDF(url) {
+            const loadingTask = pdfjsLib.getDocument(url);
             const pdf = await loadingTask.promise;
             const page = await pdf.getPage(1);
-            const scale = 1.5;
-            const viewport = page.getViewport({ scale });
-
+            const viewport = page.getViewport({ scale: 2 }); // High quality
             const canvas = document.getElementById('pdf-canvas');
-            const context = canvas.getContext('2d');
             canvas.height = viewport.height;
             canvas.width = viewport.width;
-
-            await page.render({ canvasContext: context, viewport }).promise;
-            
-            // Add a sample PYQ Tag at a specific position
-            addPYQTag(150, 300); 
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
         }
 
-        function togglePlay() {
-            if(isPlaying) { audio.pause(); } else { audio.play(); }
-            isPlaying = !isPlaying;
-            document.getElementById('playBtn').innerHTML = `<i class="fa-solid fa-${isPlaying ? 'pause' : 'play'}"></i>`;
+        // Audio Sync Logic
+        audio.ontimeupdate = () => {
+            const time = audio.currentTime;
+            document.getElementById('currentTime').innerText = formatTime(time);
+            document.getElementById('progress').style.width = (time / audio.duration * 100) + "%";
+
+            // Find matching point in map
+            const currentPoint = mapData.filter(p => p.time <= time).pop();
+            if(currentPoint) {
+                showHighlight(currentPoint.x, currentPoint.y);
+            }
+        };
+
+        function showHighlight(x, y) {
+            const box = document.getElementById('sync-box');
+            box.style.display = 'block';
+            box.style.left = (x - 50) + 'px'; // Center the highlight on point
+            box.style.top = (y - 10) + 'px';
+            box.style.width = '100px'; // Approx line width
+            box.style.height = '20px';
+
+            // Auto-Scroll
+            if(!isLocked) {
+                document.getElementById('viewport').scrollTo({
+                    top: y - 200,
+                    behavior: 'smooth'
+                });
+            }
         }
 
-        function changeSpeed(val) { audio.playbackRate = parseFloat(val); }
-
-        function addPYQTag(x, y) {
-            const overlay = document.getElementById('overlay');
-            const tag = document.createElement('div');
-            tag.className = 'pyq-tag';
-            tag.style.left = x + 'px';
-            tag.style.top = y + 'px';
-            tag.innerHTML = 'Q';
-            tag.onclick = () => document.getElementById('quizModal').classList.remove('hidden');
-            overlay.appendChild(tag);
+        function renderTags() {
+            const layer = document.getElementById('tag-layer');
+            mapData.forEach(p => {
+                if(p.quiz) {
+                    const tag = document.createElement('div');
+                    tag.className = 'pyq-tag';
+                    tag.style.left = p.x + 'px';
+                    tag.style.top = p.y + 'px';
+                    tag.innerHTML = 'Q';
+                    tag.onclick = () => openQuiz(p.quiz);
+                    layer.appendChild(tag);
+                }
+            });
         }
 
-        function closeQuiz() { document.getElementById('quizModal').classList.add('hidden'); }
-        
-        function solve(correct) {
-            if(correct) alert("Brilliant! +4 Points added to your Rank.");
-            else alert("Don't worry, re-read the paragraph.");
-            closeQuiz();
+        function toggleAudio() {
+            if(audio.paused) { audio.play(); document.getElementById('playBtn').innerHTML = '<i class="fa-solid fa-pause"></i>'; }
+            else { audio.pause(); document.getElementById('playBtn').innerHTML = '<i class="fa-solid fa-play"></i>'; }
         }
 
-        renderPDF();
+        function setSpeed(v) { audio.playbackRate = parseFloat(v); }
+        function toggleLock() { 
+            isLocked = !isLocked; 
+            document.getElementById('lockBtn').innerHTML = `<i class="fa-solid fa-lock${isLocked ? '' : '-open'}"></i>`; 
+        }
+        function formatTime(s) { return new Date(s * 1000).toISOString().substr(14, 5); }
+
+        initReader();
     </script>
 </body>
-              </html>
-                  
+</html>
