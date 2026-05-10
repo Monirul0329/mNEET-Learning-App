@@ -2,138 +2,134 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive NCERT AI</title>
+    <title>NCERT AI READER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body { background: #e5e7eb; overflow-x: hidden; font-family: 'Georgia', serif; }
-        /* Actual White Paper Look */
-        #pdf-render-container {
-            background: white;
-            box-shadow: 0 0 30px rgba(0,0,0,0.2);
-            margin: 60px auto 120px auto;
-            width: 100%;
-            max-width: 900px;
-            position: relative;
+        /* Real Book Paper Texture & Feel */
+        body { background: #1a1c2c; color: #333; overflow-x: hidden; font-family: 'Segoe UI', sans-serif; }
+        
+        .paper {
+            background: #ffffff;
+            background-image: radial-gradient(#e5e5e5 1px, transparent 1px);
+            background-size: 20px 20px;
             min-height: 100vh;
+            width: 100%;
+            max-width: 850px;
+            margin: 80px auto 140px auto;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            padding: 50px;
+            position: relative;
+            border-radius: 4px;
         }
-        canvas { width: 100% !important; height: auto !important; display: block; }
-        
-        /* Floating Audio Bar */
-        .audio-player {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 95%; max-width: 500px; background: #111827; border-radius: 2.5rem;
-            padding: 15px 25px; display: flex; align-items: center; gap: 15px;
-            z-index: 1000; box-shadow: 0 15px 40px rgba(0,0,0,0.5); border: 1px solid #374151;
+
+        /* Top Bar with Search & Back */
+        .top-nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(26, 28, 44, 0.95); backdrop-filter: blur(10px);
+            padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; gap: 15px;
         }
-        
-        .pyq-bubble {
-            position: absolute; right: -10px; background: #ef4444; color: white;
-            font-size: 8px; font-weight: 900; padding: 3px 8px; border-radius: 20px;
-            cursor: pointer; animation: pulse 2s infinite; z-index: 50;
+
+        /* Smart Audio Bar - Floating style */
+        .audio-dock {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 500px; background: #0f172a; border-radius: 50px;
+            padding: 12px 25px; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6); z-index: 2000;
+            border: 1px solid #eab308;
         }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-        
-        /* Highlight Overlay for Audio Sync */
-        #highlight-overlay {
-            position: absolute; background: rgba(253, 224, 71, 0.4);
-            pointer-events: none; transition: all 0.2s ease; border-radius: 3px; z-index: 10;
+
+        /* PYQ Year Tags */
+        .pyq-tag {
+            background: #fef08a; color: #854d0e; font-size: 10px; font-weight: 900;
+            padding: 2px 8px; border-radius: 4px; cursor: pointer;
+            margin-left: 5px; border: 1px solid #eab308; display: inline-flex;
+            align-items: center; vertical-align: middle;
         }
-        .locked { pointer-events: none !important; }
+
+        canvas { width: 100% !important; height: auto !important; margin-bottom: 30px; }
+        .highlight-word { background: rgba(234, 179, 8, 0.3); border-radius: 3px; }
+        .locked { pointer-events: none !important; user-select: none !important; }
     </style>
 </head>
 <body>
 
-    <nav class="fixed top-0 left-0 right-0 bg-white shadow-md p-4 flex justify-between items-center z-[1100]">
-        <div class="flex items-center gap-3">
-            <button onclick="history.back()" class="text-gray-700 w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></button>
-            <h1 id="chTitle" class="text-[10px] font-black uppercase italic tracking-tighter">NCERT AI Reader</h1>
+    <div class="top-nav">
+        <button onclick="history.back()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white active:scale-90 transition-all">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="relative flex-1">
+            <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-400 text-sm"></i>
+            <input type="text" placeholder="Search in Chapter..." class="w-full bg-white/5 border border-white/10 rounded-full py-2.5 pl-11 pr-4 text-white text-xs outline-none focus:border-yellow-500">
         </div>
-        <div class="flex gap-4">
-            <button onclick="toggleLock()" id="lockBtn" class="text-blue-600"><i class="fa-solid fa-lock-open"></i></button>
-            <button onclick="window.print()" class="text-gray-500"><i class="fa-solid fa-download"></i></button>
-        </div>
-    </nav>
-
-    <div id="pdf-render-container">
-        <div id="highlight-overlay"></div>
-        <div id="pdf-content"></div>
-        <div id="pyq-container"></div>
+        <button onclick="toggleLock()" id="lockBtn" class="text-yellow-500 text-lg ml-2">
+            <i class="fa-solid fa-lock-open"></i>
+        </button>
     </div>
 
-    <div class="audio-player">
-        <button onclick="togglePlay()" id="playIcon" class="w-10 h-10 bg-yellow-500 text-black rounded-full flex items-center justify-center text-sm">
+    <div id="master-page" class="paper">
+        <div id="pdf-render-area">
+            <p class="text-center text-gray-400 italic py-20 uppercase font-black tracking-widest text-[10px]">Initializing NCERT AI Environment...</p>
+        </div>
+    </div>
+
+    <div class="audio-dock">
+        <button onclick="toggleAudio()" id="playBtn" class="w-11 h-11 bg-yellow-500 text-black rounded-full flex items-center justify-center shadow-lg active:scale-90">
             <i class="fa-solid fa-play"></i>
         </button>
         
         <div class="flex-1">
-            <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest">AI Revision Audio</p>
-            <div class="w-full bg-gray-700 h-1 rounded-full mt-1 overflow-hidden">
-                <div id="audioProgress" class="bg-yellow-500 h-full w-0"></div>
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[8px] font-black text-yellow-500 uppercase italic">Syncing Audio...</span>
+                <span id="speedDisplay" class="text-[8px] font-black text-white bg-white/10 px-2 py-0.5 rounded">1.0x</span>
+            </div>
+            <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div id="audioProgress" class="bg-yellow-500 h-full w-0 transition-all duration-300"></div>
             </div>
         </div>
 
-        <select onchange="setSpeed(this.value)" class="bg-gray-800 text-[9px] text-yellow-500 font-bold border-none outline-none rounded-lg p-1">
-            <option value="1">1.0x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="2">2.0x</option>
-        </select>
+        <button onclick="cycleSpeed()" class="text-white bg-white/5 w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold"><i class="fa-solid fa-gauge-high"></i></button>
         
-        <audio id="ncertAudio" hidden></audio>
+        <audio id="ncertAudio" src=""></audio>
     </div>
 
     <script>
-        // PDF.js worker setup
+        // PDF.js Setup
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
-        const firebaseConfig = { /* Paste your config here */ };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const chapterId = urlParams.get('id');
-
-        let pdfDoc = null;
         let audio = document.getElementById('ncertAudio');
         let isLocked = false;
+        let speeds = [1, 1.25, 1.5, 2, 0.75];
+        let currentSpeedIdx = 0;
 
-        async function loadChapterData() {
-            db.ref('ncert_chapters/' + chapterId).once('value', async (snap) => {
-                const data = snap.val();
-                if(!data) return alert("Chapter not found!");
-
-                document.getElementById('chTitle').innerText = data.name;
-                audio.src = data.audio;
-                
-                // Load PDF
-                const loadingTask = pdfjsLib.getDocument(data.pdf);
-                pdfDoc = await loadingTask.promise;
-                renderAllPages();
-            });
+        // Function to cycle playback speed
+        function cycleSpeed() {
+            currentSpeedIdx = (currentSpeedIdx + 1) % speeds.length;
+            let newSpeed = speeds[currentSpeedIdx];
+            audio.playbackRate = newSpeed;
+            document.getElementById('speedDisplay').innerText = newSpeed + 'x';
         }
 
-        async function renderAllPages() {
-            const container = document.getElementById('pdf-content');
-            for(let i = 1; i <= pdfDoc.numPages; i++) {
-                const page = await pdfDoc.getPage(i);
-                const viewport = page.getViewport({ scale: 1.5 });
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                
-                await page.render({ canvasContext: context, viewport: viewport }).promise;
-                container.appendChild(canvas);
+        // Lock/Unlock editing and scrolling
+        function toggleLock() {
+            isLocked = !isLocked;
+            const page = document.getElementById('master-page');
+            const btn = document.getElementById('lockBtn');
+            if(isLocked) {
+                page.classList.add('locked');
+                btn.innerHTML = '<i class="fa-solid fa-lock text-red-500"></i>';
+            } else {
+                page.classList.remove('locked');
+                btn.innerHTML = '<i class="fa-solid fa-lock-open text-yellow-500"></i>';
             }
         }
 
-        function togglePlay() {
-            const btn = document.getElementById('playIcon');
+        // Audio controls
+        function toggleAudio() {
+            const btn = document.getElementById('playBtn');
             if(audio.paused) {
                 audio.play();
                 btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
@@ -143,30 +139,42 @@
             }
         }
 
+        // Progress bar update
         audio.ontimeupdate = () => {
-            const perc = (audio.currentTime / audio.duration) * 100;
-            document.getElementById('audioProgress').style.width = perc + "%";
+            let prog = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('audioProgress').style.width = prog + "%";
             
-            // SMART SYNC LOGIC
-            // Ekhane amra audio-r time onujayi 'highlight-overlay' er position change korbo
-            // Example: moveHighlight(audio.currentTime);
+            // FUTURE LOGIC: Highlight text based on currentTime
+            // syncTextHighlight(audio.currentTime);
         };
 
-        function setSpeed(s) { audio.playbackRate = s; }
+        // Render PDF (Simulated for Demo - You will pass your Firebase URL here)
+        async function renderPDF(url) {
+            const loadingTask = pdfjsLib.getDocument(url);
+            const pdf = await loadingTask.promise;
+            const area = document.getElementById('pdf-render-area');
+            area.innerHTML = ''; // Clear loading message
 
-        function toggleLock() {
-            isLocked = !isLocked;
-            const btn = document.getElementById('lockBtn');
-            if(isLocked) {
-                document.getElementById('pdf-render-container').classList.add('locked');
-                btn.innerHTML = '<i class="fa-solid fa-lock text-red-500"></i>';
-            } else {
-                document.getElementById('pdf-render-container').classList.remove('locked');
-                btn.innerHTML = '<i class="fa-solid fa-lock-open text-blue-600"></i>';
+            for(let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                area.appendChild(canvas);
             }
         }
 
-        loadChapterData();
+        // Fetch data from URL parameters (passed from admin or list page)
+        const params = new URLSearchParams(window.location.search);
+        const pdfUrl = params.get('pdf');
+        const audioUrl = params.get('audio');
+        
+        if(pdfUrl) renderPDF(pdfUrl);
+        if(audioUrl) audio.src = audioUrl;
+
     </script>
 </body>
 </html>
