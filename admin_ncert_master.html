@@ -13,40 +13,39 @@
         .modal { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="p-4 pb-24">
+<body class="p-4">
 
-    <div class="flex items-center gap-4 mb-6 sticky top-0 z-50 bg-[#070b14]/80 py-2">
-        <button onclick="history.back()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90"><i class="fa-solid fa-chevron-left"></i></button>
+    <div class="flex items-center gap-4 mb-6 sticky top-0 z-50 bg-[#070b14] py-2">
+        <button onclick="history.back()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400"><i class="fa-solid fa-chevron-left"></i></button>
         <div class="relative flex-1">
-            <input type="text" id="searchInput" oninput="searchCH()" placeholder="Search Chapters..." class="w-full glass p-3.5 pl-12 rounded-2xl text-[11px] font-bold">
-            <i class="fa-solid fa-magnifying-glass absolute left-4 top-4 text-gray-500"></i>
+            <input type="text" id="searchInput" oninput="searchChapters()" placeholder="Search Chapter..." class="w-full glass p-3 rounded-2xl text-xs pl-10">
+            <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-500 text-sm"></i>
         </div>
     </div>
 
-    <div class="glass p-6 rounded-[2.5rem] mb-10 border-b-4 border-yellow-500/20">
-        <p class="text-[8px] font-black uppercase text-yellow-500 mb-4 tracking-widest italic">Create New NCERT Chapter</p>
+    <div class="glass p-5 rounded-[2rem] mb-8">
+        <p class="text-[9px] font-bold text-yellow-500 uppercase mb-3 italic">Create New Chapter</p>
         <div class="flex gap-2">
-            <input type="text" id="chNameInput" placeholder="Enter Chapter Name..." class="flex-1 p-4 rounded-2xl text-[11px] font-black">
-            <button onclick="createChapter()" class="bg-yellow-500 text-black px-6 rounded-2xl font-black uppercase text-[10px]">Add</button>
+            <input type="text" id="newChName" placeholder="Chapter Name" class="flex-1 p-3 rounded-xl text-xs">
+            <button onclick="addChapter()" class="bg-yellow-500 text-black px-4 rounded-xl font-bold text-xs">ADD</button>
         </div>
     </div>
 
-    <div id="chapterList" class="space-y-4">
-        </div>
+    <div id="chList" class="space-y-4"></div>
 
-    <div id="editChapterModal" class="modal">
-        <div class="w-full max-w-sm glass p-8 rounded-[3rem] border border-white/10">
-            <h2 class="text-xs font-black uppercase text-yellow-500 mb-6 italic">Edit Chapter Name</h2>
-            <input type="text" id="editChName" class="w-full p-4 rounded-2xl text-[11px] mb-4">
+    <div id="nameModal" class="modal">
+        <div class="w-full max-w-xs glass p-6 rounded-[2rem] text-center">
+            <h2 class="text-xs font-bold text-yellow-500 mb-4 uppercase">Rename Chapter</h2>
+            <input type="text" id="editNameInput" class="w-full p-3 rounded-xl text-xs mb-4">
             <div class="flex gap-2">
-                <button onclick="saveChapterName()" class="flex-1 bg-blue-600 py-3 rounded-xl font-black text-[10px] uppercase">Update</button>
-                <button onclick="closeModal('editChapterModal')" class="flex-1 bg-gray-700 py-3 rounded-xl font-black text-[10px] uppercase">Cancel</button>
+                <button onclick="saveNewName()" class="flex-1 bg-blue-600 p-2 rounded-lg text-[10px] font-bold">UPDATE</button>
+                <button onclick="closeModals()" class="flex-1 bg-gray-700 p-2 rounded-lg text-[10px] font-bold">CANCEL</button>
             </div>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = {
+        const firebaseConfig = { 
             apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
             authDomain: "mneet-spark.firebaseapp.com",
             projectId: "mneet-spark",
@@ -55,55 +54,50 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let currentCHId = null;
+        let selectedId = null;
 
-        function createChapter() {
-            const name = document.getElementById('chNameInput').value;
-            if(!name) return;
-            db.ref('ncert_v2').push({ name, pdf: "", audio: "" }).then(() => {
-                document.getElementById('chNameInput').value = "";
-            });
+        function addChapter() {
+            const name = document.getElementById('newChName').value;
+            if(name) db.ref('ncert_final').push({ name, pdf: "", audio: "" }).then(() => document.getElementById('newChName').value = "");
         }
 
-        function loadChapters() {
-            db.ref('ncert_v2').on('value', snap => {
-                const list = document.getElementById('chapterList');
+        function loadList() {
+            db.ref('ncert_final').on('value', snap => {
+                const list = document.getElementById('chList');
                 list.innerHTML = "";
                 snap.forEach(child => {
                     const ch = child.val();
                     list.innerHTML += `
-                    <div class="glass p-5 rounded-[2rem] border-l-4 border-yellow-500 flex flex-col gap-3">
-                        <div class="flex justify-between items-center">
-                            <h4 onclick="location.href='admin_ncert_content.html?id=${child.key}'" class="text-[11px] font-black uppercase italic flex-1 cursor-pointer">${ch.name}</h4>
-                            <div class="flex gap-3 text-gray-500">
-                                <i onclick="openEditName('${child.key}', '${ch.name}')" class="fa-solid fa-pen-to-square hover:text-yellow-500"></i>
-                                <i onclick="deleteChapter('${child.key}')" class="fa-solid fa-trash hover:text-red-500"></i>
-                            </div>
+                    <div class="glass p-4 rounded-3xl flex justify-between items-center border-l-4 border-yellow-500">
+                        <div onclick="location.href='admin_ncert_content.html?id=${child.key}'" class="flex-1 cursor-pointer">
+                            <h4 class="text-xs font-bold uppercase italic">${ch.name}</h4>
+                            <p class="text-[8px] text-gray-500 mt-1">TAP TO MANAGE PDF/AUDIO</p>
                         </div>
-                        <p class="text-[7px] text-gray-600 font-bold uppercase">Click name to manage PDF/Audio</p>
+                        <div class="flex gap-4 ml-2">
+                            <i onclick="openRename('${child.key}', '${ch.name}')" class="fa-solid fa-edit text-blue-400 cursor-pointer"></i>
+                            <i onclick="deleteCh('${child.key}')" class="fa-solid fa-trash text-red-500 cursor-pointer"></i>
+                        </div>
                     </div>`;
                 });
             });
         }
 
-        function openEditName(id, name) {
-            currentCHId = id;
-            document.getElementById('editChName').value = name;
-            document.getElementById('editChapterModal').style.display = 'flex';
+        function openRename(id, name) { selectedId = id; document.getElementById('editNameInput').value = name; document.getElementById('nameModal').style.display = 'flex'; }
+        function saveNewName() { db.ref('ncert_final/'+selectedId).update({ name: document.getElementById('editNameInput').value }).then(closeModals); }
+        function deleteCh(id) { if(confirm("Delete Chapter?")) db.ref('ncert_final/'+id).remove(); }
+        function closeModals() { document.getElementById('nameModal').style.display = 'none'; }
+        function searchChapters() {
+            let filter = document.getElementById('searchInput').value.toUpperCase();
+            let cards = document.getElementById('chList').getElementsByTagName('div');
+            for (let i = 0; i < cards.length; i++) {
+                let h4 = cards[i].getElementsByTagName("h4")[0];
+                if (h4) {
+                    let txtValue = h4.textContent || h4.innerText;
+                    cards[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+                }
+            }
         }
-
-        function saveChapterName() {
-            const newName = document.getElementById('editChName').value;
-            db.ref('ncert_v2/' + currentCHId).update({ name: newName }).then(() => closeModal('editChapterModal'));
-        }
-
-        function deleteChapter(id) {
-            if(confirm("Delete this chapter?")) db.ref('ncert_v2/' + id).remove();
-        }
-
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        loadChapters();
+        loadList();
     </script>
 </body>
 </html>
