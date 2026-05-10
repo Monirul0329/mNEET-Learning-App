@@ -1,7 +1,10 @@
 <script>
-    // ... (Firebase Config same as above)
+    const firebaseConfig = { /* same as above */ };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    let allBatches = [];
+
     function saveBatch() {
-        const btn = document.getElementById('publishBtn');
         const data = {
             title: document.getElementById('cTitle').value,
             price: document.getElementById('cPrice').value,
@@ -15,19 +18,51 @@
             isHidden: false,
             timestamp: Date.now()
         };
-
-        if(!data.title || !data.price) return alert("Batch Name & Price is required!");
-        
-        btn.innerText = "Publishing...";
-        btn.disabled = true;
-
+        if(!data.title) return alert("Enter Batch Title");
         database.ref('courses').push(data).then(() => {
-            alert("Batch Published Successfully!");
-            btn.innerText = "Publish New Batch";
-            btn.disabled = false;
-            // Clear inputs
-            document.querySelectorAll('input, textarea').forEach(i => i.value = "");
+            alert("Batch Created!");
+            document.querySelectorAll('input, textarea').forEach(el => el.value = "");
         });
     }
-    // ... loadBatches and other functions remain same but with better error handling
-</script>
+
+    function loadBatches() {
+        database.ref('courses').on('value', (snap) => {
+            allBatches = [];
+            snap.forEach(child => { allBatches.push({ id: child.key, ...child.val() }); });
+            renderBatches(allBatches);
+        });
+    }
+
+    function renderBatches(data) {
+        const list = document.getElementById('batchList');
+        list.innerHTML = data.map(b => `
+            <div class="glass p-5 rounded-[2.5rem] border ${b.isHidden ? 'border-red-900 opacity-50' : 'border-white/5'} mb-4">
+                <div class="flex gap-4 items-center mb-4">
+                    <img src="${b.thumbnail || 'https://via.placeholder.com/150'}" class="w-14 h-14 rounded-2xl object-cover">
+                    <div class="flex-1">
+                        <h4 class="text-[10px] font-black uppercase italic">${b.title}</h4>
+                        <p class="text-[#eab308] font-black text-xs">₹${b.price} <span class="text-gray-500 text-[8px] ml-2 font-bold uppercase">Exam: ${b.examDate}</span></p>
+                    </div>
+                </div>
+                <div class="flex gap-2 border-t border-white/5 pt-4">
+                    <button onclick="toggleHide('${b.id}', ${b.isHidden})" class="flex-1 bg-blue-600/10 text-blue-400 py-3 rounded-xl text-[8px] font-black uppercase border border-blue-500/10 active:scale-95 transition-all">
+                        <i class="fa-solid ${b.isHidden ? 'fa-eye' : 'fa-eye-slash'} mr-1"></i> ${b.isHidden ? 'Unhide' : 'Hide'}
+                    </button>
+                    <button onclick="deleteBatch('${b.id}')" class="bg-red-600/10 text-red-500 px-4 py-3 rounded-xl text-[8px] border border-red-500/10 active:scale-95 transition-all">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function searchBatch() {
+        const term = document.getElementById('courseSearch').value.toLowerCase();
+        const filtered = allBatches.filter(b => b.title.toLowerCase().includes(term));
+        renderBatches(filtered);
+    }
+    function toggleHide(id, status) { database.ref('courses/' + id).update({ isHidden: !status }); }
+    function deleteBatch(id) { if(confirm("Confirm permanent delete?")) database.ref('courses/' + id).remove(); }
+    loadBatches();
+                                   </script>
+                                   
