@@ -2,179 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCERT AI READER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        /* Real Book Paper Texture & Feel */
-        body { background: #1a1c2c; color: #333; overflow-x: hidden; font-family: 'Segoe UI', sans-serif; }
-        
-        .paper {
-            background: #ffffff;
-            background-image: radial-gradient(#e5e5e5 1px, transparent 1px);
-            background-size: 20px 20px;
-            min-height: 100vh;
-            width: 100%;
-            max-width: 850px;
-            margin: 80px auto 140px auto;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            padding: 50px;
-            position: relative;
-            border-radius: 4px;
-        }
-
-        /* Top Bar with Search & Back */
-        .top-nav {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            background: rgba(26, 28, 44, 0.95); backdrop-filter: blur(10px);
-            padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex; align-items: center; gap: 15px;
-        }
-
-        /* Smart Audio Bar - Floating style */
-        .audio-dock {
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 500px; background: #0f172a; border-radius: 50px;
-            padding: 12px 25px; display: flex; align-items: center; gap: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6); z-index: 2000;
-            border: 1px solid #eab308;
-        }
-
-        /* PYQ Year Tags */
-        .pyq-tag {
-            background: #fef08a; color: #854d0e; font-size: 10px; font-weight: 900;
-            padding: 2px 8px; border-radius: 4px; cursor: pointer;
-            margin-left: 5px; border: 1px solid #eab308; display: inline-flex;
-            align-items: center; vertical-align: middle;
-        }
-
-        canvas { width: 100% !important; height: auto !important; margin-bottom: 30px; }
-        .highlight-word { background: rgba(234, 179, 8, 0.3); border-radius: 3px; }
-        .locked { pointer-events: none !important; user-select: none !important; }
+        body { background: #f3f4f6; color: #1f2937; font-family: 'Georgia', serif; }
+        .paper { background: white; min-height: 100vh; max-width: 800px; margin: 65px auto 120px auto; box-shadow: 0 0 30px rgba(0,0,0,0.1); padding: 20px; position: relative; }
+        canvas { width: 100% !important; height: auto !important; margin-bottom: 20px; }
+        .audio-dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #111827; border-radius: 2rem; padding: 12px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 1000; border: 1px solid #374151; }
+        .locked { pointer-events: none; }
     </style>
 </head>
 <body>
-
-    <div class="top-nav">
-        <button onclick="history.back()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white active:scale-90 transition-all">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <div class="relative flex-1">
-            <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-400 text-sm"></i>
-            <input type="text" placeholder="Search in Chapter..." class="w-full bg-white/5 border border-white/10 rounded-full py-2.5 pl-11 pr-4 text-white text-xs outline-none focus:border-yellow-500">
+    <div class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md p-4 flex justify-between items-center z-[2000] border-b shadow-sm">
+        <div class="flex items-center gap-3">
+            <button onclick="history.back()" class="text-gray-600 w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-chevron-left"></i></button>
+            <h2 id="rTitle" class="text-[10px] font-black uppercase italic tracking-widest text-gray-800">NCERT AI READER</h2>
         </div>
-        <button onclick="toggleLock()" id="lockBtn" class="text-yellow-500 text-lg ml-2">
-            <i class="fa-solid fa-lock-open"></i>
-        </button>
+        <button onclick="toggleLock()" id="lockBtn" class="text-blue-500"><i class="fa-solid fa-lock-open"></i></button>
     </div>
 
-    <div id="master-page" class="paper">
-        <div id="pdf-render-area">
-            <p class="text-center text-gray-400 italic py-20 uppercase font-black tracking-widest text-[10px]">Initializing NCERT AI Environment...</p>
-        </div>
-    </div>
+    <div id="bookArea" class="paper"><div id="pdf-container"></div></div>
 
     <div class="audio-dock">
-        <button onclick="toggleAudio()" id="playBtn" class="w-11 h-11 bg-yellow-500 text-black rounded-full flex items-center justify-center shadow-lg active:scale-90">
-            <i class="fa-solid fa-play"></i>
-        </button>
-        
-        <div class="flex-1">
-            <div class="flex justify-between items-center mb-1">
-                <span class="text-[8px] font-black text-yellow-500 uppercase italic">Syncing Audio...</span>
-                <span id="speedDisplay" class="text-[8px] font-black text-white bg-white/10 px-2 py-0.5 rounded">1.0x</span>
-            </div>
-            <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                <div id="audioProgress" class="bg-yellow-500 h-full w-0 transition-all duration-300"></div>
-            </div>
-        </div>
-
-        <button onclick="cycleSpeed()" class="text-white bg-white/5 w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold"><i class="fa-solid fa-gauge-high"></i></button>
-        
-        <audio id="ncertAudio" src=""></audio>
+        <button onclick="playA()" id="pIco" class="w-10 h-10 bg-yellow-500 text-black rounded-full flex items-center justify-center"><i class="fa-solid fa-play"></i></button>
+        <div class="flex-1"><div class="bg-gray-700 h-1 rounded-full"><div id="aProg" class="bg-yellow-500 h-full w-0"></div></div></div>
+        <select onchange="audio.playbackRate = this.value" class="bg-gray-800 text-[10px] text-yellow-500 font-bold p-1 rounded">
+            <option value="1">1.0x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2.0x</option><option value="0.75">0.75x</option>
+        </select>
+        <audio id="mainA"></audio>
     </div>
 
     <script>
-        // PDF.js Setup
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        const firebaseConfig = { /* Config */ };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const audio = document.getElementById('mainA');
+        const cid = new URLSearchParams(window.location.search).get('id');
 
-        let audio = document.getElementById('ncertAudio');
-        let isLocked = false;
-        let speeds = [1, 1.25, 1.5, 2, 0.75];
-        let currentSpeedIdx = 0;
+        db.ref('ncert_ai/'+cid).once('value', async snap => {
+            const d = snap.val();
+            document.getElementById('rTitle').innerText = d.name;
+            audio.src = d.audio;
+            if(d.pdf) renderPDF(d.pdf);
+        });
 
-        // Function to cycle playback speed
-        function cycleSpeed() {
-            currentSpeedIdx = (currentSpeedIdx + 1) % speeds.length;
-            let newSpeed = speeds[currentSpeedIdx];
-            audio.playbackRate = newSpeed;
-            document.getElementById('speedDisplay').innerText = newSpeed + 'x';
-        }
-
-        // Lock/Unlock editing and scrolling
-        function toggleLock() {
-            isLocked = !isLocked;
-            const page = document.getElementById('master-page');
-            const btn = document.getElementById('lockBtn');
-            if(isLocked) {
-                page.classList.add('locked');
-                btn.innerHTML = '<i class="fa-solid fa-lock text-red-500"></i>';
-            } else {
-                page.classList.remove('locked');
-                btn.innerHTML = '<i class="fa-solid fa-lock-open text-yellow-500"></i>';
-            }
-        }
-
-        // Audio controls
-        function toggleAudio() {
-            const btn = document.getElementById('playBtn');
-            if(audio.paused) {
-                audio.play();
-                btn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            } else {
-                audio.pause();
-                btn.innerHTML = '<i class="fa-solid fa-play"></i>';
-            }
-        }
-
-        // Progress bar update
-        audio.ontimeupdate = () => {
-            let prog = (audio.currentTime / audio.duration) * 100;
-            document.getElementById('audioProgress').style.width = prog + "%";
-            
-            // FUTURE LOGIC: Highlight text based on currentTime
-            // syncTextHighlight(audio.currentTime);
-        };
-
-        // Render PDF (Simulated for Demo - You will pass your Firebase URL here)
         async function renderPDF(url) {
-            const loadingTask = pdfjsLib.getDocument(url);
-            const pdf = await loadingTask.promise;
-            const area = document.getElementById('pdf-render-area');
-            area.innerHTML = ''; // Clear loading message
-
-            for(let i = 1; i <= pdf.numPages; i++) {
+            const pdf = await pdfjsLib.getDocument(url).promise;
+            const container = document.getElementById('pdf-container');
+            for(let i=1; i<=pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 1.5 });
+                const viewport = page.getViewport({scale: 1.5});
                 const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                await page.render({ canvasContext: context, viewport: viewport }).promise;
-                area.appendChild(canvas);
+                const ctx = canvas.getContext('2d');
+                canvas.height = viewport.height; canvas.width = viewport.width;
+                await page.render({canvasContext: ctx, viewport: viewport}).promise;
+                container.appendChild(canvas);
             }
         }
 
-        // Fetch data from URL parameters (passed from admin or list page)
-        const params = new URLSearchParams(window.location.search);
-        const pdfUrl = params.get('pdf');
-        const audioUrl = params.get('audio');
-        
-        if(pdfUrl) renderPDF(pdfUrl);
-        if(audioUrl) audio.src = audioUrl;
-
+        function playA() {
+            if(audio.paused) { audio.play(); document.getElementById('pIco').innerHTML='<i class="fa-solid fa-pause"></i>'; }
+            else { audio.pause(); document.getElementById('pIco').innerHTML='<i class="fa-solid fa-play"></i>'; }
+        }
+        audio.ontimeupdate = () => document.getElementById('aProg').style.width = (audio.currentTime/audio.duration)*100 + "%";
+        function toggleLock() {
+            document.getElementById('bookArea').classList.toggle('locked');
+            document.getElementById('lockBtn').innerHTML = document.getElementById('bookArea').classList.contains('locked') ? '<i class="fa-solid fa-lock text-red-500"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+        }
     </script>
 </body>
 </html>
