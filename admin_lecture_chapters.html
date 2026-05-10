@@ -1,104 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <style>
-        .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        body { background: #070b14; color: white; font-family: sans-serif; }
-        .tab-btn.active { border-bottom: 2px solid #eab308; color: #eab308; }
-    </style>
-</head>
-<body class="p-6 pb-32">
+<script>
+    // ... (Firebase Init)
+    let currentChapterId = null;
+    const batchId = localStorage.getItem('selectedBatchId');
 
-    <div class="flex items-center gap-4 mb-6">
-        <button onclick="history.back()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400"><i class="fa-solid fa-chevron-left"></i></button>
-        <h1 class="text-sm font-black italic uppercase text-blue-400">NCERT & Lecture Hub</h1>
-    </div>
+    if(!batchId) {
+        alert("Please Select a Batch from Dashboard first!");
+        location.href = 'admin_dashboard.html';
+    }
 
-    <div class="relative mb-6">
-        <input type="text" id="chapterSearch" oninput="searchChapters()" placeholder="Search Chapter..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none">
-        <i class="fa-solid fa-magnifying-glass absolute left-5 top-4.5 text-gray-500"></i>
-    </div>
+    function createChapter() {
+        const name = document.getElementById('chName').value;
+        if(!name) return alert("Enter Chapter Name!");
+        // Store chapters inside specific batch
+        database.ref(`courses/${batchId}/chapters`).push({
+            name: name,
+            timestamp: Date.now()
+        }).then(() => {
+            document.getElementById('chName').value = "";
+            alert("Chapter Created!");
+        });
+    }
 
-    <div class="glass p-5 rounded-3xl mb-8 border border-white/5">
-        <input type="text" id="chName" placeholder="New Chapter Name..." class="w-full bg-black/20 p-4 rounded-xl text-xs mb-3 outline-none border border-white/10">
-        <button onclick="createChapter()" class="w-full bg-blue-600 py-3 rounded-xl font-black uppercase text-[10px]">Add Chapter</button>
-    </div>
-
-    <div id="chapterList" class="space-y-3"></div>
-
-    <div id="contentModal" class="fixed inset-0 bg-black/95 z-[100] hidden overflow-y-auto p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 id="modalTitle" class="text-xs font-black uppercase text-yellow-500 italic">Manage Content</h2>
-            <button onclick="closeModal()" class="text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        
-        <div class="glass p-5 rounded-3xl space-y-3 mb-6">
-            <select id="contentType" class="w-full p-4 rounded-xl bg-black/40 text-xs uppercase font-bold border border-white/10">
-                <option value="video">Lecture Video (URL/ID)</option>
-                <option value="pdf">NCERT PDF (Link)</option>
-                <option value="audio">Audio Lecture (Link)</option>
-                <option value="pyq">PYQ Tag (PDF Link)</option>
-            </select>
-            <input type="text" id="contTitle" placeholder="Content Title (e.g. Part 01)" class="w-full p-4 rounded-xl bg-black/40 text-xs border border-white/10">
-            <input type="text" id="contUrl" placeholder="Paste URL here..." class="w-full p-4 rounded-xl bg-black/40 text-xs border border-white/10">
-            <button onclick="addContent()" class="w-full bg-yellow-500 text-black py-4 rounded-xl font-black uppercase text-xs">Upload Now</button>
-        </div>
-
-        <div id="addedContentList" class="space-y-2"></div>
-    </div>
-
-    <script>
-        // (Firebase Init same as above)
-        let allChapters = [];
-        const batchId = localStorage.getItem('selectedBatchId');
-
-        if(!batchId) {
-            alert("Please select a batch from Dashboard first!");
-            location.href = 'admin_dashboard.html';
-        }
-
-        function createChapter() {
-            const name = document.getElementById('chName').value;
-            if(!name) return;
-            database.ref(`courses/${batchId}/chapters`).push({
-                name: name,
-                timestamp: Date.now()
-            }).then(() => { document.getElementById('chName').value = ""; });
-        }
-
-        function loadChapters() {
-            database.ref(`courses/${batchId}/chapters`).on('value', (snap) => {
-                allChapters = [];
-                const list = document.getElementById('chapterList');
-                list.innerHTML = "";
-                snap.forEach(child => {
-                    const ch = { id: child.key, ...child.val() };
-                    allChapters.push(ch);
-                    renderChapterCard(ch);
-                });
-            });
-        }
-
-        function renderChapterCard(ch) {
-            const list = document.getElementById('chapterList');
-            list.innerHTML += `
-                <div class="glass p-4 rounded-2xl flex justify-between items-center">
-                    <div onclick="openManager('${ch.id}', '${ch.name}')" class="flex-1">
-                        <h4 class="text-[11px] font-black uppercase italic">${ch.name}</h4>
-                    </div>
-                    <button onclick="deleteChapter('${ch.id}')" class="text-red-500 p-2"><i class="fa-solid fa-trash-can"></i></button>
-                </div>`;
-        }
-
-        function searchChapters() {
-            const term = document.getElementById('chapterSearch').value.toLowerCase();
+    function loadChapters() {
+        database.ref(`courses/${batchId}/chapters`).on('value', (snap) => {
             const list = document.getElementById('chapterList');
             list.innerHTML = "";
-            allChapters.filter(c => c.name.toLowerCase().includes(term)).forEach(renderChapterCard);
-        }
+            snap.forEach(child => {
+                const ch = child.val();
+                list.innerHTML += `
+                    <div class="glass p-5 rounded-[2rem] flex justify-between items-center border border-white/5 mb-3">
+                        <div class="flex-1" onclick="openManager('${child.key}', '${ch.name}')">
+                            <h4 class="text-[11px] font-black uppercase italic">${ch.name}</h4>
+                            <p class="text-[7px] text-gray-500 font-bold mt-1 uppercase italic tracking-widest">Click to Edit/Add Content</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="deleteChapter('${child.key}')" class="w-8 h-8 rounded-full bg-red-500/10 text-red-500 text-[10px] border border-red-500/20"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
 
-        // ... closeModal, openManager, addContent, loadChapterContent functions ...
-        // Note: Use path `courses/${batchId}/chapters/${currentChapterId}/content` for uploads.
-    </script>
-</body>
-</html>
+    function openManager(id, name) {
+        currentChapterId = id;
+        document.getElementById('modalTitle').innerText = name;
+        document.getElementById('contentModal').classList.remove('hidden');
+        loadChapterContent(id);
+    }
+
+    function addContent() {
+        const type = document.getElementById('contentType').value;
+        const title = document.getElementById('contTitle').value;
+        const url = document.getElementById('contUrl').value;
+        if(!title || !url) return alert("Fill all fields!");
+
+        database.ref(`courses/${batchId}/chapters/${currentChapterId}/content`).push({
+            type: type,
+            title: title,
+            url: url
+        }).then(() => {
+            document.getElementById('contTitle').value = "";
+            document.getElementById('contUrl').value = "";
+        });
+    }
+
+    function loadChapterContent(chId) {
+        database.ref(`courses/${batchId}/chapters/${chId}/content`).on('value', (snap) => {
+            const list = document.getElementById('addedContentList');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const c = child.val();
+                list.innerHTML += `
+                    <div class="glass p-4 rounded-2xl flex justify-between items-center border border-white/5 mb-2">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-file-pdf text-yellow-500 text-[10px]"></i>
+                            <span class="text-[9px] font-black uppercase">${c.title} (${c.type})</span>
+                        </div>
+                        <button onclick="deleteContent('${chId}', '${child.key}')" class="text-red-500 text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+            });
+        });
+    }
+
+    function closeModal() { document.getElementById('contentModal').classList.add('hidden'); }
+    function deleteChapter(id) { if(confirm("Delete Chapter?")) database.ref(`courses/${batchId}/chapters/${id}`).remove(); }
+    function deleteContent(chId, cId) { database.ref(`courses/${batchId}/chapters/${chId}/content/${cId}`).remove(); }
+
+    loadChapters();
+</script>
