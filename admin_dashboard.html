@@ -9,12 +9,11 @@
     <style>
         .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
-        body { background: #070b14; color: white; font-family: sans-serif; }
+        body { background: #070b14; color: white; font-family: sans-serif; overflow-x: hidden; }
     </style>
 </head>
 <body class="p-6 pb-36">
 
-    <!-- Row 1: Top Bar -->
     <div class="flex justify-between items-center mb-8">
         <div>
             <h2 class="text-xl font-black gold-glow uppercase italic leading-none">ADMIN CONTROL</h2>
@@ -25,68 +24,31 @@
         </button>
     </div>
 
-    <!-- Row 2: Select Course Option -->
-    <div class="glass p-5 rounded-3xl mb-4 border border-white/5">
+    <div class="glass p-5 rounded-3xl mb-4 border border-white/5 shadow-2xl">
         <p class="text-[8px] text-yellow-500 font-black uppercase mb-3 ml-1 italic tracking-widest">Select Active Batch to Manage</p>
-        <select id="adminBatchSelect" class="w-full bg-[#0b1120] border border-gray-700 p-4 rounded-2xl text-[10px] font-black uppercase gold-glow outline-none">
-            <option value="">-- ALL ACTIVE BATCHES --</option>
+        <select id="adminBatchSelect" onchange="saveSelectedBatch(this.value)" class="w-full bg-[#0b1120] border border-gray-700 p-4 rounded-2xl text-[12px] font-black uppercase gold-glow outline-none">
+            <option value="">-- SELECT BATCH --</option>
         </select>
     </div>
 
-    <!-- Row 3: Student Control -->
-    <div onclick="location.href='admin_users.html'" class="glass p-6 rounded-3xl mb-4 flex items-center justify-between border-l-4 border-blue-500 active:scale-95 transition-all cursor-pointer">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 shadow-lg shadow-blue-500/10">
-                <i class="fa-solid fa-user-gear"></i>
+    <div class="grid grid-cols-1 gap-4">
+        <div onclick="location.href='admin_users.html'" class="glass p-6 rounded-3xl flex items-center justify-between border-l-4 border-blue-500 active:scale-95 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fa-solid fa-user-gear"></i></div>
+                <div><h3 class="text-[11px] font-black uppercase italic">Student Control</h3></div>
             </div>
-            <div>
-                <h3 class="text-[11px] font-black uppercase italic">Student Control</h3>
-                <p class="text-[7px] text-gray-500 font-bold uppercase mt-0.5">Manage Access, Ban & Profiles</p>
-            </div>
+            <i class="fa-solid fa-chevron-right text-gray-700"></i>
         </div>
-        <i class="fa-solid fa-chevron-right text-gray-700 text-xs"></i>
-    </div>
 
-    <!-- Row 4: WP Community -->
-    <div onclick="window.open('https://wa.me/yournumber')" class="glass p-6 rounded-3xl mb-4 flex items-center justify-between border-l-4 border-green-500 active:scale-95 transition-all cursor-pointer">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500 shadow-lg shadow-green-500/10">
-                <i class="fa-brands fa-whatsapp text-lg"></i>
+        <div onclick="location.href='admin_notifications.html'" class="glass p-6 rounded-3xl flex items-center justify-between border-l-4 border-orange-500 active:scale-95 transition-all">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500"><i class="fa-solid fa-bullhorn"></i></div>
+                <div><h3 class="text-[11px] font-black uppercase italic">Push Notification</h3></div>
             </div>
-            <div>
-                <h3 class="text-[11px] font-black uppercase italic">WP Community</h3>
-                <p class="text-[7px] text-gray-500 font-bold uppercase mt-0.5">Direct Student Support Hub</p>
-            </div>
-        </div>
-        <span class="bg-green-600/20 text-green-500 px-3 py-1 rounded-full text-[8px] font-black uppercase">Online</span>
-    </div>
-
-    <!-- Row 5: Notification Send Option -->
-    <div onclick="location.href='admin_notifications.html'" class="glass p-6 rounded-3xl mb-4 flex items-center justify-between border-l-4 border-orange-500 active:scale-95 transition-all cursor-pointer">
-        <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 shadow-lg shadow-orange-500/10">
-                <i class="fa-solid fa-bullhorn"></i>
-            </div>
-            <div>
-                <h3 class="text-[11px] font-black uppercase italic">Push Notification</h3>
-                <p class="text-[7px] text-gray-500 font-bold uppercase mt-0.5">Send Global Updates To All</p>
-            </div>
-        </div>
-        <i class="fa-solid fa-paper-plane text-orange-500 text-xs"></i>
-    </div>
-
-    <!-- Row 6: Motivational Video/Img Upload -->
-    <div class="glass p-6 rounded-[2.5rem] mb-10 border border-yellow-500/10">
-        <h3 class="text-[9px] font-black uppercase text-gray-400 mb-4 italic tracking-[0.2em] px-1">Upload Daily Motivation</h3>
-        <div class="space-y-3">
-            <input type="text" id="mMediaUrl" placeholder="Media URL (Image or MP4)" class="w-full bg-[#0b1120] p-4 rounded-2xl border border-gray-700 text-[10px] outline-none focus:border-yellow-500">
-            <button onclick="uploadMotivation()" class="w-full bg-white text-black py-4 rounded-2xl font-black uppercase text-[10px] shadow-xl active:scale-95 transition-all">
-                Update Dashboard Media
-            </button>
+            <i class="fa-solid fa-paper-plane text-orange-500 text-xs"></i>
         </div>
     </div>
 
-    <!-- Navigation Bar -->
     <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50 shadow-2xl border-white/10">
         <i class="fa-solid fa-house gold-glow"></i>
         <a href="admin_study.html"><i class="fa-solid fa-book-open text-gray-600"></i></a>
@@ -106,28 +68,24 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        function uploadMotivation() {
-            const url = document.getElementById('mMediaUrl').value;
-            if(!url) return alert("Please enter Media URL!");
-            database.ref('admin/motivation').set({
-                url: url,
-                time: Date.now()
-            }).then(() => alert("Motivation Updated! 🚀"));
-        }
-
-        // Load courses for the select option
-        database.ref('courses').on('value', (snap) => {
-            const select = document.getElementById('adminBatchSelect');
-            select.innerHTML = '<option value="">-- ALL ACTIVE BATCHES --</option>';
-            snap.forEach(child => {
-                select.innerHTML += `<option value="${child.key}">${child.val().title}</option>`;
+        function loadBatches() {
+            database.ref('courses').on('value', (snap) => {
+                const select = document.getElementById('adminBatchSelect');
+                const saved = localStorage.getItem('selectedBatchId');
+                select.innerHTML = '<option value="">-- SELECT BATCH --</option>';
+                snap.forEach(child => {
+                    const selected = (child.key === saved) ? 'selected' : '';
+                    select.innerHTML += `<option value="${child.key}" ${selected}>${child.val().title}</option>`;
+                });
             });
-        });
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
         }
+
+        function saveSelectedBatch(id) {
+            if(id) localStorage.setItem('selectedBatchId', id);
+        }
+
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+        loadBatches();
     </script>
 </body>
 </html>
