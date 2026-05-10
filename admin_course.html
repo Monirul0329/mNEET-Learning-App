@@ -11,14 +11,14 @@
         .glass-input { background: #0b1120; border: 1px solid #1f2937; outline: none; color: white; }
         .glass-input:focus { border-color: #eab308; }
         body { background: #070b14; color: white; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .scroll-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 120px; }
+        .scroll-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 120px; scroll-behavior: smooth; }
         ::-webkit-scrollbar { width: 0px; }
         .active-nav { color: #eab308 !important; }
     </style>
 </head>
 <body>
 
-    <div class="flex justify-between items-center p-6 bg-[#16213e] border-b border-white/5">
+    <div class="flex justify-between items-center p-6 bg-[#16213e] border-b border-white/5 shadow-xl">
         <button onclick="history.back()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90">
             <i class="fa-solid fa-chevron-left"></i>
         </button>
@@ -30,13 +30,13 @@
 
     <div class="p-4 bg-[#070b14]">
         <div class="relative">
-            <input type="text" id="courseSearch" oninput="searchBatch()" placeholder="Search batch by name..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none text-white">
+            <input type="text" id="courseSearch" onkeyup="searchBatch()" placeholder="Search batch by name..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none text-white">
             <i class="fa-solid fa-magnifying-glass absolute left-5 top-4 text-gray-500"></i>
         </div>
     </div>
 
     <div class="scroll-area" id="mainScroll">
-        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-10">
+        <div id="formAnchor" class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-10">
             <p id="formTitle" class="text-[8px] font-black uppercase text-gray-500 mb-6 text-center italic tracking-widest">Publish New Batch</p>
             <div class="space-y-3">
                 <input type="hidden" id="editBatchId">
@@ -58,7 +58,7 @@
                     </div>
                     <div class="flex flex-col gap-1">
                         <label class="text-[7px] text-yellow-500 uppercase font-black ml-1">Exam</label>
-                        <input type="date" id="examDate" class="w-full glass-input p-3 rounded-xl text-[9px] text-yellow-500">
+                        <input type="date" id="examDate" class="w-full glass-input p-3 rounded-xl text-[9px] text-yellow-500 border-yellow-500/20">
                     </div>
                 </div>
 
@@ -69,8 +69,10 @@
             </div>
         </div>
 
-        <h3 class="text-[10px] font-black uppercase text-gray-500 mb-6 px-2 italic">Active Batches List</h3>
-        <div id="batchList" class="space-y-4"></div>
+        <h3 class="text-[10px] font-black uppercase text-gray-500 mb-6 px-2 italic tracking-widest">Active Batches</h3>
+        <div id="batchList" class="space-y-4">
+            <p class="text-center text-gray-600 text-xs py-10 italic">Loading batches...</p>
+        </div>
     </div>
 
     <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50 shadow-2xl border-white/10">
@@ -93,6 +95,47 @@
         const database = firebase.database();
         let allBatches = [];
 
+        // Real-time Data Sync
+        function loadBatches() {
+            database.ref('courses').on('value', (snap) => {
+                allBatches = [];
+                if(snap.exists()){
+                    snap.forEach(child => {
+                        allBatches.push({ id: child.key, ...child.val() });
+                    });
+                    renderBatches(allBatches);
+                } else {
+                    document.getElementById('batchList').innerHTML = `<p class="text-center text-gray-700 text-[10px] py-10 uppercase font-bold italic">No Batches Found</p>`;
+                }
+            });
+        }
+
+        function renderBatches(data) {
+            const list = document.getElementById('batchList');
+            list.innerHTML = data.map(b => `
+                <div class="glass p-5 rounded-[2rem] border ${b.isHidden ? 'border-red-900 opacity-50' : 'border-white/5'}">
+                    <div class="flex gap-4 items-center mb-4">
+                        <div class="w-14 h-14 rounded-xl overflow-hidden bg-black/40 border border-white/5">
+                            <img src="${b.thumbnail || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150'">
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-[11px] font-black uppercase italic tracking-tighter">${b.title}</h4>
+                            <p class="text-[#eab308] font-black text-xs">₹${b.price} <span class="text-gray-500 text-[8px] ml-1">(-${b.discount}%)</span></p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 border-t border-white/5 pt-4">
+                        <button onclick="editBatch('${b.id}')" class="flex-1 bg-white/5 text-white py-3 rounded-xl text-[8px] font-black uppercase border border-white/5">Edit</button>
+                        <button onclick="toggleHide('${b.id}', ${b.isHidden})" class="flex-1 bg-blue-600/10 text-blue-400 py-3 rounded-xl text-[8px] font-black uppercase border border-blue-500/10">
+                            ${b.isHidden ? 'Unhide' : 'Hide'}
+                        </button>
+                        <button onclick="deleteBatch('${b.id}')" class="bg-red-600/10 text-red-500 px-4 py-3 rounded-xl text-[8px] border border-red-500/10">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function saveBatch() {
             const editId = document.getElementById('editBatchId').value;
             const data = {
@@ -108,7 +151,10 @@
                 timestamp: Date.now()
             };
 
-            if(!data.title || !data.examDate) return alert("Please fill Name and Exam Date!");
+            if(!data.title || !data.examDate) return alert("Fill Name and Exam Date!");
+
+            const btn = document.getElementById('publishBtn');
+            btn.innerText = "Processing...";
 
             if(editId) {
                 database.ref('courses/' + editId).update(data).then(() => {
@@ -117,51 +163,10 @@
                 });
             } else {
                 database.ref('courses').push(data).then(() => {
-                    alert("Batch Created!");
+                    alert("Batch Published!");
                     resetForm();
                 });
             }
-        }
-
-        function resetForm() {
-            document.querySelectorAll('input, textarea').forEach(el => el.value = "");
-            document.getElementById('editBatchId').value = "";
-            document.getElementById('publishBtn').innerText = "Publish Batch Now";
-            document.getElementById('formTitle').innerText = "Publish New Batch";
-        }
-
-        function loadBatches() {
-            database.ref('courses').on('value', (snap) => {
-                allBatches = [];
-                snap.forEach(child => {
-                    allBatches.push({ id: child.key, ...child.val() });
-                });
-                renderBatches(allBatches);
-            });
-        }
-
-        function renderBatches(data) {
-            const list = document.getElementById('batchList');
-            list.innerHTML = data.map(b => `
-                <div class="glass p-5 rounded-[2rem] border ${b.isHidden ? 'border-red-900 opacity-50' : 'border-white/5'}">
-                    <div class="flex gap-4 items-center mb-4">
-                        <img src="${b.thumbnail || 'https://via.placeholder.com/150'}" class="w-14 h-14 rounded-xl object-cover bg-black/40">
-                        <div class="flex-1">
-                            <h4 class="text-[10px] font-black uppercase italic">${b.title}</h4>
-                            <p class="text-[#eab308] font-black text-xs">₹${b.price} <span class="text-gray-500 text-[7px] ml-1">(-${b.discount}%)</span></p>
-                        </div>
-                    </div>
-                    <div class="flex gap-2 border-t border-white/5 pt-4">
-                        <button onclick="editBatch('${b.id}')" class="flex-1 bg-white/5 text-white py-3 rounded-xl text-[8px] font-black uppercase border border-white/5 active:scale-95">Edit</button>
-                        <button onclick="toggleHide('${b.id}', ${b.isHidden})" class="flex-1 bg-blue-600/10 text-blue-400 py-3 rounded-xl text-[8px] font-black uppercase border border-blue-500/10">
-                            ${b.isHidden ? 'Unhide' : 'Hide'}
-                        </button>
-                        <button onclick="deleteBatch('${b.id}')" class="bg-red-600/10 text-red-500 px-4 py-3 rounded-xl text-[8px] border border-red-500/10 active:scale-95">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
         }
 
         function editBatch(id) {
@@ -178,6 +183,8 @@
             
             document.getElementById('publishBtn').innerText = "Update Batch Now";
             document.getElementById('formTitle').innerText = "Editing: " + b.title;
+            
+            // Scroll to Form
             document.getElementById('mainScroll').scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -187,11 +194,19 @@
             renderBatches(filtered);
         }
 
+        function resetForm() {
+            document.querySelectorAll('.glass-input').forEach(el => el.value = "");
+            document.getElementById('editBatchId').value = "";
+            document.getElementById('publishBtn').innerText = "Publish Batch Now";
+            document.getElementById('formTitle').innerText = "Publish New Batch";
+        }
+
         function toggleHide(id, status) { database.ref('courses/' + id).update({ isHidden: !status }); }
-        function deleteBatch(id) { if(confirm("Confirm Delete?")) database.ref('courses/' + id).remove(); }
+        function deleteBatch(id) { if(confirm("Are you sure?")) database.ref('courses/' + id).remove(); }
         function logout() { localStorage.clear(); window.location.href = 'index.html'; }
 
         loadBatches();
     </script>
 </body>
-</html>
+    </html>
+    
