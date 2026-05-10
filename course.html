@@ -1,60 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .course-card { background: #16213e; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-        .buy-btn { background: linear-gradient(90deg, #eab308, #ca8a04); }
-    </style>
+    <style> .course-card { background: #16213e; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; } .buy-btn { background: linear-gradient(90deg, #eab308, #ca8a04); } </style>
 </head>
 <body class="bg-[#0b1120] p-4 pb-24 text-white">
-
     <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 mb-6 text-center italic">Available Batches</h2>
-
     <div id="studentCourseList" class="space-y-6"></div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-        const firebaseConfig = { 
-            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
-            authDomain: "mneet-spark.firebaseapp.com",
-            projectId: "mneet-spark",
-            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        const q = query(collection(db, "courses"), where("isHidden", "==", false));
-        
-        onSnapshot(q, (snap) => {
-            const list = document.getElementById('studentCourseList'); 
-            list.innerHTML = "";
+        onSnapshot(query(collection(db, "courses"), where("isHidden", "==", false)), (snap) => {
+            const list = document.getElementById('studentCourseList'); list.innerHTML = "";
             snap.forEach(d => {
                 const c = d.data();
-                // Check if field name is 'img' or 'thumbnail' to avoid blank images
-                const displayImg = c.thumbnail || c.img || 'https://via.placeholder.com/300x150';
-                list.innerHTML += `
-                <div class="course-card rounded-[2.5rem] overflow-hidden shadow-2xl">
-                    <div class="relative">
-                        <img src="${displayImg}" class="w-full h-52 object-cover">
-                        <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg text-[9px] font-black uppercase text-gold">NEW BATCH</div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-2xl font-black italic uppercase tracking-tighter mb-2">${c.title}</h3>
-                        <p class="text-gray-400 text-xs mb-6 line-clamp-2">${c.desc}</p>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-[9px] font-bold text-gray-500 uppercase">Special Price</p>
-                                <p class="text-xl font-black text-white italic">₹${c.price}</p>
-                            </div>
-                            <button class="buy-btn text-black px-8 py-3 rounded-2xl font-black uppercase text-xs shadow-lg active:scale-95 transition-all">Buy Now</button>
-                        </div>
-                    </div>
-                </div>`;
+                list.innerHTML += `<div class="course-card rounded-[2.5rem] overflow-hidden shadow-2xl mb-6"><img src="${c.thumbnail || c.img}" class="w-full h-52 object-cover"><div class="p-6"><h3 class="text-2xl font-black uppercase tracking-tighter mb-2 italic">${c.title}</h3><div class="flex items-center justify-between"><div><p class="text-[9px] font-bold text-gray-500 uppercase">Special Price</p><p class="text-xl font-black text-white italic">₹${c.price}</p></div><button class="buy-btn text-black px-8 py-3 rounded-2xl font-black uppercase text-xs">Buy Now</button></div></div></div>`;
             });
         });
     </script>
