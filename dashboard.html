@@ -20,7 +20,7 @@
 
     <div class="flex justify-between items-start mb-6 px-1">
         <div>
-            <h2 id="uName" class="text-xl font-black italic gold-glow uppercase leading-none tracking-tighter">STUDENT</h2>
+            <h2 id="uName" class="text-xl font-black italic gold-glow uppercase leading-none tracking-tighter">ASPIRANT</h2>
             <p id="uTarget" class="text-[9px] text-gray-500 font-bold mt-1 uppercase italic tracking-widest">AIIMS (TARGET)</p>
         </div>
         <div class="flex gap-2">
@@ -66,18 +66,18 @@
         <div class="study-card glass border-l-4 border-blue-500">
             <i class="fa-solid fa-play-circle text-blue-500 text-2xl mb-2"></i>
             <h4 class="text-[11px] font-black uppercase italic mb-1">New Lecture Uploaded</h4>
-            <p class="text-[8px] text-gray-500 font-bold uppercase italic">Check Study Hub</p>
+            <p class="text-[8px] text-gray-500 font-bold uppercase italic tracking-tighter">Check Study Hub</p>
         </div>
         <div class="study-card glass border-l-4 border-green-500">
             <i class="fa-solid fa-file-signature text-green-500 text-2xl mb-2"></i>
             <h4 class="text-[11px] font-black uppercase italic mb-1">New DPP Sheet</h4>
-            <p class="text-[8px] text-gray-500 font-bold uppercase italic">Check Study Hub</p>
+            <p class="text-[8px] text-gray-500 font-bold uppercase italic tracking-tighter">Check Study Hub</p>
         </div>
     </div>
 
     <div id="motivationBox" class="mb-8 rounded-[3rem] overflow-hidden border border-white/5 h-36 hidden relative shadow-2xl">
         <img id="mImg" src="" class="w-full h-full object-cover opacity-60 hidden">
-        <video id="mVid" class="w-full h-full object-cover hidden" muted loop></video>
+        <video id="mVid" class="w-full h-full object-cover hidden" muted loop playsinline></video>
         <div class="absolute inset-0 flex items-center justify-center"><p class="text-[10px] font-black uppercase italic text-white/90">Mission AIIMS 2026</p></div>
     </div>
 
@@ -98,9 +98,9 @@
 
     <div class="glass p-8 rounded-[3.5rem] mb-12 border border-white/5 shadow-2xl">
         <h3 class="text-[10px] font-black uppercase text-yellow-500 mb-8 italic text-center tracking-[0.3em] border-b border-white/5 pb-4">Performance Analytics</h3>
-        <div class="space-y-4">
+        <div class="space-y-4 px-2">
             <div class="flex justify-between items-center bg-white/5 p-5 rounded-[1.5rem]"><span class="text-[10px] font-black uppercase italic">Accuracy</span><span id="avgAcc" class="text-[11px] font-black text-green-500 italic">0%</span></div>
-            <div class="flex justify-between items-center bg-white/5 p-5 rounded-[1.5rem]"><span class="text-[10px] font-black uppercase italic">Rank</span><span id="rankPred" class="text-[11px] font-black text-yellow-500 italic">#----</span></div>
+            <div class="flex justify-between items-center bg-white/5 p-5 rounded-[1.5rem]"><span class="text-[10px] font-black uppercase italic">Rank Prediction</span><span id="rankPred" class="text-[11px] font-black text-yellow-500 italic">#----</span></div>
         </div>
     </div>
 
@@ -117,6 +117,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const userKey = localStorage.getItem('mUserEmail');
+        let timer;
 
         function init() {
             if(!userKey) { window.location.href = 'index.html'; return; }
@@ -128,14 +129,16 @@
                 document.getElementById('sLectures').innerText = (u.hours || 0) + 'h';
                 document.getElementById('sStudy').innerText = (u.selfStudy || 0.0) + 'h';
                 document.getElementById('sMCQs').innerText = u.questions || 0;
+                document.getElementById('avgAcc').innerText = (u.accuracy || 0) + "%";
+                document.getElementById('rankPred').innerText = "#" + (u.rank || "----");
             });
 
             database.ref('courses').on('value', snap => {
                 const select = document.getElementById('activeBatch');
                 select.innerHTML = '<option value="">-- SWITCH ACTIVE BATCH --</option>';
                 snap.forEach(child => { if(!child.val().isHidden) select.innerHTML += `<option value="${child.key}">${child.val().title}</option>`; });
-                const lastBatch = localStorage.getItem('selectedBatchId');
-                if(lastBatch) { select.value = lastBatch; syncBatchData(lastBatch); }
+                const saved = localStorage.getItem('selectedBatchId');
+                if(saved) { select.value = saved; syncBatchData(saved); }
             });
 
             database.ref('admin/motivation').on('value', snap => {
@@ -148,7 +151,6 @@
             });
         }
 
-        let timer;
         function syncBatchData(id) {
             if(!id) return; localStorage.setItem('selectedBatchId', id);
             database.ref('courses/' + id).on('value', s => {
@@ -173,5 +175,5 @@
         init();
     </script>
 </body>
-                                                                                               </html>
-    
+            </html>
+            
