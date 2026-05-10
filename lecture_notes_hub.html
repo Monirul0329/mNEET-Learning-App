@@ -1,35 +1,61 @@
-<div id="lectureContainer" class="space-y-4">
-    <p class="text-center text-[10px] text-gray-600 uppercase font-black py-10">Select a Batch from Dashboard to see Lectures</p>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        body { background: #070b14; color: white; }
+    </style>
+</head>
+<body class="p-4 pb-28">
 
-<script>
-    const batchId = localStorage.getItem('selectedBatchId');
-    if(batchId) {
-        database.ref(`courses/${batchId}/chapters`).on('value', snap => {
-            const container = document.getElementById('lectureContainer');
-            container.innerHTML = "";
-            snap.forEach(child => {
-                const ch = child.val();
-                container.innerHTML += `
-                <div class="glass p-5 rounded-[2rem] border border-white/5 mb-4">
-                    <h3 class="text-[11px] font-black uppercase mb-3 text-gray-400 italic">${ch.name}</h3>
-                    <div id="content-${child.key}" class="space-y-2">
-                        </div>
-                </div>`;
-                // Load inner content for each chapter
-                database.ref(`courses/${batchId}/chapters/${child.key}/content`).on('value', cSnap => {
-                    const contentDiv = document.getElementById(`content-${child.key}`);
-                    contentDiv.innerHTML = "";
-                    cSnap.forEach(contentChild => {
-                        const c = contentChild.val();
-                        contentDiv.innerHTML += `
-                        <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center">
-                            <p class="text-[9px] font-bold uppercase">${c.title}</p>
-                            <a href="${c.url}" class="w-8 h-8 glass rounded-full flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-play text-[10px]"></i></a>
-                        </div>`;
-                    });
+    <div class="flex justify-between items-center mb-8 px-1">
+        <div class="flex items-center gap-4">
+            <button onclick="history.back()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90"><i class="fa-solid fa-chevron-left"></i></button>
+            <h1 class="text-sm font-black italic uppercase text-blue-400 tracking-tighter">LECTURES HUB</h1>
+        </div>
+        <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20 text-xs font-black italic">🪙 <span id="uCoins">0</span></div>
+    </div>
+
+    <div id="lectureList" class="space-y-6">
+        </div>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const batchId = localStorage.getItem('selectedBatchId');
+        const userKey = localStorage.getItem('mUserEmail');
+
+        if(userKey) { database.ref('users/'+userKey+'/coins').on('value', s => { document.getElementById('uCoins').innerText = s.val() || 0; }); }
+
+        if(batchId) {
+            database.ref(`courses/${batchId}/chapters`).on('value', snap => {
+                const list = document.getElementById('lectureList'); list.innerHTML = "";
+                snap.forEach(child => {
+                    const ch = child.val();
+                    let contentHtml = "";
+                    if(ch.content) {
+                        Object.keys(ch.content).forEach(key => {
+                            const c = ch.content[key];
+                            const icon = c.type === 'video' ? 'fa-video text-blue-400' : 'fa-file-pdf text-yellow-400';
+                            contentHtml += `
+                            <div class="glass p-4 rounded-2xl border border-white/5 flex justify-between items-center mb-2">
+                                <p class="text-[10px] font-bold uppercase tracking-tighter">${c.title}</p>
+                                <a href="${c.url}" class="w-7 h-7 glass rounded-full flex items-center justify-center"><i class="fa-solid ${icon} text-xs"></i></a>
+                            </div>`;
+                        });
+                    }
+                    list.innerHTML += `
+                        <h3 class="text-[11px] font-black uppercase mb-3 tracking-widest text-gray-500 italic px-2">${ch.name}</h3>
+                        <div class="space-y-2 mb-6">${contentHtml || '<p class="text-[8px] text-gray-700 px-2">NO CONTENT YET</p>'}</div>`;
                 });
             });
-        });
-    }
-</script>
+        }
+    </script>
+</body>
+</html>
