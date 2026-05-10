@@ -1,57 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        body { background: #0f172a; color: white; font-family: sans-serif; }
-    </style>
-</head>
-<body class="p-6">
-    <div class="flex items-center gap-4 mb-8">
-        <button onclick="history.back()" class="w-10 h-10 glass rounded-xl flex items-center justify-center text-gray-400"><i class="fa-solid fa-chevron-left"></i></button>
-        <h1 class="text-xs font-black uppercase tracking-widest text-yellow-500">NCERT Chapter Creator</h1>
-    </div>
+<script>
+    // ... Firebase Init
+    const batchId = localStorage.getItem('selectedBatchId');
+    if(!batchId) { alert("Select Batch from Dashboard!"); location.href='admin_dashboard.html'; }
 
-    <div class="glass p-6 rounded-[2.5rem] space-y-5">
-        <input type="text" id="cName" placeholder="Chapter Name (e.g. Genetics)" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none">
-        <select id="cSubject" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none">
-            <option value="Biology">Biology</option><option value="Physics">Physics</option><option value="Chemistry">Chemistry</option>
-        </select>
-        <input type="text" id="pdfUrl" placeholder="NCERT PDF Link (Direct Link)" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none">
-        <input type="text" id="audioUrl" placeholder="Revision Audio Link (MP3)" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none">
-        
-        <button onclick="saveChapter()" class="w-full bg-yellow-500 text-black p-5 rounded-2xl font-black uppercase text-xs shadow-xl active:scale-95 transition-all">Publish Smart Chapter</button>
-    </div>
+    function saveChapter() {
+        const name = document.getElementById('cName').value;
+        const pdf = document.getElementById('pdfUrl').value;
+        const audio = document.getElementById('audioUrl').value;
+        const subject = document.getElementById('cSubject').value;
 
-    <script>
-        const firebaseConfig = { /* Tomar Config */ };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        if(!name || !pdf) return alert("Fill required fields!");
 
-        function saveChapter() {
-            const name = document.getElementById('cName').value;
-            const pdf = document.getElementById('pdfUrl').value;
-            const audio = document.getElementById('audioUrl').value;
-            const subject = document.getElementById('cSubject').value;
-
-            if(!name || !pdf) return alert("Chapter Name and PDF are required!");
-
-            const newChapter = database.ref('ncert_chapters').push();
-            newChapter.set({
-                name, pdf, audio, subject,
-                id: newChapter.key,
-                timestamp: Date.now()
-            }).then(() => {
-                alert("Chapter Added!");
-                location.reload();
-            });
-        }
-    </script>
-</body>
-</html>
-
+        // Storing inside: courses/{batchId}/ncert
+        database.ref(`courses/${batchId}/ncert`).push({
+            name, pdf, audio, subject, timestamp: Date.now()
+        }).then(() => {
+            alert("NCERT Smart Chapter Added!");
+            document.querySelectorAll('input').forEach(i => i.value = "");
+        });
+    }
+</script>
