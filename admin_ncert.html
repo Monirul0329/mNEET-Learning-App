@@ -10,9 +10,9 @@
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .glass-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); outline: none; color: white; }
         body { background: #070b14; color: white; font-family: sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 120px; }
+        .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 120px; scroll-behavior: smooth; }
         ::-webkit-scrollbar { width: 0px; }
-        .gold-text { color: #eab308; }
+        .gold-text { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.3); }
     </style>
 </head>
 <body>
@@ -27,57 +27,69 @@
         </button>
     </div>
 
-    <div class="p-4">
+    <div class="p-4 bg-[#070b14]">
         <div class="relative">
-            <input type="text" id="mainSearch" onkeyup="filterList()" placeholder="Search..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none text-white">
+            <input type="text" id="mainSearch" onkeyup="searchChapter()" placeholder="Search NCERT Chapter..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none text-white">
             <i class="fa-solid fa-magnifying-glass absolute left-5 top-4 text-gray-500"></i>
         </div>
     </div>
 
-    <div class="scroll-area p-4">
-        <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 mb-10 shadow-2xl">
-            <p id="formStatus" class="text-[8px] font-black uppercase text-gray-500 mb-6 text-center italic tracking-widest">Create New Chapter</p>
+    <div class="scroll-area p-4" id="mainScroll">
+        <div id="formSection" class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 mb-10 shadow-2xl">
+            <p id="formStatus" class="text-[8px] font-black uppercase text-gray-500 mb-6 text-center italic tracking-widest">Create New NCERT Chapter</p>
             <div class="space-y-3">
                 <input type="hidden" id="editId">
-                <input type="text" id="itemName" placeholder="Name..." class="w-full glass-input p-4 rounded-xl text-xs font-bold">
+                <input type="text" id="itemName" placeholder="Chapter Name (e.g. Genetics)" class="w-full glass-input p-4 rounded-xl text-xs font-bold">
                 
                 <div id="contentFields" class="hidden space-y-3">
-                    <input type="text" id="pdfUrl" placeholder="PDF Direct Link" class="w-full glass-input p-4 rounded-xl text-[10px]">
-                    <input type="text" id="audioUrl" placeholder="Audio Revision Link" class="w-full glass-input p-4 rounded-xl text-[10px]">
+                    <input type="text" id="pdfUrl" placeholder="NCERT PDF Direct Link" class="w-full glass-input p-4 rounded-xl text-[10px]">
+                    <input type="text" id="audioUrl" placeholder="Revision Audio Link (.mp3)" class="w-full glass-input p-4 rounded-xl text-[10px]">
                 </div>
 
-                <button onclick="saveItem()" id="saveBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs active:scale-95 shadow-lg">Save Changes</button>
+                <button onclick="saveItem()" id="saveBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs active:scale-95 shadow-lg">Save To Hub</button>
             </div>
         </div>
 
+        <h3 class="text-[10px] font-black uppercase text-gray-500 mb-6 px-2 italic tracking-widest">Available Materials</h3>
         <div id="itemList" class="space-y-4"></div>
     </div>
 
     <script>
-        // Firebase Config (Keep same as yours)
+        const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
         const batchId = localStorage.getItem('selectedBatchId');
-        let currentLevel = 'chapters'; // chapters or content
+
+        let currentLevel = 'chapters';
         let currentChapterId = '';
+        let allChapters = [];
+
+        function init() {
+            if(!batchId) { alert("Select Batch First!"); location.href='admin_dashboard.html'; return; }
+            loadChapters();
+        }
 
         function loadChapters() {
             currentLevel = 'chapters';
             document.getElementById('pageTitle').innerText = "NCERT Chapters";
             document.getElementById('contentFields').classList.add('hidden');
-            firebase.database().ref(`courses/${batchId}/ncert`).on('value', snap => {
+            database.ref(`courses/${batchId}/ncert`).on('value', snap => {
+                allChapters = [];
                 const list = document.getElementById('itemList');
                 list.innerHTML = "";
                 snap.forEach(child => {
                     const c = child.val();
+                    allChapters.push({id: child.key, ...c});
                     list.innerHTML += `
                         <div class="glass p-5 rounded-[2rem] border ${c.isHidden ? 'border-red-900 opacity-50' : 'border-white/5'}">
                             <div class="flex justify-between items-center" onclick="openChapter('${child.key}', '${c.name}')">
                                 <h4 class="text-xs font-black uppercase italic">${c.name}</h4>
-                                <i class="fa-solid fa-chevron-right text-gray-600 text-xs"></i>
+                                <i class="fa-solid fa-chevron-right text-[#eab308] text-xs"></i>
                             </div>
                             <div class="flex gap-2 border-t border-white/5 pt-4 mt-4">
-                                <button onclick="editItem('${child.key}', '${c.name}')" class="flex-1 bg-white/5 text-[8px] font-black py-2 rounded-xl">Edit</button>
+                                <button onclick="editChapter('${child.key}')" class="flex-1 bg-white/5 text-[8px] font-black py-2 rounded-xl">Edit</button>
                                 <button onclick="toggleHide('${child.key}', ${c.isHidden})" class="flex-1 bg-blue-500/10 text-blue-400 text-[8px] font-black py-2 rounded-xl">${c.isHidden ? 'Unhide' : 'Hide'}</button>
-                                <button onclick="deleteItem('${child.key}')" class="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl"><i class="fa-solid fa-trash text-[8px]"></i></button>
+                                <button onclick="deleteChapter('${child.key}')" class="bg-red-600/10 text-red-500 px-4 py-2 rounded-xl"><i class="fa-solid fa-trash text-[8px]"></i></button>
                             </div>
                         </div>`;
                 });
@@ -90,11 +102,48 @@
             document.getElementById('pageTitle').innerText = name;
             document.getElementById('contentFields').classList.remove('hidden');
             document.getElementById('formStatus').innerText = "Upload PDF & Audio for " + name;
-            // Fetch existing PDF/Audio data to form...
+            
+            // Fetch current data for this chapter
+            database.ref(`courses/${batchId}/ncert/${id}`).once('value', s => {
+                const c = s.val();
+                document.getElementById('pdfUrl').value = c.pdf || "";
+                document.getElementById('audioUrl').value = c.audio || "";
+                // Button to jump to Interactive Mapper
+                document.getElementById('itemList').innerHTML = `
+                    <button onclick="location.href='admin_ncert_mapper.html?id=${id}'" class="w-full glass p-6 rounded-3xl border border-yellow-500/30 flex items-center justify-between group active:scale-95">
+                        <div class="flex items-center gap-4">
+                            <i class="fa-solid fa-wand-magic-sparkles text-yellow-500"></i>
+                            <span class="text-[10px] font-black uppercase italic">Open Interactive PYQ Mapper</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-right text-xs text-gray-700"></i>
+                    </button>
+                `;
+            });
+        }
+
+        function saveItem() {
+            const name = document.getElementById('itemName').value;
+            const pdf = document.getElementById('pdfUrl').value;
+            const audio = document.getElementById('audioUrl').value;
+            const editId = document.getElementById('editId').value;
+            if(!name) return;
+
+            const path = `courses/${batchId}/ncert`;
+            const data = { name: name, isHidden: false, timestamp: Date.now() };
+            if(currentLevel === 'content') { data.pdf = pdf; data.audio = audio; }
+
+            if(editId || currentLevel === 'content') {
+                database.ref(path + '/' + (editId || currentChapterId)).update(data).then(() => alert("Saved!"));
+            } else {
+                database.ref(path).push(data).then(() => alert("Chapter Created!"));
+            }
         }
 
         function handleBack() { currentLevel === 'content' ? loadChapters() : history.back(); }
-        // Save, Edit, Delete functions will use currentLevel logic...
+        function logout() { localStorage.clear(); location.href='index.html'; }
+        
+        init();
     </script>
 </body>
-</html>
+    </html>
+    
