@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        body { background: #070b14; color: white; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="flex items-center gap-4 mb-6">
+        <button onclick="history.back()" class="w-10 h-10 glass rounded-full flex items-center justify-center text-yellow-500"><i class="fa-solid fa-arrow-left"></i></button>
+        <div class="relative flex-1">
+            <input type="text" id="searchInput" oninput="searchChapters()" placeholder="Search NCERT Chapters..." class="w-full glass p-3 pl-10 rounded-full outline-none text-xs">
+            <i class="fa-solid fa-search absolute left-4 top-3.5 text-gray-500"></i>
+        </div>
+    </div>
+
+    <div id="chapterContainer" class="space-y-4">
+        </div>
+
+    <script>
+        const firebaseConfig = { /* Tomar Config */ };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function loadChapters() {
+            database.ref('ncert_chapters').on('value', snap => {
+                const container = document.getElementById('chapterContainer');
+                container.innerHTML = "";
+                snap.forEach(child => {
+                    const ch = child.val();
+                    container.innerHTML += `
+                    <div onclick="openReader('${ch.id}')" class="glass p-5 rounded-[2rem] border-l-4 border-yellow-500 flex justify-between items-center active:scale-95 transition-all">
+                        <div>
+                            <h3 class="text-xs font-black uppercase italic text-white">${ch.name}</h3>
+                            <p class="text-[8px] text-gray-500 uppercase mt-1 font-bold">${ch.subject}</p>
+                        </div>
+                        <i class="fa-solid fa-book-open text-yellow-500"></i>
+                    </div>`;
+                });
+            });
+        }
+        function openReader(id) { location.href = `ncert_reader.html?id=${id}`; }
+        loadChapters();
+    </script>
+</body>
+</html>
+
