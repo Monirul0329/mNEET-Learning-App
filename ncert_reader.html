@@ -8,51 +8,51 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #f3f4f6; color: #1f2937; font-family: 'Georgia', serif; }
-        .paper { background: white; min-height: 100vh; max-width: 800px; margin: 65px auto 120px auto; box-shadow: 0 0 30px rgba(0,0,0,0.1); padding: 20px; position: relative; }
-        canvas { width: 100% !important; height: auto !important; margin-bottom: 20px; }
-        .audio-dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: #111827; border-radius: 2rem; padding: 12px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 1000; border: 1px solid #374151; }
-        .locked { pointer-events: none; }
+        body { background: #f3f4f6; color: #1f2937; }
+        .paper { background: white; min-height: 100vh; max-width: 850px; margin: 70px auto 130px auto; box-shadow: 0 0 20px rgba(0,0,0,0.1); padding: 15px; }
+        canvas { width: 100% !important; margin-bottom: 20px; }
+        .audio-dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 500px; background: #0f172a; border-radius: 2rem; padding: 12px 20px; display: flex; align-items: center; gap: 15px; z-index: 1000; border: 1px solid #334155; }
+        .locked { pointer-events: none; user-select: none; }
     </style>
 </head>
 <body>
-    <div class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md p-4 flex justify-between items-center z-[2000] border-b shadow-sm">
+    <div class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md p-4 flex justify-between items-center z-[2000] border-b">
         <div class="flex items-center gap-3">
-            <button onclick="history.back()" class="text-gray-600 w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-chevron-left"></i></button>
-            <h2 id="rTitle" class="text-[10px] font-black uppercase italic tracking-widest text-gray-800">NCERT AI READER</h2>
+            <button onclick="history.back()" class="text-gray-600"><i class="fa-solid fa-chevron-left"></i></button>
+            <h2 id="readerTitle" class="text-[10px] font-black uppercase italic tracking-widest">NCERT AI</h2>
         </div>
         <button onclick="toggleLock()" id="lockBtn" class="text-blue-500"><i class="fa-solid fa-lock-open"></i></button>
     </div>
 
-    <div id="bookArea" class="paper"><div id="pdf-container"></div></div>
+    <div id="pageContent" class="paper"><div id="pdf-box"></div></div>
 
     <div class="audio-dock">
-        <button onclick="playA()" id="pIco" class="w-10 h-10 bg-yellow-500 text-black rounded-full flex items-center justify-center"><i class="fa-solid fa-play"></i></button>
-        <div class="flex-1"><div class="bg-gray-700 h-1 rounded-full"><div id="aProg" class="bg-yellow-500 h-full w-0"></div></div></div>
-        <select onchange="audio.playbackRate = this.value" class="bg-gray-800 text-[10px] text-yellow-500 font-bold p-1 rounded">
+        <button onclick="toggleA()" id="playIcon" class="w-10 h-10 bg-yellow-500 text-black rounded-full flex items-center justify-center"><i class="fa-solid fa-play"></i></button>
+        <div class="flex-1"><div class="bg-gray-700 h-1 rounded-full"><div id="progress" class="bg-yellow-500 h-full w-0"></div></div></div>
+        <select onchange="mainAudio.playbackRate = this.value" class="bg-gray-800 text-[10px] text-yellow-500 font-bold p-1 rounded">
             <option value="1">1.0x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2.0x</option><option value="0.75">0.75x</option>
         </select>
-        <audio id="mainA"></audio>
+        <audio id="mainAudio"></audio>
     </div>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-        const firebaseConfig = { /* Config */ };
+        const firebaseConfig = { /* Paste Aki Config */ };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const audio = document.getElementById('mainA');
+        const mainAudio = document.getElementById('mainAudio');
         const cid = new URLSearchParams(window.location.search).get('id');
 
-        db.ref('ncert_ai/'+cid).once('value', async snap => {
+        db.ref('study/ncert_data/' + cid).once('value', async snap => {
             const d = snap.val();
-            document.getElementById('rTitle').innerText = d.name;
-            audio.src = d.audio;
+            document.getElementById('readerTitle').innerText = d.name;
+            mainAudio.src = d.audio;
             if(d.pdf) renderPDF(d.pdf);
         });
 
         async function renderPDF(url) {
             const pdf = await pdfjsLib.getDocument(url).promise;
-            const container = document.getElementById('pdf-container');
+            const box = document.getElementById('pdf-box');
             for(let i=1; i<=pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const viewport = page.getViewport({scale: 1.5});
@@ -60,18 +60,18 @@
                 const ctx = canvas.getContext('2d');
                 canvas.height = viewport.height; canvas.width = viewport.width;
                 await page.render({canvasContext: ctx, viewport: viewport}).promise;
-                container.appendChild(canvas);
+                box.appendChild(canvas);
             }
         }
 
-        function playA() {
-            if(audio.paused) { audio.play(); document.getElementById('pIco').innerHTML='<i class="fa-solid fa-pause"></i>'; }
-            else { audio.pause(); document.getElementById('pIco').innerHTML='<i class="fa-solid fa-play"></i>'; }
+        function toggleA() {
+            if(mainAudio.paused) { mainAudio.play(); document.getElementById('playIcon').innerHTML='<i class="fa-solid fa-pause"></i>'; }
+            else { mainAudio.pause(); document.getElementById('playIcon').innerHTML='<i class="fa-solid fa-play"></i>'; }
         }
-        audio.ontimeupdate = () => document.getElementById('aProg').style.width = (audio.currentTime/audio.duration)*100 + "%";
+        mainAudio.ontimeupdate = () => document.getElementById('progress').style.width = (mainAudio.currentTime/mainAudio.duration)*100 + "%";
         function toggleLock() {
-            document.getElementById('bookArea').classList.toggle('locked');
-            document.getElementById('lockBtn').innerHTML = document.getElementById('bookArea').classList.contains('locked') ? '<i class="fa-solid fa-lock text-red-500"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+            document.getElementById('pageContent').classList.toggle('locked');
+            document.getElementById('lockBtn').innerHTML = document.getElementById('pageContent').classList.contains('locked') ? '<i class="fa-solid fa-lock text-red-500"></i>' : '<i class="fa-solid fa-lock-open"></i>';
         }
     </script>
 </body>
