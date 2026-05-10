@@ -11,8 +11,9 @@
         .glass-input { background: #0b1120; border: 1px solid #1f2937; outline: none; color: white; }
         .glass-input:focus { border-color: #eab308; }
         body { background: #070b14; color: white; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .scroll-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+        .scroll-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 120px; }
         ::-webkit-scrollbar { width: 0px; }
+        .active-nav { color: #eab308 !important; }
     </style>
 </head>
 <body>
@@ -27,14 +28,14 @@
         </button>
     </div>
 
-    <div class="p-6 pb-2">
+    <div class="p-4 bg-[#070b14]">
         <div class="relative">
-            <input type="text" id="courseSearch" oninput="searchBatch()" placeholder="Search batch by name..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none">
+            <input type="text" id="courseSearch" oninput="searchBatch()" placeholder="Search batch by name..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none text-white">
             <i class="fa-solid fa-magnifying-glass absolute left-5 top-4 text-gray-500"></i>
         </div>
     </div>
 
-    <div class="scroll-area">
+    <div class="scroll-area" id="mainScroll">
         <div class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 shadow-2xl mb-10">
             <p id="formTitle" class="text-[8px] font-black uppercase text-gray-500 mb-6 text-center italic tracking-widest">Publish New Batch</p>
             <div class="space-y-3">
@@ -42,35 +43,43 @@
                 <input type="text" id="cTitle" placeholder="Batch Name" class="w-full glass-input p-4 rounded-xl text-xs font-bold">
                 
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="number" id="cPrice" placeholder="Original Price (₹)" class="w-full glass-input p-4 rounded-xl text-xs">
+                    <input type="number" id="cPrice" placeholder="Price (₹)" class="w-full glass-input p-4 rounded-xl text-xs">
                     <input type="number" id="cDiscount" placeholder="Discount %" class="w-full glass-input p-4 rounded-xl text-xs">
                 </div>
 
                 <div class="grid grid-cols-3 gap-2">
                     <div class="flex flex-col gap-1">
-                        <label class="text-[7px] text-gray-500 uppercase italic">Start Date</label>
+                        <label class="text-[7px] text-gray-500 uppercase font-black ml-1">Start</label>
                         <input type="date" id="sDate" class="w-full glass-input p-3 rounded-xl text-[9px]">
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="text-[7px] text-gray-500 uppercase italic">End Date</label>
+                        <label class="text-[7px] text-gray-500 uppercase font-black ml-1">End</label>
                         <input type="date" id="endDate" class="w-full glass-input p-3 rounded-xl text-[9px]">
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="text-[7px] text-yellow-500 uppercase italic">Exam Date</label>
-                        <input type="date" id="examDate" class="w-full glass-input p-3 rounded-xl text-[9px] text-yellow-500 border-yellow-500/20">
+                        <label class="text-[7px] text-yellow-500 uppercase font-black ml-1">Exam</label>
+                        <input type="date" id="examDate" class="w-full glass-input p-3 rounded-xl text-[9px] text-yellow-500">
                     </div>
                 </div>
 
-                <input type="text" id="cThumb" placeholder="Thumbnail URL (Image or Video)" class="w-full glass-input p-4 rounded-xl text-[10px]">
-                <textarea id="cDesc" placeholder="Course Description..." class="w-full glass-input p-4 rounded-xl h-20 text-xs"></textarea>
+                <input type="text" id="cThumb" placeholder="Thumbnail Image URL" class="w-full glass-input p-4 rounded-xl text-[10px]">
+                <textarea id="cDesc" placeholder="Description..." class="w-full glass-input p-4 rounded-xl h-20 text-xs"></textarea>
                 
-                <button onclick="saveBatch()" id="publishBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs active:scale-95">Publish Batch Now</button>
+                <button onclick="saveBatch()" id="publishBtn" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs active:scale-95 shadow-lg">Publish Batch Now</button>
             </div>
         </div>
 
         <h3 class="text-[10px] font-black uppercase text-gray-500 mb-6 px-2 italic">Active Batches List</h3>
         <div id="batchList" class="space-y-4"></div>
     </div>
+
+    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50 shadow-2xl border-white/10">
+        <a href="admin_dashboard.html" class="text-gray-600"><i class="fa-solid fa-house"></i></a>
+        <a href="admin_study.html" class="text-gray-600"><i class="fa-solid fa-book-open"></i></a>
+        <a href="admin_course.html" class="active-nav"><i class="fa-solid fa-layer-group text-lg"></i></a>
+        <a href="admin_test.html" class="text-gray-600"><i class="fa-solid fa-pen-nib"></i></a>
+        <a href="admin_mstore.html" class="text-gray-600"><i class="fa-solid fa-store"></i></a>
+    </nav>
 
     <script>
         const firebaseConfig = {
@@ -99,7 +108,7 @@
                 timestamp: Date.now()
             };
 
-            if(!data.title || !data.examDate) return alert("Fill Name and Exam Date!");
+            if(!data.title || !data.examDate) return alert("Please fill Name and Exam Date!");
 
             if(editId) {
                 database.ref('courses/' + editId).update(data).then(() => {
@@ -136,18 +145,18 @@
             list.innerHTML = data.map(b => `
                 <div class="glass p-5 rounded-[2rem] border ${b.isHidden ? 'border-red-900 opacity-50' : 'border-white/5'}">
                     <div class="flex gap-4 items-center mb-4">
-                        <img src="${b.thumbnail || 'https://via.placeholder.com/150'}" class="w-14 h-14 rounded-xl object-cover bg-black">
+                        <img src="${b.thumbnail || 'https://via.placeholder.com/150'}" class="w-14 h-14 rounded-xl object-cover bg-black/40">
                         <div class="flex-1">
                             <h4 class="text-[10px] font-black uppercase italic">${b.title}</h4>
-                            <p class="text-[#eab308] font-black text-xs">₹${b.price} <span class="text-gray-500 text-[7px]">(-${b.discount}%)</span></p>
+                            <p class="text-[#eab308] font-black text-xs">₹${b.price} <span class="text-gray-500 text-[7px] ml-1">(-${b.discount}%)</span></p>
                         </div>
                     </div>
                     <div class="flex gap-2 border-t border-white/5 pt-4">
-                        <button onclick="editBatch('${b.id}')" class="flex-1 bg-white/5 text-white py-3 rounded-xl text-[8px] font-black uppercase">Edit</button>
-                        <button onclick="toggleHide('${b.id}', ${b.isHidden})" class="flex-1 bg-blue-600/10 text-blue-400 py-3 rounded-xl text-[8px] font-black uppercase">
+                        <button onclick="editBatch('${b.id}')" class="flex-1 bg-white/5 text-white py-3 rounded-xl text-[8px] font-black uppercase border border-white/5 active:scale-95">Edit</button>
+                        <button onclick="toggleHide('${b.id}', ${b.isHidden})" class="flex-1 bg-blue-600/10 text-blue-400 py-3 rounded-xl text-[8px] font-black uppercase border border-blue-500/10">
                             ${b.isHidden ? 'Unhide' : 'Hide'}
                         </button>
-                        <button onclick="deleteBatch('${b.id}')" class="bg-red-600/10 text-red-500 px-4 py-3 rounded-xl text-[8px]">
+                        <button onclick="deleteBatch('${b.id}')" class="bg-red-600/10 text-red-500 px-4 py-3 rounded-xl text-[8px] border border-red-500/10 active:scale-95">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
@@ -168,8 +177,8 @@
             document.getElementById('cDesc').value = b.desc;
             
             document.getElementById('publishBtn').innerText = "Update Batch Now";
-            document.getElementById('formTitle').innerText = "Editing Batch: " + b.title;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('formTitle').innerText = "Editing: " + b.title;
+            document.getElementById('mainScroll').scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function searchBatch() {
