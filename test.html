@@ -1,134 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <title>Mock Center - mNEET</title>
-    <style>
-        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
-        body { background: #070b14; color: white; }
-        .progress-bg { background: rgba(255, 255, 255, 0.05); }
-    </style>
-</head>
-<body class="p-4 pb-28 font-sans">
+<script>
+    // ... Firebase Init
+    const batchId = localStorage.getItem('selectedBatchId');
 
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-2xl font-black italic gold-glow uppercase tracking-tighter">MOCK CENTER</h1>
-        <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1 bg-yellow-500/10 px-3 py-1.5 rounded-full border border-yellow-500/20">
-                <i class="fa-solid fa-coins text-[#eab308] text-[10px]"></i>
-                <span id="uCoins" class="text-xs font-black">0</span>
-            </div>
-            <button onclick="localStorage.clear(); window.location.href='index.html'" class="w-9 h-9 flex items-center justify-center bg-red-500/10 text-red-500 rounded-full border border-red-500/20">
-                <i class="fa-solid fa-power-off text-sm"></i>
-            </button>
-        </div>
-    </div>
-
-    <div class="glass p-6 rounded-[2.5rem] mb-8 border-b-2 border-blue-500/30">
-        <div class="flex justify-between items-center mb-3">
-            <span class="text-[10px] font-black uppercase tracking-widest text-gray-500 italic">Total Mock Progress</span>
-            <span id="overallPercent" class="text-[11px] font-black text-blue-400">0%</span>
-        </div>
-        <div class="w-full progress-bg h-2 rounded-full overflow-hidden">
-            <div id="overallBar" class="bg-blue-500 h-full transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.5)]" style="width: 0%"></div>
-        </div>
-    </div>
-
-    <h3 class="text-[11px] font-black uppercase mb-5 tracking-[0.2em] text-gray-400 px-2 italic">Available Mock Tests</h3>
-    
-    <div id="mockList" class="space-y-4">
-        <div class="flex flex-col items-center justify-center py-10 opacity-30">
-            <i class="fa-solid fa-circle-notch animate-spin text-2xl mb-2"></i>
-            <p class="text-[10px] font-bold uppercase">Syncing Mock Exams...</p>
-        </div>
-    </div>
-
-    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around shadow-2xl border-white/10 z-50">
-        <a href="dashboard.html"><i class="fa-solid fa-house text-gray-500"></i></a>
-        <a href="study.html"><i class="fa-solid fa-book-open text-gray-500"></i></a>
-        <i class="fa-solid fa-pen-nib gold-glow"></i>
-        <a href="mstore.html"><i class="fa-solid fa-store text-gray-500"></i></a>
-    </nav>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58",
-            authDomain: "mneet-spark.firebaseapp.com",
-            projectId: "mneet-spark",
-            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/",
-            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const userKey = localStorage.getItem('mUserEmail');
-
-        function initTestCenter() {
-            if(!userKey) window.location.href = 'index.html';
-
-            // 1. Sync BP Coins
-            database.ref('users/' + userKey + '/coins').on('value', (s) => {
-                document.getElementById('uCoins').innerText = s.val() || 0;
-            });
-
-            // 2. Load Mock Tests with Percentage Logic
-            database.ref('admin/mock_tests').on('value', (snap) => {
-                const list = document.getElementById('mockList');
-                if(snap.exists()){
-                    list.innerHTML = "";
-                    let totalTests = 0;
-                    let completedSum = 0;
-
-                    snap.forEach(child => {
-                        const m = child.val();
-                        totalTests++;
-                        
-                        // Percentage logic: Assuming we store user's test progress in users/userKey/test_progress/testID
-                        let testID = child.key;
-                        database.ref(`users/${userKey}/test_progress/${testID}`).once('value').then(pSnap => {
-                            let progress = pSnap.val() || 0;
-                            completedSum += progress;
-
-                            const testCard = `
-                                <div class="glass p-6 rounded-[2.5rem] border border-white/5 group active:scale-[0.98] transition-all">
-                                    <div class="flex justify-between items-start mb-5">
-                                        <div>
-                                            <h4 class="text-sm font-black uppercase italic italic">${m.title}</h4>
-                                            <div class="flex gap-3 mt-1">
-                                                <span class="text-[7px] text-gray-500 font-bold uppercase"><i class="fa-solid fa-list-check mr-1"></i>${m.qCount} Qs</span>
-                                                <span class="text-[7px] text-gray-500 font-bold uppercase"><i class="fa-solid fa-clock mr-1"></i>${m.time} Mins</span>
-                                            </div>
-                                        </div>
-                                        <a href="quiz_engine.html?id=${testID}" class="bg-[#eab308] text-black px-5 py-2 rounded-xl text-[9px] font-black uppercase shadow-[0_5px_15px_rgba(234,179,8,0.3)]">Start</a>
-                                    </div>
-                                    <div class="flex items-center gap-4">
-                                        <div class="flex-1 progress-bg h-1 rounded-full overflow-hidden">
-                                            <div class="bg-[#eab308] h-full transition-all duration-700" style="width: ${progress}%"></div>
-                                        </div>
-                                        <span class="text-[8px] font-black text-gray-500">${progress}%</span>
-                                    </div>
-                                </div>`;
-                            list.innerHTML += testCard;
-
-                            // Update Overall Bar
-                            let overall = Math.round(completedSum / totalTests);
-                            document.getElementById('overallPercent').innerText = overall + "%";
-                            document.getElementById('overallBar').style.width = overall + "%";
-                        });
-                    });
-                } else {
-                    list.innerHTML = `<p class="text-center text-[10px] text-gray-600 italic py-10">No Mock Tests scheduled yet.</p>`;
-                }
-            });
+    function initTestCenter() {
+        if(!batchId) {
+            document.getElementById('mockList').innerHTML = `<p class="text-center text-gray-500 text-[10px] py-10 italic uppercase">Select a batch from Dashboard first!</p>`;
+            return;
         }
-
-        initTestCenter();
-    </script>
-</body>
-    </html>
-    
+        // Load tests from: courses/{batchId}/tests
+        database.ref(`courses/${batchId}/tests`).on('value', (snap) => {
+            const list = document.getElementById('mockList');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const m = child.val();
+                list.innerHTML += `
+                    <div class="glass p-6 rounded-[2.5rem] border border-white/5 mb-4">
+                        <div class="flex justify-between items-start mb-5">
+                            <div>
+                                <h4 class="text-sm font-black uppercase italic">${m.name}</h4>
+                                <p class="text-[7px] text-gray-500 uppercase mt-1">Status: ${m.status}</p>
+                            </div>
+                            <a href="quiz_engine.html?id=${child.key}" class="bg-[#eab308] text-black px-5 py-2 rounded-xl text-[9px] font-black uppercase">Start</a>
+                        </div>
+                    </div>`;
+            });
+        });
+    }
+    initTestCenter();
+</script>
