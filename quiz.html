@@ -1,41 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-white text-black p-6 font-sans">
-    
-    <div class="flex justify-between items-center mb-8 border-b-2 border-gray-100 pb-4">
-        <span class="text-[10px] font-black uppercase bg-red-100 text-red-600 px-3 py-1 rounded">NEET Simulator</span>
-        <div id="timer" class="font-mono font-bold text-lg">01:00</div>
-    </div>
-
-    <div id="qBox">
-        <p class="text-xs text-gray-400 font-bold mb-2">Question 1/20</p>
-        <h2 class="text-xl font-bold mb-8">Which organelle is known as the powerhouse of the cell?</h2>
-        
-        <div class="space-y-4">
-            <button onclick="check(false)" class="w-full text-left p-5 border-2 border-gray-100 rounded-2xl hover:border-black transition-all">A. Nucleus</button>
-            <button onclick="check(true)" class="w-full text-left p-5 border-2 border-gray-100 rounded-2xl hover:border-black transition-all">B. Mitochondria</button>
-            <button onclick="check(false)" class="w-full text-left p-5 border-2 border-gray-100 rounded-2xl hover:border-black transition-all">C. Ribosome</button>
-        </div>
-    </div>
-
-    <script>
-        let time = 60;
-        setInterval(() => {
-            if(time > 0) {
-                time--;
-                document.getElementById('timer').innerText = `00:${time < 10 ? '0'+time : time}`;
-            }
-        }, 1000);
-
-        function check(isCorrect) {
-            if(isCorrect) alert("Correct! +4 Points 🥳");
-            else alert("Wrong! -1 Point 😢\nCheck NCERT Page 126 for details.");
+<script>
+    let time = 60;
+    const timerEl = document.getElementById('timer');
+    const interval = setInterval(() => {
+        if(time > 0) {
+            time--;
+            timerEl.innerText = `00:${time < 10 ? '0'+time : time}`;
+        } else {
+            clearInterval(interval);
+            alert("Time Over!");
             location.reload();
         }
-    </script>
-</body>
-</html>
+    }, 1000);
+
+    function check(isCorrect) {
+        if(isCorrect) {
+            alert("Correct! +4 Points 🥳");
+            // Here you can update user coins in database
+        } else {
+            alert("Wrong! -1 Point 😢\nCheck Mitochondria in NCERT Page 126.");
+        }
+        location.reload();
+    }
+</script>
