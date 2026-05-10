@@ -16,61 +16,52 @@
 
     <div class="flex items-center gap-4 mb-8">
         <button onclick="history.back()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400"><i class="fa-solid fa-chevron-left"></i></button>
-        <h1 id="chapterHeader" class="text-xs font-black uppercase text-yellow-500 italic">Manage Content</h1>
+        <h1 id="chHeader" class="text-xs font-bold text-yellow-500 uppercase italic">Manage Content</h1>
     </div>
 
-    <div class="glass p-8 rounded-[3rem] space-y-8 border border-white/5">
+    <div class="glass p-6 rounded-[2.5rem] space-y-6">
         <div>
-            <div class="flex justify-between items-center mb-3">
-                <label class="text-[9px] font-black uppercase text-gray-500 tracking-widest">NCERT PDF Master URL</label>
-                <button onclick="deleteField('pdf')" class="text-red-500 text-[10px] font-bold">DELETE PDF</button>
+            <div class="flex justify-between items-center mb-2">
+                <label class="text-[9px] font-bold text-gray-500 uppercase italic">NCERT PDF URL</label>
+                <button onclick="clearField('pdf')" class="text-red-500 text-[8px] font-bold">DELETE PDF</button>
             </div>
-            <input type="text" id="pdfUrl" placeholder="Paste PDF Link here..." class="w-full p-4 rounded-2xl text-[10px]">
+            <input type="text" id="pdfUrl" class="w-full p-4 rounded-2xl text-xs">
         </div>
 
         <div>
-            <div class="flex justify-between items-center mb-3">
-                <label class="text-[9px] font-black uppercase text-gray-500 tracking-widest">Revision Audio URL</label>
-                <button onclick="deleteField('audio')" class="text-red-500 text-[10px] font-bold">DELETE AUDIO</button>
+            <div class="flex justify-between items-center mb-2">
+                <label class="text-[9px] font-bold text-gray-500 uppercase italic">Revision Audio URL</label>
+                <button onclick="clearField('audio')" class="text-red-500 text-[8px] font-bold">DELETE AUDIO</button>
             </div>
-            <input type="text" id="audioUrl" placeholder="Paste Audio Link here..." class="w-full p-4 rounded-2xl text-[10px]">
+            <input type="text" id="audioUrl" class="w-full p-4 rounded-2xl text-xs">
         </div>
 
-        <button onclick="saveContent()" class="w-full bg-blue-600 text-white py-5 rounded-[2rem] font-black uppercase text-[11px] shadow-2xl active:scale-95 transition-all">Save All Updates</button>
+        <button onclick="saveAll()" class="w-full bg-blue-600 p-4 rounded-2xl font-bold text-xs uppercase shadow-xl">Save All Changes</button>
     </div>
 
     <script>
-        const firebaseConfig = { /* Paste Config Here */ };
+        const firebaseConfig = { /* Oi aki config boshao */ };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const urlParams = new URLSearchParams(window.location.search);
-        const chId = urlParams.get('id');
+        const cid = urlParams.get('id');
 
-        function loadData() {
-            db.ref('ncert_v2/' + chId).once('value', snap => {
-                const data = snap.val();
-                document.getElementById('chapterHeader').innerText = data.name;
-                document.getElementById('pdfUrl').value = data.pdf || "";
-                document.getElementById('audioUrl').value = data.audio || "";
+        function load() {
+            db.ref('ncert_final/' + cid).once('value', snap => {
+                const d = snap.val();
+                document.getElementById('chHeader').innerText = d.name;
+                document.getElementById('pdfUrl').value = d.pdf || "";
+                document.getElementById('audioUrl').value = d.audio || "";
             });
         }
-
-        function saveContent() {
-            db.ref('ncert_v2/' + chId).update({
+        function saveAll() {
+            db.ref('ncert_final/' + cid).update({
                 pdf: document.getElementById('pdfUrl').value,
                 audio: document.getElementById('audioUrl').value
-            }).then(() => alert("Content Updated Successfully!"));
+            }).then(() => alert("Updated!"));
         }
-
-        function deleteField(type) {
-            if(confirm(`Remove ${type}?`)) {
-                document.getElementById(type + 'Url').value = "";
-                saveContent();
-            }
-        }
-
-        loadData();
+        function clearField(type) { if(confirm("Clear " + type + "?")) { document.getElementById(type+'Url').value = ""; saveAll(); } }
+        load();
     </script>
 </body>
 </html>
-
