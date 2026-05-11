@@ -11,68 +11,84 @@
         .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         body { background: #070b14; color: white; font-family: sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         .main-editor { display: flex; flex: 1; overflow: hidden; }
-        .pdf-section { flex: 1; overflow: auto; background: #111; position: relative; cursor: crosshair; }
-        .sidebar { width: 350px; background: #16213e; border-left: 1px solid #1f2937; overflow-y: auto; padding: 20px; }
-        #pdf-canvas { display: block; margin: 0 auto; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        .marker { position: absolute; width: 14px; height: 14px; background: #eab308; border: 2px solid white; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); box-shadow: 0 0 10px #eab308; }
+        .pdf-viewer { flex: 1; overflow: auto; position: relative; background: #111; cursor: crosshair; }
+        .side-panel { width: 350px; background: #16213e; border-left: 1px solid #1f2937; overflow-y: auto; padding: 20px; }
+        #pdf-canvas { display: block; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        .marker { position: absolute; width: 14px; height: 14px; background: #eab308; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; box-shadow: 0 0 10px #eab308; }
         .mapping-card { background: rgba(255,255,255,0.03); border-radius: 15px; padding: 12px; border-left: 4px solid #eab308; margin-bottom: 10px; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="h-[70px] bg-[#16213e] flex justify-between items-center px-6 border-b border-white/5">
+    <div class="h-[70px] bg-[#16213e] flex justify-between items-center px-6 border-b border-white/5 shadow-2xl z-50">
         <div class="flex items-center gap-4">
-            <button onclick="history.back()" class="w-10 h-10 glass rounded-xl flex items-center justify-center text-gray-400"><i class="fa-solid fa-chevron-left"></i></button>
-            <h1 class="text-xs font-black uppercase text-yellow-500 italic tracking-widest">Interactive PYQ Mapper</h1>
+            <button onclick="history.back()" class="w-10 h-10 glass rounded-xl flex items-center justify-center text-gray-400 active:scale-90"><i class="fa-solid fa-chevron-left"></i></button>
+            <div>
+                <h1 class="text-xs font-black uppercase text-yellow-500 italic tracking-widest leading-none">Smart Mapper</h1>
+                <p id="chapterNameDisplay" class="text-[7px] text-gray-500 font-bold mt-1 uppercase">Loading Chapter...</p>
+            </div>
         </div>
-        <button onclick="saveAllPoints()" class="bg-green-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg active:scale-95">Save Smart Map</button>
+        <button onclick="saveMap()" class="bg-green-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg active:scale-95 transition-all">Publish Logic</button>
     </div>
 
     <div class="main-editor">
-        <div class="pdf-section" id="pdfContainer" onclick="placeMarker(event)">
+        <div class="pdf-viewer" id="pdfContainer" onclick="handleMapClick(event)">
             <canvas id="pdf-canvas"></canvas>
             <div id="marker-layer" class="absolute inset-0 pointer-events-none"></div>
         </div>
 
-        <div class="sidebar">
-            <h3 class="text-[10px] font-black uppercase text-gray-500 mb-6 italic tracking-widest">Mapping Sequence</h3>
-            
-            <div id="configForm" class="glass p-5 rounded-2xl mb-8 hidden">
-                <p class="text-[8px] text-yellow-500 font-black uppercase mb-4 italic">Configure Point</p>
+        <div class="side-panel">
+            <div id="setupInfo" class="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl">
+                <p class="text-[9px] text-blue-400 font-bold leading-relaxed uppercase italic">Click any line on the PDF to sync audio timestamp or add PYQ Quiz.</p>
+            </div>
+
+            <div id="pointForm" class="glass p-5 rounded-2xl mb-8 hidden border border-yellow-500/20">
+                <p class="text-[8px] text-yellow-500 font-black uppercase mb-4 italic">Active Marker Settings</p>
                 <div class="space-y-4">
                     <div>
-                        <label class="text-[7px] uppercase font-bold text-gray-400 ml-1">Audio Time (Seconds)</label>
-                        <input type="number" id="pointTime" placeholder="e.g. 45.5" class="w-full bg-black/40 p-3 rounded-xl border border-white/10 outline-none text-xs text-yellow-500 font-bold">
+                        <label class="text-[7px] uppercase font-bold text-gray-500 ml-1">Audio Sync Time (Sec)</label>
+                        <input type="number" id="pTime" placeholder="e.g. 120.5" class="w-full bg-black/40 p-3 rounded-xl border border-white/10 outline-none text-xs text-yellow-500 font-bold">
                     </div>
                     <div>
-                        <label class="text-[7px] uppercase font-bold text-gray-400 ml-1">PYQ Tag / Question</label>
-                        <textarea id="pointQuiz" placeholder="Type NEET Question here..." class="w-full bg-black/40 p-3 rounded-xl border border-white/10 outline-none text-xs h-24"></textarea>
+                        <label class="text-[7px] uppercase font-bold text-gray-500 ml-1">PYQ Question (Optional)</label>
+                        <textarea id="pQuiz" placeholder="Question content..." class="w-full bg-black/40 p-3 rounded-xl border border-white/10 outline-none text-xs h-24"></textarea>
                     </div>
-                    <button onclick="addPointToList()" class="w-full bg-[#eab308] text-black py-3 rounded-xl font-black uppercase text-[10px]">Sync Point</button>
+                    <div class="flex gap-2">
+                        <button onclick="addPoint()" class="flex-1 bg-[#eab308] text-black py-3 rounded-xl font-black uppercase text-[10px]">Add Point</button>
+                        <button onclick="cancelPoint()" class="px-4 bg-white/5 text-gray-400 rounded-xl"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
                 </div>
             </div>
 
             <div id="pointsList" class="space-y-3">
-                <p class="text-center text-gray-600 text-[9px] py-10 uppercase font-black">Click on PDF to start mapping</p>
-            </div>
+                </div>
         </div>
     </div>
 
     <script>
+        const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
+        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const batchId = localStorage.getItem('selectedBatchId');
         const chapterId = new URLSearchParams(window.location.search).get('id');
-        
-        let pdfDoc = null;
+
         let points = [];
         let tempX, tempY;
+        let pdfDoc = null;
 
-        async function initMapper() {
-            // Fetch PDF Link from Chapter
+        async function init() {
+            if(!chapterId) return alert("Chapter ID missing!");
+
+            // Fetch Chapter Details
             database.ref(`courses/${batchId}/ncert/${chapterId}`).once('value', async snap => {
                 const data = snap.val();
-                if(data && data.pdf) loadPDF(data.pdf);
-                if(data && data.map) { points = data.map; renderPoints(); }
+                if(data) {
+                    document.getElementById('chapterNameDisplay').innerText = data.name;
+                    if(data.pdf) loadPDF(data.pdf);
+                    if(data.map) { points = data.map; renderPoints(); }
+                }
             });
         }
 
@@ -81,7 +97,7 @@
             pdfjsLib.getDocument(url).promise.then(pdf => {
                 pdfDoc = pdf;
                 renderPage(1);
-            });
+            }).catch(e => alert("PDF Load Error: Check Link"));
         }
 
         async function renderPage(num) {
@@ -92,47 +108,45 @@
             canvas.height = viewport.height;
             canvas.width = viewport.width;
             await page.render({ canvasContext: ctx, viewport }).promise;
-            renderVisualMarkers(); // Draw existing markers
+            renderMarkers();
         }
 
-        function placeMarker(e) {
+        function handleMapClick(e) {
             const rect = document.getElementById('pdf-canvas').getBoundingClientRect();
             tempX = e.clientX - rect.left;
             tempY = e.clientY - rect.top;
 
-            document.getElementById('configForm').classList.remove('hidden');
-            document.getElementById('pointTime').focus();
+            document.getElementById('pointForm').classList.remove('hidden');
+            document.getElementById('pTime').focus();
         }
 
-        function addPointToList() {
-            const time = document.getElementById('pointTime').value;
-            const quiz = document.getElementById('pointQuiz').value;
-            if(!time) return alert("Enter Seconds!");
+        function addPoint() {
+            const time = document.getElementById('pTime').value;
+            const quiz = document.getElementById('pQuiz').value;
+            if(!time) return alert("Seconds required!");
 
             points.push({ x: tempX, y: tempY, time: parseFloat(time), quiz: quiz });
             points.sort((a,b) => a.time - b.time);
             
             renderPoints();
-            document.getElementById('configForm').classList.add('hidden');
-            document.getElementById('pointTime').value = "";
-            document.getElementById('pointQuiz').value = "";
+            cancelPoint();
         }
 
         function renderPoints() {
             const list = document.getElementById('pointsList');
             list.innerHTML = points.map((p, i) => `
                 <div class="mapping-card">
-                    <div class="flex justify-between">
-                        <span class="text-[10px] font-black text-yellow-500 italic">${p.time}s</span>
-                        <button onclick="points.splice(${i},1); renderPoints();" class="text-red-500 text-[10px]"><i class="fa-solid fa-trash"></i></button>
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-black text-yellow-500 italic">@ ${p.time}s</span>
+                        <button onclick="deletePoint(${i})" class="text-red-500 text-[10px] active:scale-75"><i class="fa-solid fa-trash"></i></button>
                     </div>
-                    <p class="text-[8px] text-gray-500 mt-1 truncate">${p.quiz || 'Sync Marker Only'}</p>
+                    <p class="text-[8px] text-gray-500 mt-1 line-clamp-1">${p.quiz || 'Audio Highlight Only'}</p>
                 </div>
             `).join('');
-            renderVisualMarkers();
+            renderMarkers();
         }
 
-        function renderVisualMarkers() {
+        function renderMarkers() {
             const layer = document.getElementById('marker-layer');
             layer.innerHTML = "";
             points.forEach(p => {
@@ -144,14 +158,20 @@
             });
         }
 
-        function saveAllPoints() {
+        function saveMap() {
             database.ref(`courses/${batchId}/ncert/${chapterId}/map`).set(points).then(() => {
-                alert("Smart Logic Saved! Student app updated.");
-                history.back();
+                alert("Smart Logic Synchronized! Students can now see the interactive highlights.");
             });
         }
 
-        initMapper();
+        function deletePoint(i) { points.splice(i, 1); renderPoints(); }
+        function cancelPoint() {
+            document.getElementById('pointForm').classList.add('hidden');
+            document.getElementById('pTime').value = "";
+            document.getElementById('pQuiz').value = "";
+        }
+
+        init();
     </script>
 </body>
 </html>
