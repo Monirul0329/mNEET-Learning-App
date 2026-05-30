@@ -1,191 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mNEET Admin - NCERT Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .glass-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); outline: none; color: white; }
-        body { background: #070b14; color: white; font-family: sans-serif; min-height: 100vh; }
-        .gold-text { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.3); }
-        .btn-active:active { transform: scale(0.95); }
-    </style>
 </head>
-<body class="pb-24">
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+    <div class="flex">
+        <aside class="w-64 bg-slate-950 p-6 min-h-screen border-r border-slate-800">
+            <h2 class="text-xl font-bold text-yellow-400 mb-8"><i class="fa-solid fa-user-shield mr-2"></i>mNEET Admin</h2>
+            <nav class="space-y-3">
+                <a href="admin_dashboard.html" class="block py-2.5 px-4 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition"><i class="fa-solid fa-chart-pie mr-2"></i>Dashboard</a>
+                <a href="admin_ncert.html" class="block py-2.5 px-4 rounded-xl bg-indigo-600 text-white font-medium shadow-md"><i class="fa-solid fa-book mr-2"></i>NCERT Manager</a>
+                <a href="admin_quiz_chapters.html" class="block py-2.5 px-4 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition"><i class="fa-solid fa-vial mr-2"></i>Quiz Engine</a>
+                <a href="admin_mstore.html" class="block py-2.5 px-4 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition"><i class="fa-solid fa-shop mr-2"></i>mStore Setup</a>
+                <a href="dashboard.html" class="block py-2.5 px-4 rounded-xl text-amber-400 hover:bg-amber-950/30 transition"><i class="fa-solid fa-arrow-left-long mr-2"></i>Exit Portal</a>
+            </nav>
+        </aside>
 
-    <div class="sticky top-0 z-50 p-6 glass border-b border-white/5 flex justify-between items-center">
-        <button onclick="handleBack()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 btn-active">
-            <i class="fa-solid fa-arrow-left"></i>
-        </button>
-        <h2 id="titleText" class="text-xs font-black gold-text uppercase italic tracking-widest">NCERT Hub</h2>
-        <div class="w-10"></div>
-    </div>
+        <main class="flex-1 p-8">
+            <header class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">NCERT Audio Reader Configuration</h1>
+                    <p class="text-slate-400 text-sm">Upload and deploy content endpoints directly to student dashboard models</p>
+                </div>
+            </header>
 
-    <div class="p-4 max-w-lg mx-auto space-y-6">
-        
-        <div id="mainForm" class="bg-[#16213e] p-6 rounded-[2.5rem] border border-white/5 shadow-2xl">
-            <p id="formLabel" class="text-[8px] font-black uppercase text-gray-500 mb-4 italic tracking-widest text-center">Step 1: Create Chapter</p>
-            
-            <div class="space-y-3">
-                <input type="hidden" id="editId">
-                <input type="text" id="itemName" placeholder="Chapter Name..." class="w-full glass-input p-4 rounded-xl text-xs font-bold">
-                
-                <div id="contentSection" class="hidden space-y-3 pt-2">
-                    <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
-                        <p class="text-[7px] font-black text-yellow-500 uppercase mb-2">Upload Material Links</p>
-                        <input type="text" id="pdfLink" placeholder="PDF Direct URL" class="w-full glass-input p-3 rounded-lg text-[10px] mb-2">
-                        <input type="text" id="audioLink" placeholder="Audio Revision URL" class="w-full glass-input p-3 rounded-lg text-[10px]">
-                    </div>
-                    
-                    <button onclick="goToMapper()" class="w-full py-3 border border-dashed border-blue-500/50 text-blue-400 rounded-xl text-[9px] font-black uppercase italic">
-                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Open Interactive Mapper
-                    </button>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 bg-slate-950 p-6 rounded-2xl border border-slate-800 h-fit">
+                    <h2 class="text-md font-semibold text-slate-200 mb-4"><i class="fa-solid fa-plus-circle text-indigo-500 mr-2"></i>Deploy New Sheet</h2>
+                    <form id="ncertForm" onsubmit="saveNcertMaterial(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs uppercase text-slate-400 font-bold tracking-wider mb-1">Chapter Name</label>
+                            <input type="text" id="chapName" required placeholder="e.g., Cell: The Unit of Life" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase text-slate-400 font-bold tracking-wider mb-1">Subject / Stream</label>
+                            <select id="subject" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-slate-300">
+                                <option value="Biology">Biology (Botany/Zoology)</option>
+                                <option value="Physics">Physics</option>
+                                <option value="Chemistry">Chemistry</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase text-slate-400 font-bold tracking-wider mb-1">Google Drive Link (PDF)</label>
+                            <input type="url" id="driveLink" required placeholder="https://drive.google.com/..." class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-xl transition text-sm shadow-lg shadow-indigo-600/20 active:scale-95">Push to Student Database</button>
+                    </form>
                 </div>
 
-                <button onclick="saveData()" class="w-full bg-[#eab308] text-black py-4 rounded-xl font-black uppercase text-xs btn-active shadow-lg">Confirm & Save</button>
+                <div class="lg:col-span-2 bg-slate-950 p-6 rounded-2xl border border-slate-800">
+                    <h2 class="text-md font-semibold text-slate-200 mb-4"><i class="fa-solid fa-layer-group text-yellow-500 mr-2"></i>Active Global Repository Storage</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-300">
+                            <thead class="bg-slate-900 text-xs uppercase text-slate-400 border-b border-slate-800">
+                                <tr>
+                                    <th class="py-3 px-4">Chapter Title</th>
+                                    <th class="py-3 px-4">Subject</th>
+                                    <th class="py-3 px-4">Data Source Path</th>
+                                    <th class="py-3 px-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ncertTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="space-y-4" id="listArea">
-            <p class="text-center text-gray-600 text-[9px] font-black uppercase italic">Loading Chapters...</p>
-        </div>
-
+        </main>
     </div>
 
     <script>
-        // Firebase Configuration (Directly linked for testing)
-        const firebaseConfig = { 
-            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", 
-            authDomain: "mneet-spark.firebaseapp.com", 
-            projectId: "mneet-spark", 
-            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", 
-            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" 
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const batchId = localStorage.getItem('selectedBatchId') || "B001"; // Fallback batch
+        let dbMaterials = JSON.parse(localStorage.getItem('mneet_ncert_store')) || [];
 
-        let viewMode = "LIST"; // LIST or CHAPTER_EDIT
-        let activeChapterId = "";
-
-        // Load Data
-        function loadData() {
-            db.ref(`courses/${batchId}/ncert`).on('value', snap => {
-                const listArea = document.getElementById('listArea');
-                listArea.innerHTML = "";
-                
-                if(!snap.exists()) {
-                    listArea.innerHTML = `<p class="text-center text-gray-700 text-[10px] py-10 uppercase">No Chapters Found</p>`;
-                    return;
-                }
-
-                snap.forEach(child => {
-                    const data = child.val();
-                    listArea.innerHTML += `
-                        <div class="glass p-5 rounded-[2rem] border ${data.isHidden ? 'border-red-900/50 opacity-60' : 'border-white/5'}">
-                            <div class="flex justify-between items-center" onclick="enterChapter('${child.key}', '${data.name}')">
-                                <h4 class="text-xs font-black uppercase italic">${data.name}</h4>
-                                <i class="fa-solid fa-chevron-right text-yellow-500 text-[10px]"></i>
-                            </div>
-                            <div class="flex gap-2 mt-4 pt-4 border-t border-white/5">
-                                <button onclick="quickEdit('${child.key}', '${data.name}')" class="flex-1 py-2 bg-white/5 rounded-lg text-[8px] font-black uppercase">Edit Name</button>
-                                <button onclick="toggleHide('${child.key}', ${data.isHidden})" class="flex-1 py-2 bg-blue-500/10 text-blue-400 rounded-lg text-[8px] font-black uppercase">${data.isHidden ? 'Show' : 'Hide'}</button>
-                                <button onclick="deleteItem('${child.key}')" class="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg"><i class="fa-solid fa-trash text-[8px]"></i></button>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        function enterChapter(id, name) {
-            viewMode = "CHAPTER_EDIT";
-            activeChapterId = id;
-            document.getElementById('titleText').innerText = name;
-            document.getElementById('formLabel').innerText = "Step 2: Edit Material";
-            document.getElementById('itemName').value = name;
-            document.getElementById('contentSection').classList.remove('hidden');
+        function renderTable() {
+            const tbody = document.getElementById('ncertTableBody');
+            tbody.innerHTML = dbMaterials.length === 0 ? 
+                `<tr><td colspan="4" class="text-center py-8 text-slate-500 italic">No assets mapped to dynamic cloud structures yet.</td></tr>` : '';
             
-            // Get current links
-            db.ref(`courses/${batchId}/ncert/${id}`).once('value', s => {
-                const d = s.val();
-                document.getElementById('pdfLink').value = d.pdf || "";
-                document.getElementById('audioLink').value = d.audio || "";
+            dbMaterials.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-900 hover:bg-slate-900/40 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-medium text-slate-100">${item.name}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full text-xs bg-indigo-950 text-indigo-400 border border-indigo-900">${item.subject}</span></td>
+                    <td class="py-3 px-4 text-xs font-mono text-slate-400">${item.link.substring(0, 35)}...</td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="deleteAsset(${idx})" class="text-rose-400 hover:text-rose-500 transition px-2 py-1"><i class="fa-solid fa-trash-can"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
-            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        function handleBack() {
-            if(viewMode === "CHAPTER_EDIT") {
-                viewMode = "LIST";
-                document.getElementById('titleText').innerText = "NCERT Hub";
-                document.getElementById('formLabel').innerText = "Step 1: Create Chapter";
-                document.getElementById('contentSection').classList.add('hidden');
-                resetForm();
-            } else {
-                history.back();
+        function saveNcertMaterial(e) {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('chapName').value,
+                subject: document.getElementById('subject').value,
+                link: document.getElementById('driveLink').value
+            };
+            dbMaterials.push(payload);
+            localStorage.setItem('mneet_ncert_store', JSON.stringify(dbMaterials));
+            document.getElementById('ncertForm').reset();
+            renderTable();
+        }
+
+        function deleteAsset(index) {
+            if(confirm("Delete this content resource?")) {
+                dbMaterials.splice(index, 1);
+                localStorage.setItem('mneet_ncert_store', JSON.stringify(dbMaterials));
+                renderTable();
             }
         }
 
-        function saveData() {
-            const name = document.getElementById('itemName').value;
-            const pdf = document.getElementById('pdfLink').value;
-            const audio = document.getElementById('audioLink').value;
-            const editId = document.getElementById('editId').value;
-
-            if(!name) return alert("Enter Name");
-
-            const path = `courses/${batchId}/ncert/` + (viewMode === "CHAPTER_EDIT" ? activeChapterId : (editId || ""));
-            const payload = { name: name };
-
-            if(viewMode === "CHAPTER_EDIT") {
-                payload.pdf = pdf;
-                payload.audio = audio;
-            }
-
-            if(viewMode === "CHAPTER_EDIT" || editId) {
-                db.ref(path).update(payload).then(() => {
-                    if(viewMode !== "CHAPTER_EDIT") resetForm();
-                    alert("Updated Successfully");
-                });
-            } else {
-                db.ref(`courses/${batchId}/ncert`).push({
-                    name: name,
-                    isHidden: false,
-                    timestamp: Date.now()
-                }).then(() => resetForm());
-            }
-        }
-
-        function quickEdit(id, name) {
-            document.getElementById('editId').value = id;
-            document.getElementById('itemName').value = name;
-            document.getElementById('itemName').focus();
-        }
-
-        function toggleHide(id, status) {
-            db.ref(`courses/${batchId}/ncert/${id}`).update({ isHidden: !status });
-        }
-
-        function deleteItem(id) {
-            if(confirm("Confirm Delete?")) db.ref(`courses/${batchId}/ncert/${id}`).remove();
-        }
-
-        function resetForm() {
-            document.getElementById('itemName').value = "";
-            document.getElementById('editId').value = "";
-            document.getElementById('pdfLink').value = "";
-            document.getElementById('audioLink').value = "";
-        }
-
-        function goToMapper() {
-            location.href = `admin_ncert_mapper.html?id=${activeChapterId}`;
-        }
-
-        loadData();
+        window.onload = renderTable;
     </script>
 </body>
 </html>
