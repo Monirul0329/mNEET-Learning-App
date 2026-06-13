@@ -7,172 +7,122 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .glass { background: rgba(22, 33, 62, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
-        .glass-input { background: #0b1120; border: 1px solid #1f2937; outline: none; color: white; }
-        body { background: #070b14; color: white; font-family: sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        .scroll-area { flex: 1; overflow-y: auto; padding-bottom: 100px; scroll-behavior: smooth; }
-        ::-webkit-scrollbar { width: 0px; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); outline: none; color: white; }
+        body { background: #070b14; color: white; font-family: sans-serif; min-height: 100vh; }
+        .btn-active:active { transform: scale(0.95); }
     </style>
 </head>
-<body>
+<body class="pb-24">
 
-    <div class="flex justify-between items-center p-6 bg-[#16213e] border-b border-white/5">
-        <button onclick="handleBack()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <h2 id="pageTitle" class="text-sm font-black text-blue-400 uppercase italic tracking-widest">Lecture Chapters</h2>
-        <button onclick="logout()" class="w-10 h-10 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center border border-red-500/20 active:scale-90">
-            <i class="fa-solid fa-power-off text-xs"></i>
-        </button>
+    <div class="sticky top-0 z-50 p-6 glass border-b border-white/5 flex justify-between items-center">
+        <button onclick="handleBack()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 btn-active"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2 id="titleText" class="text-xs font-black text-blue-500 uppercase tracking-widest">Lecture Hub Control</h2>
+        <div class="w-10"></div>
     </div>
 
-    <div class="p-4">
-        <div class="relative">
-            <input type="text" id="mainSearch" onkeyup="filterData()" placeholder="Search..." class="w-full glass p-4 rounded-2xl outline-none text-xs pl-12 border-none text-white">
-            <i class="fa-solid fa-magnifying-glass absolute left-5 top-4 text-gray-500"></i>
-        </div>
-    </div>
-
-    <div class="scroll-area p-4" id="mainContent">
+    <div class="p-4 max-w-lg mx-auto space-y-6">
         
-        <div id="chapterForm" class="bg-[#16213e] p-6 rounded-[2.5rem] border border-gray-800 mb-8 shadow-xl">
-            <p id="formStatus" class="text-[8px] font-black uppercase text-gray-500 mb-4 italic tracking-widest">Create New Chapter</p>
-            <div class="flex gap-2">
+        <div id="mainForm" class="bg-[#16213e] p-6 rounded-[2.5rem] border border-white/5 shadow-2xl">
+            <p id="formLabel" class="text-[8px] font-black uppercase text-gray-500 mb-4 text-center tracking-widest">Step 1: Create Lecture Topic</p>
+            <div class="space-y-3">
                 <input type="hidden" id="editId">
-                <input type="text" id="itemName" placeholder="Enter Chapter Name..." class="flex-1 glass-input p-4 rounded-xl text-xs font-bold">
-                <button onclick="saveItem()" class="bg-blue-600 px-6 rounded-xl text-white active:scale-90"><i class="fa-solid fa-plus"></i></button>
+                <input type="text" id="itemName" placeholder="Chapter / Topic Name..." class="w-full glass-input p-4 rounded-xl text-xs font-bold">
+                
+                <div id="contentSection" class="hidden space-y-3 pt-2">
+                    <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl space-y-2">
+                        <p class="text-[7px] font-black text-blue-400 uppercase mb-1">Resource Streaming Pipelines</p>
+                        <input type="text" id="videoLink" placeholder="Video Embed URL (YouTube/Vimeo)" class="w-full glass-input p-3 rounded-lg text-[10px]">
+                        <input type="text" id="notesLink" placeholder="Class Notes PDF Link" class="w-full glass-input p-3 rounded-lg text-[10px]">
+                        <input type="text" id="dppLink" placeholder="DPP Sheet PDF Link" class="w-full glass-input p-3 rounded-lg text-[10px]">
+                    </div>
+                </div>
+
+                <button onclick="saveData()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase text-xs btn-active shadow-lg">Confirm & Save Content</button>
             </div>
         </div>
 
-        <div id="itemList" class="space-y-4">
-            </div>
+        <div class="space-y-4" id="listArea">
+            <p class="text-center text-gray-600 text-[9px] font-black uppercase italic">Syncing Lectures database...</p>
+        </div>
 
     </div>
-
-    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50 shadow-2xl border-white/10">
-        <a href="admin_dashboard.html" class="text-gray-600"><i class="fa-solid fa-house"></i></a>
-        <a href="admin_study.html" class="text-blue-400"><i class="fa-solid fa-book-open"></i></a>
-        <a href="admin_course.html" class="text-gray-600"><i class="fa-solid fa-layer-group"></i></a>
-        <a href="admin_test.html" class="text-gray-600"><i class="fa-solid fa-pen-nib"></i></a>
-        <a href="admin_mstore.html" class="text-gray-600"><i class="fa-solid fa-store"></i></a>
-    </nav>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const batchId = localStorage.getItem('selectedBatchId');
+        firebase.initializeApp(firebaseConfig); const db = firebase.database();
+        const batchId = localStorage.getItem('selectedBatchId') || "B001";
+        let viewMode = "LIST"; let activeChapterId = "";
 
-        let currentLevel = 'chapters'; // 'chapters' or 'topics'
-        let currentChapterId = '';
-        let allData = [];
-
-        function init() {
-            if(!batchId) { alert("Select Batch First!"); location.href='admin_dashboard.html'; return; }
-            loadChapters();
-        }
-
-        // --- CHAPTER LOGIC ---
-        function loadChapters() {
-            currentLevel = 'chapters';
-            document.getElementById('pageTitle').innerText = "Lecture Chapters";
-            document.getElementById('formStatus').innerText = "Create New Chapter";
-            database.ref(`courses/${batchId}/chapters`).on('value', snap => {
-                allData = [];
-                snap.forEach(child => { allData.push({ id: child.key, ...child.val() }); });
-                renderList();
+        function loadData() {
+            db.ref(`courses/${batchId}/lectures`).on('value', snap => {
+                const listArea = document.getElementById('listArea'); listArea.innerHTML = "";
+                if(!snap.exists()) { listArea.innerHTML = `<p class="text-center text-gray-700 text-[10px] py-10 uppercase">No Lecture Chapters Found</p>`; return; }
+                snap.forEach(child => {
+                    const data = child.val();
+                    listArea.innerHTML += `
+                        <div class="glass p-5 rounded-[2rem] border ${data.isHidden ? 'border-red-900/50 opacity-60' : 'border-white/5'}">
+                            <div class="flex justify-between items-center cursor-pointer" onclick="enterChapter('${child.key}', '${data.name}')">
+                                <h4 class="text-xs font-black uppercase italic text-white">${data.name}</h4>
+                                <i class="fa-solid fa-chevron-right text-blue-500 text-[10px]"></i>
+                            </div>
+                            <div class="flex gap-2 mt-4 pt-4 border-t border-white/5">
+                                <button onclick="quickEdit('${child.key}', '${data.name}')" class="flex-1 py-2 bg-white/5 rounded-lg text-[8px] font-black uppercase btn-active">Edit Title</button>
+                                <button onclick="toggleHide('${child.key}', ${data.isHidden})" class="flex-1 py-2 bg-blue-500/10 text-blue-400 rounded-lg text-[8px] font-black uppercase btn-active">${data.isHidden?'Show':'Hide'}</button>
+                                <button onclick="deleteItem('${child.key}')" class="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg btn-active"><i class="fa-solid fa-trash text-[8px]"></i></button>
+                            </div>
+                        </div>`;
+                });
             });
         }
 
-        // --- TOPIC LOGIC ---
-        function openTopics(chId, chName) {
-            currentLevel = 'topics';
-            currentChapterId = chId;
-            document.getElementById('pageTitle').innerText = chName;
-            document.getElementById('formStatus').innerText = "Add Topic to " + chName;
-            database.ref(`courses/${batchId}/chapters/${chId}/topics`).on('value', snap => {
-                allData = [];
-                snap.forEach(child => { allData.push({ id: child.key, ...child.val() }); });
-                renderList();
+        function enterChapter(id, name) {
+            viewMode = "CHAPTER_EDIT"; activeChapterId = id;
+            document.getElementById('titleText').innerText = name;
+            document.getElementById('formLabel').innerText = "Step 2: Connect Materials";
+            document.getElementById('itemName').value = name;
+            document.getElementById('contentSection').classList.remove('hidden');
+            db.ref(`courses/${batchId}/lectures/${id}`).once('value', s => {
+                const d = s.val();
+                document.getElementById('videoLink').value = d.video || "";
+                document.getElementById('notesLink').value = d.notes || "";
+                document.getElementById('dppLink').value = d.dpp || "";
             });
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        function renderList() {
-            const list = document.getElementById('itemList');
-            list.innerHTML = allData.map((item, index) => `
-                <div class="glass p-5 rounded-[2rem] border ${item.isHidden ? 'border-red-900 opacity-50' : 'border-white/5'}">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex-1" onclick="${currentLevel === 'chapters' ? `openTopics('${item.id}', '${item.name}')` : ''}">
-                            <h4 class="text-xs font-black uppercase italic">${item.name}</h4>
-                            <p class="text-[7px] text-gray-500 font-bold uppercase">${currentLevel === 'chapters' ? 'Click to manage Topics' : 'Content Item'}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="moveItem('${item.id}', ${index-1})" class="text-gray-500 text-[10px]"><i class="fa-solid fa-arrow-up"></i></button>
-                            <button onclick="moveItem('${item.id}', ${index+1})" class="text-gray-500 text-[10px]"><i class="fa-solid fa-arrow-down"></i></button>
-                        </div>
-                    </div>
-                    <div class="flex gap-2 border-t border-white/5 pt-4">
-                        <button onclick="editItem('${item.id}', '${item.name}')" class="flex-1 bg-white/5 text-[8px] font-black uppercase py-2 rounded-xl">Edit</button>
-                        <button onclick="toggleHide('${item.id}', ${item.isHidden})" class="flex-1 bg-blue-500/10 text-blue-400 text-[8px] font-black uppercase py-2 rounded-xl">${item.isHidden ? 'Unhide' : 'Hide'}</button>
-                        <button onclick="deleteItem('${item.id}')" class="bg-red-500/10 text-red-500 px-4 py-2 rounded-xl"><i class="fa-solid fa-trash text-[8px]"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function saveItem() {
+        function saveData() {
             const name = document.getElementById('itemName').value;
+            const video = document.getElementById('videoLink').value;
+            const notes = document.getElementById('notesLink').value;
+            const dpp = document.getElementById('dppLink').value;
             const editId = document.getElementById('editId').value;
-            if(!name) return;
 
-            const path = currentLevel === 'chapters' ? `courses/${batchId}/chapters` : `courses/${batchId}/chapters/${currentChapterId}/topics`;
-            
-            if(editId) {
-                database.ref(path + '/' + editId).update({ name: name }).then(() => resetForm());
+            if(!name) return alert("Enter Name");
+            const path = `courses/${batchId}/lectures/` + (viewMode === "CHAPTER_EDIT" ? activeChapterId : (editId || ""));
+            const payload = { name: name };
+
+            if(viewMode === "CHAPTER_EDIT") { payload.video = video; payload.notes = notes; payload.dpp = dpp; }
+
+            if(viewMode === "CHAPTER_EDIT" || editId) {
+                db.ref(path).update(payload).then(() => { alert("Lecture Synced!"); handleBack(); });
             } else {
-                database.ref(path).push({ name: name, isHidden: false, timestamp: Date.now() }).then(() => resetForm());
+                db.ref(`courses/${batchId}/lectures`).push({ name: name, isHidden: false, timestamp: Date.now() }).then(() => resetForm());
             }
         }
 
         function handleBack() {
-            if(currentLevel === 'topics') loadChapters();
-            else history.back();
+            if(viewMode === "CHAPTER_EDIT") {
+                viewMode = "LIST"; document.getElementById('titleText').innerText = "Lecture Hub Control";
+                document.getElementById('formLabel').innerText = "Step 1: Create Lecture Topic";
+                document.getElementById('contentSection').classList.add('hidden'); resetForm();
+            } else { location.href = "admin_dashboard.html"; }
         }
-
-        function resetForm() {
-            document.getElementById('itemName').value = "";
-            document.getElementById('editId').value = "";
-            document.getElementById('formStatus').innerText = currentLevel === 'chapters' ? "Create New Chapter" : "Add Topic";
-        }
-
-        function editItem(id, name) {
-            document.getElementById('editId').value = id;
-            document.getElementById('itemName').value = name;
-            document.getElementById('formStatus').innerText = "Editing: " + name;
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
-        function toggleHide(id, status) {
-            const path = currentLevel === 'chapters' ? `courses/${batchId}/chapters/` : `courses/${batchId}/chapters/${currentChapterId}/topics/`;
-            database.ref(path + id).update({ isHidden: !status });
-        }
-
-        function deleteItem(id) {
-            if(!confirm("Are you sure?")) return;
-            const path = currentLevel === 'chapters' ? `courses/${batchId}/chapters/` : `courses/${batchId}/chapters/${currentChapterId}/topics/`;
-            database.ref(path + id).remove();
-        }
-
-        function filterData() {
-            const term = document.getElementById('mainSearch').value.toLowerCase();
-            const filtered = allData.filter(i => i.name.toLowerCase().includes(term));
-            const list = document.getElementById('itemList');
-            // Render filtered (re-using part of renderList logic)
-            // ... Logic simplified for brevity, works on keyup
-        }
-
-        function logout() { localStorage.clear(); location.href='index.html'; }
-        init();
+        function quickEdit(id, name) { document.getElementById('editId').value = id; document.getElementById('itemName').value = name; document.getElementById('itemName').focus(); }
+        function toggleHide(id, status) { db.ref(`courses/${batchId}/lectures/${id}`).update({ isHidden: !status }); }
+        function deleteItem(id) { if(confirm("Confirm Delete?")) db.ref(`courses/${batchId}/lectures/${id}`).remove(); }
+        function resetForm() { document.getElementById('itemName').value = ""; document.getElementById('editId').value = ""; document.getElementById('videoLink').value = ""; document.getElementById('notesLink').value = ""; document.getElementById('dppLink').value = ""; }
+        loadData();
     </script>
 </body>
 </html>
