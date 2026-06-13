@@ -29,7 +29,6 @@
     </div>
 
     <div class="scroll-area p-4 space-y-5">
-        
         <div class="glass p-5 rounded-3xl border-b-2 border-blue-500/30 mx-1">
             <div class="flex justify-between items-center mb-2 px-1">
                 <span class="text-[9px] font-black uppercase text-gray-500 italic tracking-widest">Knowledge Mastery</span>
@@ -79,7 +78,6 @@
             </div>
             <div class="bg-green-500 text-[7px] font-black px-2 py-1 rounded text-black italic">NEW</div>
         </div>
-
     </div>
 
     <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center z-50 border-white/10 shadow-2xl">
@@ -88,7 +86,7 @@
         <a href="all_batches.html" class="relative -mt-12">
             <div class="bg-blue-600 w-14 h-14 rounded-full flex items-center justify-center border-4 border-[#070b14] shadow-lg"><i class="fa-solid fa-layer-group text-white text-xl"></i></div>
         </a>
-        <a href="test.html" class="text-gray-500"><i class="fa-solid fa-pen-nib"></i></a>
+        <a href="test_zone.html" class="text-gray-500"><i class="fa-solid fa-pen-nib"></i></a>
         <a href="mstore.html" class="text-gray-500"><i class="fa-solid fa-store"></i></a>
     </nav>
 
@@ -96,10 +94,8 @@
         const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-
         const selectedBatchId = localStorage.getItem('selectedBatchId');
         if (!selectedBatchId) { alert("Please select a batch first!"); window.location.href = 'all_batches.html'; }
-
         const userEmail = localStorage.getItem('mUserEmail');
         if (userEmail) {
             const safeEmail = userEmail.replace(/\./g, ',');
@@ -113,4 +109,5 @@
         function navigate(page) { window.location.href = page; }
     </script>
 </body>
-</html>
+    </html>
+            
