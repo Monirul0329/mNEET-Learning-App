@@ -1,24 +1,88 @@
-<script>
-    let time = 60;
-    const timerEl = document.getElementById('timer');
-    const interval = setInterval(() => {
-        if(time > 0) {
-            time--;
-            timerEl.innerText = `00:${time < 10 ? '0'+time : time}`;
-        } else {
-            clearInterval(interval);
-            alert("Time Over!");
-            location.reload();
-        }
-    }, 1000);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        body { background: #070b14; color: white; font-family: sans-serif; min-height: 100vh; }
+        .purple-glow { color: #a855f7; text-shadow: 0 0 10px rgba(168, 85, 247, 0.4); }
+    </style>
+</head>
+<body class="p-4 pb-32">
 
-    function check(isCorrect) {
-        if(isCorrect) {
-            alert("Correct! +4 Points 🥳");
-            // Here you can update user coins in database
-        } else {
-            alert("Wrong! -1 Point 😢\nCheck Mitochondria in NCERT Page 126.");
+    <div class="flex justify-between items-center mb-8 px-1 mt-2">
+        <div class="flex items-center gap-4">
+            <button onclick="location.href='study_zone.html'" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400"><i class="fa-solid fa-chevron-left"></i></button>
+            <div>
+                <h1 class="text-xl font-black italic purple-glow uppercase tracking-tighter">QUIZ HUB</h1>
+                <p class="text-[7px] text-gray-500 uppercase font-bold tracking-widest mt-0.5">Test Your Knowledge Accuracy</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-4" id="quizContainer"></div>
+
+    <!-- Active MCQ Interactive Model Pop Layer -->
+    <div id="liveQuizModal" class="fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center p-6">
+        <div class="bg-slate-900 border border-white/10 rounded-[2.5rem] w-full max-w-sm p-6 text-white">
+            <span class="text-[8px] font-black uppercase text-purple-400 tracking-widest">LIVE TOPIC CHALLENGE</span>
+            <h3 id="targetQuestionText" class="text-sm font-bold my-4 leading-tight"></h3>
+            <div class="space-y-2" id="optionsBox"></div>
+            <button onclick="closeLiveQuiz()" class="w-full mt-4 text-center text-gray-500 text-[9px] font-bold uppercase tracking-wider">Exit Session</button>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
+        firebase.initializeApp(firebaseConfig); const database = firebase.database();
+        const batchId = localStorage.getItem('selectedBatchId') || "B001";
+        let activeAns = "";
+
+        function loadStudentQuizzes() {
+            database.ref(`courses/${batchId}/quizzes`).on('value', snap => {
+                const container = document.getElementById('quizContainer'); container.innerHTML = "";
+                if(!snap.exists()) { container.innerHTML = '<p class="text-center text-xs text-gray-600 py-10">No Quizzes Active</p>'; return; }
+                snap.forEach(child => {
+                    const q = child.val(); if(q.isHidden) return;
+                    container.innerHTML += `
+                        <div onclick="launchQuizSession('${child.key}')" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border border-white/5 shadow-md cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400"><i class="fa-solid fa-vial"></i></div>
+                                <div><h4 class="text-xs font-black uppercase italic tracking-wide">${q.name}</h4></div>
+                            </div>
+                            <i class="fa-solid fa-circle-play text-purple-500 text-lg"></i>
+                        </div>`;
+                });
+            });
         }
-        location.reload();
-    }
-</script>
+
+        function launchQuizSession(id) {
+            database.ref(`courses/${batchId}/quizzes/${id}/questions`).once('value', snap => {
+                const q = snap.val(); if(!q) return alert("No Questions In This Set!");
+                activeAns = q.correct;
+                document.getElementById('targetQuestionText').innerText = q.question;
+                
+                const optBox = document.getElementById('optionsBox'); optBox.innerHTML = "";
+                ['A','B','C','D'].forEach(key => {
+                    if(q[key]) {
+                        optBox.innerHTML += `<button onclick="checkSelectedAns('${key}', this)" class="w-full text-left p-3 rounded-xl border border-white/10 bg-white/5 text-xs font-bold active:scale-95 transition-all">${q[key]}</button>`;
+                    }
+                });
+                document.getElementById('liveQuizModal').style.display = 'flex';
+            });
+        }
+
+        function checkSelectedAns(key, btn) {
+            if(key === activeAns) { btn.classList.add('bg-green-600', 'border-green-500'); alert("Fantastic! Correct Answer."); }
+            else { btn.classList.add('bg-red-600', 'border-red-500'); alert("Wrong! Try again."); }
+            setTimeout(closeLiveQuiz, 1000);
+        }
+        function closeLiveQuiz() { document.getElementById('liveQuizModal').style.display = 'none'; }
+        loadStudentQuizzes();
+    </script>
+</body>
+</html>
