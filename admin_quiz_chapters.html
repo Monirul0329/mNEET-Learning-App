@@ -1,33 +1,128 @@
-<script>
-    // ... Firebase Init
-    const batchId = localStorage.getItem('selectedBatchId');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .glass-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); outline: none; color: white; }
+        body { background: #070b14; color: white; font-family: sans-serif; min-height: 100vh; }
+        .btn-active:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="pb-24">
 
-    function addQuizCh() {
-        const name = document.getElementById('quizChName').value;
-        if(!name) return;
-        // Path: courses/{batchId}/quizzes
-        firebase.database().ref(`courses/${batchId}/quizzes`).push({ 
-            name: name,
-            timestamp: Date.now()
-        }).then(() => {
-            document.getElementById('quizChName').value = "";
-            alert("Quiz Chapter Created!");
-        });
-    }
+    <div class="sticky top-0 z-50 p-6 glass border-b border-white/5 flex justify-between items-center">
+        <button onclick="handleBack()" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 btn-active"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2 id="titleText" class="text-xs font-black text-purple-400 uppercase tracking-widest">Quiz Master Panel</h2>
+        <div class="w-10"></div>
+    </div>
 
-    firebase.database().ref(`courses/${batchId}/quizzes`).on('value', snap => {
-        const list = document.getElementById('quizChList');
-        list.innerHTML = "";
-        snap.forEach(child => {
-            list.innerHTML += `
-                <div class="glass p-5 rounded-[2rem] flex justify-between items-center border border-purple-500/10 mb-3">
-                    <div onclick="location.href='admin_quiz_topics.html?id=${child.key}&batch=${batchId}'" class="flex-1">
-                        <h4 class="text-[11px] font-black uppercase italic">${child.val().name}</h4>
+    <div class="p-4 max-w-lg mx-auto space-y-6">
+        <div id="mainForm" class="bg-[#16213e] p-6 rounded-[2.5rem] border border-white/5 shadow-2xl">
+            <p id="formLabel" class="text-[8px] font-black uppercase text-gray-500 mb-4 text-center tracking-widest">Step 1: Create Quiz Chapter</p>
+            <div class="space-y-3">
+                <input type="hidden" id="editId">
+                <input type="text" id="itemName" placeholder="Quiz Topic / Chapter Name..." class="w-full glass-input p-4 rounded-xl text-xs font-bold">
+                
+                <div id="contentSection" class="hidden space-y-3 pt-2">
+                    <div class="p-4 bg-purple-500/10 border border-purple-500/20 rounded-2xl space-y-2">
+                        <p class="text-[7px] font-black text-purple-400 uppercase mb-1">Add MCQ Question details</p>
+                        <input type="text" id="quizQ" placeholder="Question Text" class="w-full glass-input p-3 rounded-lg text-[10px]">
+                        <input type="text" id="optA" placeholder="Option A" class="w-full glass-input p-3 rounded-lg text-[10px]">
+                        <input type="text" id="optB" placeholder="Option B" class="w-full glass-input p-3 rounded-lg text-[10px]">
+                        <input type="text" id="optC" placeholder="Option C" class="w-full glass-input p-3 rounded-lg text-[10px]">
+                        <input type="text" id="optD" placeholder="Option D" class="w-full glass-input p-3 rounded-lg text-[10px]">
+                        <select id="correctAns" class="w-full glass-input p-3 rounded-lg text-[10px] bg-[#16213e]">
+                            <option value="">Select Correct Answer</option>
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
                     </div>
-                    <button onclick="deleteQuizCh('${child.key}')" class="text-red-500 p-2"><i class="fa-solid fa-trash-can"></i></button>
-                </div>`;
-        });
-    });
+                </div>
+                <button onclick="saveData()" class="w-full bg-purple-600 text-white py-4 rounded-xl font-black uppercase text-xs btn-active shadow-lg">Save Question Setup</button>
+            </div>
+        </div>
 
-    function deleteQuizCh(id) { if(confirm("Delete Quiz?")) firebase.database().ref(`courses/${batchId}/quizzes/` + id).remove(); }
-</script>
+        <div class="space-y-4" id="listArea"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
+        firebase.initializeApp(firebaseConfig); const db = firebase.database();
+        const batchId = localStorage.getItem('selectedBatchId') || "B001";
+        let viewMode = "LIST"; let activeChapterId = "";
+
+        function loadData() {
+            db.ref(`courses/${batchId}/quizzes`).on('value', snap => {
+                const listArea = document.getElementById('listArea'); listArea.innerHTML = "";
+                if(!snap.exists()) return;
+                snap.forEach(child => {
+                    const data = child.val();
+                    listArea.innerHTML += `
+                        <div class="glass p-5 rounded-[2rem] border mb-3">
+                            <div class="flex justify-between items-center cursor-pointer" onclick="enterChapter('${child.key}', '${data.name}')">
+                                <h4 class="text-xs font-black uppercase italic text-white">${data.name}</h4>
+                                <i class="fa-solid fa-chevron-right text-purple-500 text-[10px]"></i>
+                            </div>
+                            <div class="flex gap-2 mt-4 pt-4 border-t border-white/5">
+                                <button onclick="quickEdit('${child.key}', '${data.name}')" class="flex-1 py-2 bg-white/5 rounded-lg text-[8px] font-black uppercase">Edit Title</button>
+                                <button onclick="toggleHide('${child.key}', ${data.isHidden})" class="flex-1 py-2 bg-purple-500/10 text-purple-400 rounded-lg text-[8px] font-black uppercase">${data.isHidden?'Show':'Hide'}</button>
+                                <button onclick="deleteItem('${child.key}')" class="px-4 py-2 bg-red-500/10 text-red-500 rounded-lg"><i class="fa-solid fa-trash text-[8px]"></i></button>
+                            </div>
+                        </div>`;
+                });
+            });
+        }
+
+        function enterChapter(id, name) {
+            viewMode = "CHAPTER_EDIT"; activeChapterId = id;
+            document.getElementById('titleText').innerText = name;
+            document.getElementById('formLabel').innerText = "Step 2: Add Live MCQ Questions";
+            document.getElementById('itemName').value = name;
+            document.getElementById('contentSection').classList.remove('hidden');
+            db.ref(`courses/${batchId}/quizzes/${id}/questions`).once('value', s => {
+                const d = s.val() || {};
+                document.getElementById('quizQ').value = d.question || "";
+                document.getElementById('optA').value = d.A || ""; document.getElementById('optB').value = d.B || "";
+                document.getElementById('optC').value = d.C || ""; document.getElementById('optD').value = d.D || "";
+                document.getElementById('correctAns').value = d.correct || "";
+            });
+        }
+
+        function saveData() {
+            const name = document.getElementById('itemName').value;
+            if(!name) return alert("Enter Title!");
+            const path = `courses/${batchId}/quizzes/` + (viewMode === "CHAPTER_EDIT" ? activeChapterId : "");
+            
+            const payload = { name: name };
+            if(viewMode === "CHAPTER_EDIT") {
+                payload.questions = {
+                    question: document.getElementById('quizQ').value,
+                    A: document.getElementById('optA').value, B: document.getElementById('optB').value,
+                    C: document.getElementById('optC').value, D: document.getElementById('optD').value,
+                    correct: document.getElementById('correctAns').value
+                };
+            }
+
+            db.ref(path).update(payload).then(() => { alert("Quiz Data Updated!"); handleBack(); });
+        }
+
+        function handleBack() {
+            if(viewMode === "CHAPTER_EDIT") {
+                viewMode = "LIST"; document.getElementById('contentSection').classList.add('hidden'); resetForm();
+            } else { location.href = "admin_dashboard.html"; }
+        }
+        function quickEdit(id, name) { document.getElementById('editId').value = id; document.getElementById('itemName').value = name; }
+        function toggleHide(id, status) { db.ref(`courses/${batchId}/quizzes/${id}`).update({ isHidden: !status }); }
+        function deleteItem(id) { if(confirm("Confirm Delete?")) db.ref(`courses/${batchId}/quizzes/${id}`).remove(); }
+        function resetForm() { document.getElementById('itemName').value = ""; }
+        loadData();
+    </script>
+</body>
+</html>
