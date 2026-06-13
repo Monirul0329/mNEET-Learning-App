@@ -6,124 +6,69 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style> 
-        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); } 
+    <style>
+        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
+        body { background: #070b14; color: white; font-family: sans-serif; min-height: 100vh; }
+        .ch-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .ch-card:active { transform: scale(0.97); opacity: 0.8; }
         .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
     </style>
 </head>
-<body class="bg-[#070b14] text-white p-4 pb-32">
+<body class="p-4 pb-32">
 
-    <div class="flex justify-between items-center mb-8 px-1">
+    <div class="flex justify-between items-center mb-8 px-1 mt-2">
         <div class="flex items-center gap-4">
-            <button onclick="location.href='dashboard.html'" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90 transition-all"><i class="fa-solid fa-chevron-left"></i></button>
-            <h1 class="text-2xl font-black italic gold-glow uppercase tracking-tighter">STUDY ZONE</h1>
-        </div>
-        <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full text-xs font-black italic border border-yellow-500/20">🪙 <span id="coinCountDisplay">0</span></div>
-    </div>
-
-    <div class="glass p-5 rounded-3xl mb-8 border-b-2 border-blue-500/30">
-        <div class="flex justify-between items-center mb-2 px-1">
-            <span class="text-[9px] font-black uppercase text-gray-500 italic tracking-widest">Knowledge Mastery</span>
-            <span class="text-[10px] font-black text-blue-400" id="progressPctText">0%</span>
-        </div>
-        <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-            <div class="bg-blue-500 h-full transition-all duration-500" id="progressBarFill" style="width: 0%"></div>
+            <button onclick="location.href='study_zone.html'" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90 transition-all"><i class="fa-solid fa-chevron-left"></i></button>
+            <div>
+                <h1 class="text-xl font-black italic gold-glow uppercase tracking-tighter">NCERT CHAPTERS</h1>
+                <p class="text-[7px] text-gray-500 uppercase font-bold tracking-widest mt-0.5">Select chapter to read</p>
+            </div>
         </div>
     </div>
 
-    <div class="space-y-4">
-        <a href="lecture_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-blue-500 active:scale-95 transition-all">
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fa-solid fa-clapperboard"></i></div>
-                <h4 class="text-sm font-black uppercase italic">Lecture, Notes & DPP Hub</h4>
-            </div>
-            <i class="fa-solid fa-chevron-right text-gray-800"></i>
-        </a>
-
-        <a href="ncert_reading_pyq.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-yellow-500 active:scale-95 transition-all">
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-book-open"></i></div>
-                <h4 class="text-sm font-black uppercase italic tracking-tighter">NCERT Reading & PYQ Tags</h4>
-            </div>
-            <i class="fa-solid fa-chevron-right text-gray-800"></i>
-        </a>
-
-        <a href="chapter_quiz_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-purple-500 active:scale-95 transition-all">
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400"><i class="fa-solid fa-vial-circle-check"></i></div>
-                <h4 class="text-sm font-black uppercase italic tracking-tighter">Chapter & Topic Wise Quiz</h4>
-            </div>
-            <i class="fa-solid fa-chevron-right text-gray-800"></i>
-        </a>
-
-        <a href="special_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-red-500 active:scale-95 transition-all">
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500"><i class="fa-solid fa-folder-plus"></i></div>
-                <h4 class="text-sm font-black uppercase italic tracking-tighter">Special Materials Hub</h4>
-            </div>
-            <i class="fa-solid fa-chevron-right text-gray-800"></i>
-        </a>
-
-        <a href="support.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-green-500 active:scale-95 transition-all">
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500"><i class="fa-solid fa-headset"></i></div>
-                <h4 class="text-sm font-black uppercase italic tracking-tighter">Doubt & Support Box</h4>
-            </div>
-            <i class="fa-solid fa-chevron-right text-gray-800"></i>
-        </a>
+    <div class="space-y-4" id="chaptersContainer">
+        <div class="py-20 text-center text-gray-600 text-[10px] uppercase font-black tracking-widest">
+            <i class="fa-solid fa-circle-notch animate-spin text-yellow-500 mr-2"></i> Syncing Hub...
+        </div>
     </div>
-
-    <nav class="fixed bottom-6 left-6 right-6 glass p-4 rounded-full flex justify-around items-center shadow-2xl border-white/10 z-50">
-        <a href="dashboard.html"><i class="fa-solid fa-house text-gray-600"></i></a>
-        <i class="fa-solid fa-book-open gold-glow"></i>
-        <a href="all_batches.html"><div class="bg-blue-600 w-11 h-11 rounded-full flex items-center justify-center -mt-8 border-4 border-[#070b14] shadow-xl"><i class="fa-solid fa-layer-group text-white text-lg"></i></div></a>
-        <a href="test.html"><i class="fa-solid fa-pen-nib text-gray-600"></i></a>
-        <a href="mstore.html"><i class="fa-solid fa-store text-gray-600"></i></a>
-    </nav>
 
     <script>
-        // Real-time Storage Credentials Config Initialization
-        const firebaseConfig = { 
-            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", 
-            authDomain: "mneet-spark.firebaseapp.com", 
-            projectId: "mneet-spark", 
-            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", 
-            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" 
-        };
+        const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const batchId = localStorage.getItem('selectedBatchId') || "B001";
 
-        const selectedBatchId = localStorage.getItem('selectedBatchId');
-        const userEmail = localStorage.getItem('mUserEmail');
+        function loadStudentChapters() {
+            database.ref(`courses/${batchId}/ncert`).on('value', snap => {
+                const container = document.getElementById('chaptersContainer');
+                container.innerHTML = "";
 
-        function initStudyZone() {
-            // Secure check layer
-            if (!selectedBatchId) {
-                alert("Please select your batch first!");
-                window.location.href = 'all_batches.html';
-                return;
-            }
+                if (!snap.exists()) {
+                    container.innerHTML = `<p class="text-center text-gray-600 text-[9px] font-black uppercase tracking-widest py-10">No NCERT Chapters Published</p>`;
+                    return;
+                }
 
-            if (userEmail) {
-                const safeEmail = userEmail.replace(/\./g, ',');
-                
-                // 1. Live Sync Coins Display Logic
-                database.ref(`users/${safeEmail}/coins`).on('value', snap => {
-                    const coins = snap.val() || 0;
-                    document.getElementById('coinCountDisplay').innerText = coins;
+                snap.forEach(child => {
+                    const c = child.val();
+                    if (c.isHidden) return; // Automatic bypass hidden chapters
+
+                    container.innerHTML += `
+                        <div onclick="openReader('${child.key}')" class="glass p-6 rounded-[2.5rem] flex justify-between items-center ch-card border border-white/5 shadow-md">
+                            <div class="flex items-center gap-4">
+                                <div class="w-11 h-11 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-500"><i class="fa-solid fa-book-bookmark"></i></div>
+                                <div>
+                                    <h4 class="text-sm font-black uppercase italic tracking-wide">${c.name}</h4>
+                                    <p class="text-[7px] text-gray-500 uppercase font-bold mt-0.5">Smart Study Session Ready</p>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-circle-play text-yellow-500 text-lg"></i>
+                        </div>`;
                 });
-
-                // 2. Dynamic Performance Mastery Progress Analytics
-                database.ref(`users/${safeEmail}/masteryProgress/${selectedBatchId}`).on('value', snap => {
-                    const currentProgress = snap.val() || 45; // Falls back to default initial layout
-                    document.getElementById('progressPctText').innerText = currentProgress + "%";
-                    document.getElementById('progressBarFill').style.width = currentProgress + "%";
-                });
-            }
+            });
         }
 
-        initStudyZone();
+        function openReader(id) { location.href = `ncert_reader.html?id=${id}`; }
+        loadStudentChapters();
     </script>
 </body>
-                    </html>
-    
+</html>
