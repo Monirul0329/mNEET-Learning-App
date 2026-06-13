@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style> .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); } </style>
+    <style> 
+        .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); } 
+        .gold-glow { color: #eab308; text-shadow: 0 0 10px rgba(234, 179, 8, 0.4); }
+    </style>
 </head>
 <body class="bg-[#070b14] text-white p-4 pb-32">
 
@@ -13,21 +18,21 @@
             <button onclick="location.href='dashboard.html'" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90 transition-all"><i class="fa-solid fa-chevron-left"></i></button>
             <h1 class="text-2xl font-black italic gold-glow uppercase tracking-tighter">STUDY ZONE</h1>
         </div>
-        <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full text-xs font-black italic border border-yellow-500/20">🪙 0</div>
+        <div class="bg-yellow-500/10 px-3 py-1.5 rounded-full text-xs font-black italic border border-yellow-500/20">🪙 <span id="coinCountDisplay">0</span></div>
     </div>
 
     <div class="glass p-5 rounded-3xl mb-8 border-b-2 border-blue-500/30">
         <div class="flex justify-between items-center mb-2 px-1">
             <span class="text-[9px] font-black uppercase text-gray-500 italic tracking-widest">Knowledge Mastery</span>
-            <span class="text-[10px] font-black text-blue-400">45%</span>
+            <span class="text-[10px] font-black text-blue-400" id="progressPctText">0%</span>
         </div>
         <div class="w-full bg-white/5 h-1 rounded-full overflow-hidden">
-            <div class="bg-blue-500 h-full" style="width: 45%"></div>
+            <div class="bg-blue-500 h-full transition-all duration-500" id="progressBarFill" style="width: 0%"></div>
         </div>
     </div>
 
     <div class="space-y-4">
-        <a href="lecture_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-blue-500">
+        <a href="lecture_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-blue-500 active:scale-95 transition-all">
             <div class="flex items-center gap-4">
                 <div class="w-11 h-11 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500"><i class="fa-solid fa-clapperboard"></i></div>
                 <h4 class="text-sm font-black uppercase italic">Lecture, Notes & DPP Hub</h4>
@@ -35,7 +40,7 @@
             <i class="fa-solid fa-chevron-right text-gray-800"></i>
         </a>
 
-        <a href="ncert_reading_pyq.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-yellow-500">
+        <a href="ncert_reading_pyq.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-yellow-500 active:scale-95 transition-all">
             <div class="flex items-center gap-4">
                 <div class="w-11 h-11 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-[#eab308]"><i class="fa-solid fa-book-open"></i></div>
                 <h4 class="text-sm font-black uppercase italic tracking-tighter">NCERT Reading & PYQ Tags</h4>
@@ -43,7 +48,7 @@
             <i class="fa-solid fa-chevron-right text-gray-800"></i>
         </a>
 
-        <a href="chapter_quiz_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-purple-500">
+        <a href="chapter_quiz_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-purple-500 active:scale-95 transition-all">
             <div class="flex items-center gap-4">
                 <div class="w-11 h-11 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-400"><i class="fa-solid fa-vial-circle-check"></i></div>
                 <h4 class="text-sm font-black uppercase italic tracking-tighter">Chapter & Topic Wise Quiz</h4>
@@ -51,7 +56,7 @@
             <i class="fa-solid fa-chevron-right text-gray-800"></i>
         </a>
 
-        <a href="special_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-red-500">
+        <a href="special_hub.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-red-500 active:scale-95 transition-all">
             <div class="flex items-center gap-4">
                 <div class="w-11 h-11 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500"><i class="fa-solid fa-folder-plus"></i></div>
                 <h4 class="text-sm font-black uppercase italic tracking-tighter">Special Materials Hub</h4>
@@ -59,7 +64,7 @@
             <i class="fa-solid fa-chevron-right text-gray-800"></i>
         </a>
 
-        <a href="support.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-green-500">
+        <a href="support.html" class="glass p-6 rounded-[2.5rem] flex justify-between items-center border-l-4 border-green-500 active:scale-95 transition-all">
             <div class="flex items-center gap-4">
                 <div class="w-11 h-11 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500"><i class="fa-solid fa-headset"></i></div>
                 <h4 class="text-sm font-black uppercase italic tracking-tighter">Doubt & Support Box</h4>
@@ -76,6 +81,49 @@
         <a href="mstore.html"><i class="fa-solid fa-store text-gray-600"></i></a>
     </nav>
 
+    <script>
+        // Real-time Storage Credentials Config Initialization
+        const firebaseConfig = { 
+            apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", 
+            authDomain: "mneet-spark.firebaseapp.com", 
+            projectId: "mneet-spark", 
+            databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", 
+            appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const selectedBatchId = localStorage.getItem('selectedBatchId');
+        const userEmail = localStorage.getItem('mUserEmail');
+
+        function initStudyZone() {
+            // Secure check layer
+            if (!selectedBatchId) {
+                alert("Please select your batch first!");
+                window.location.href = 'all_batches.html';
+                return;
+            }
+
+            if (userEmail) {
+                const safeEmail = userEmail.replace(/\./g, ',');
+                
+                // 1. Live Sync Coins Display Logic
+                database.ref(`users/${safeEmail}/coins`).on('value', snap => {
+                    const coins = snap.val() || 0;
+                    document.getElementById('coinCountDisplay').innerText = coins;
+                });
+
+                // 2. Dynamic Performance Mastery Progress Analytics
+                database.ref(`users/${safeEmail}/masteryProgress/${selectedBatchId}`).on('value', snap => {
+                    const currentProgress = snap.val() || 45; // Falls back to default initial layout
+                    document.getElementById('progressPctText').innerText = currentProgress + "%";
+                    document.getElementById('progressBarFill').style.width = currentProgress + "%";
+                });
+            }
+        }
+
+        initStudyZone();
+    </script>
 </body>
-    </html>
+                    </html>
     
