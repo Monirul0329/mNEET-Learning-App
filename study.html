@@ -5,7 +5,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link class="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .glass { background: rgba(22, 33, 62, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.08); }
         body { background: #070b14; color: white; font-family: sans-serif; min-height: 100vh; }
@@ -18,7 +18,7 @@
 
     <div class="flex justify-between items-center mb-8 px-1 mt-2">
         <div class="flex items-center gap-4">
-            <button onclick="location.href='study_zone.html'" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400 active:scale-90 transition-all"><i class="fa-solid fa-chevron-left"></i></button>
+            <button onclick="location.href='study_zone.html'" class="w-10 h-10 glass rounded-2xl flex items-center justify-center text-gray-400"><i class="fa-solid fa-chevron-left"></i></button>
             <div>
                 <h1 class="text-xl font-black italic gold-glow uppercase tracking-tighter">NCERT CHAPTERS</h1>
                 <p class="text-[7px] text-gray-500 uppercase font-bold tracking-widest mt-0.5">Select chapter to read</p>
@@ -42,16 +42,13 @@
             database.ref(`courses/${batchId}/ncert`).on('value', snap => {
                 const container = document.getElementById('chaptersContainer');
                 container.innerHTML = "";
-
                 if (!snap.exists()) {
                     container.innerHTML = `<p class="text-center text-gray-600 text-[9px] font-black uppercase tracking-widest py-10">No NCERT Chapters Published</p>`;
                     return;
                 }
-
                 snap.forEach(child => {
                     const c = child.val();
-                    if (c.isHidden) return; // Automatic bypass hidden chapters
-
+                    if (c.isHidden) return; 
                     container.innerHTML += `
                         <div onclick="openReader('${child.key}')" class="glass p-6 rounded-[2.5rem] flex justify-between items-center ch-card border border-white/5 shadow-md">
                             <div class="flex items-center gap-4">
@@ -66,8 +63,7 @@
                 });
             });
         }
-
-        function openReader(id) { location.href = `ncert_reader.html?id=${id}`; }
+        function openReader(id) { location.href = './ncert_reader.html?id=' + encodeURIComponent(id); }
         loadStudentChapters();
     </script>
 </body>
