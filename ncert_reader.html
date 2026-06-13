@@ -11,42 +11,21 @@
         body { background: #070b14; color: white; font-family: sans-serif; overflow: hidden; height: 100vh; }
         .viewport { flex: 1; overflow: auto; position: relative; background: #000; scroll-behavior: smooth; }
         #pdf-canvas { display: block; margin: 0 auto; transition: transform 0.3s; }
-        
-        /* Interactive Layers */
-        #highlight-box { 
-            position: absolute; pointer-events: none; 
-            background: rgba(234, 179, 8, 0.25); 
-            border-left: 4px solid #eab308;
-            border-radius: 4px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 10; display: none;
-            box-shadow: 0 0 20px rgba(234, 179, 8, 0.15);
-        }
-
-        .pyq-bubble { 
-            position: absolute; width: 24px; height: 24px; 
-            background: #ef4444; color: white; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 10px; font-weight: 900; cursor: pointer; 
-            z-index: 20; animation: pulse 2s infinite;
-            border: 2px solid white;
-        }
-
+        #highlight-box { position: absolute; pointer-events: none; background: rgba(234, 179, 8, 0.25); border-left: 4px solid #eab308; border-radius: 4px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; display: none; box-shadow: 0 0 20px rgba(234, 179, 8, 0.15); }
+        .pyq-bubble { position: absolute; width: 24px; height: 24px; background: #ef4444; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; cursor: pointer; z-index: 20; animation: pulse 2s infinite; border: 2px solid white; }
         @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1.2); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { transform: scale(1); } }
-        
         .control-bar { background: rgba(22, 33, 62, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); }
         ::-webkit-scrollbar { width: 0px; }
     </style>
 </head>
 <body class="flex flex-col h-screen" id="mainBody">
 
-    <!-- Top Navigation Bar -->
     <div class="h-[60px] bg-[#16213e] flex justify-between items-center px-6 border-b border-white/5 z-50">
-        <button onclick="history.back()" class="text-gray-400 active:scale-75 transition-all"><i class="fa-solid fa-arrow-left"></i></button>
+        <button onclick="history.back()" class="text-gray-400"><i class="fa-solid fa-arrow-left"></i></button>
         <h2 id="chapterTitle" class="text-[10px] font-black uppercase text-yellow-500 italic tracking-widest">Smart NCERT Reader</h2>
-        <button onclick="toggleFullscreen()" class="text-gray-400 active:scale-75 transition-all"><i class="fa-solid fa-expand"></i></button>
+        <button onclick="toggleFullscreen()" class="text-gray-400"><i class="fa-solid fa-expand"></i></button>
     </div>
 
-    <!-- Main Viewport for PDF Render -->
     <div class="viewport" id="readerViewport">
         <div class="relative inline-block left-1/2 -translate-x-1/2" id="pdfWrapper">
             <canvas id="pdf-canvas"></canvas>
@@ -55,20 +34,15 @@
         </div>
     </div>
 
-    <!-- Audio Controller Bar -->
     <div class="control-bar p-6 space-y-4 shadow-2xl z-50">
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-5">
-                <button onclick="handlePlay()" id="playBtn" class="w-14 h-14 bg-[#eab308] text-black rounded-full flex items-center justify-center text-2xl shadow-lg active:scale-90 transition-all">
-                    <i class="fa-solid fa-play"></i>
-                </button>
+                <button onclick="handlePlay()" id="playBtn" class="w-14 h-14 bg-[#eab308] text-black rounded-full flex items-center justify-center text-2xl shadow-lg active:scale-90 transition-all"><i class="fa-solid fa-play"></i></button>
                 <div>
                     <p class="text-[11px] font-black text-white uppercase italic leading-none" id="statusText">Ready to Read</p>
                     <p class="text-[8px] text-gray-500 uppercase font-bold mt-1" id="timerText">00:00 / 00:00</p>
                 </div>
             </div>
-
-            <!-- Playback Speed Control -->
             <div class="flex items-center gap-3">
                 <div class="bg-black/40 px-3 py-2 rounded-xl border border-white/10 flex items-center gap-2">
                     <i class="fa-solid fa-bolt text-yellow-500 text-[10px]"></i>
@@ -81,23 +55,20 @@
                 </div>
             </div>
         </div>
-
-        <!-- Custom Timeline / Progress Bar -->
         <div class="relative h-2 w-full bg-white/5 rounded-full overflow-hidden cursor-pointer" onclick="seekAudio(event)" id="progressContainer">
-            <div id="progressBar" class="absolute left-0 top-0 h-full bg-[#eab308] transition-all duration-100 pointer-events-none" style="width: 0%"></div>
+            <div id="progressBar" class="absolute left-0 top-0 h-full bg-[#eab308]" style="width: 0%"></div>
         </div>
     </div>
 
-    <!-- Interactive Quiz Modal Layer -->
     <div id="quizModal" class="fixed inset-0 bg-black/95 z-[100] hidden items-center justify-center p-6">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-sm p-8 text-black transform scale-95 transition-all">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-sm p-8 text-black">
             <p class="text-[9px] font-black uppercase text-red-500 mb-2 italic">PYQ Challenge</p>
             <h3 id="quizQuestion" class="text-base font-bold mb-8 leading-tight">Question loading...</h3>
             <div class="grid gap-3">
-                <button onclick="handleQuiz(true)" class="w-full py-4 border-2 border-gray-100 rounded-2xl font-bold hover:bg-green-50 active:scale-95 transition-all text-sm text-left px-6">Check Correct Detail</button>
-                <button onclick="handleQuiz(false)" class="w-full py-4 border-2 border-gray-100 rounded-2xl font-bold hover:bg-red-50 active:scale-95 transition-all text-sm text-left px-6 text-gray-400 italic">I need to re-read</button>
+                <button onclick="handleQuiz(true)" class="w-full py-4 border-2 border-gray-100 rounded-2xl font-bold hover:bg-green-50 text-sm text-left px-6">Check Correct Detail</button>
+                <button onclick="handleQuiz(false)" class="w-full py-4 border-2 border-gray-100 rounded-2xl font-bold hover:bg-red-50 text-sm text-left px-6 text-gray-400 italic">I need to re-read</button>
             </div>
-            <button onclick="closeQuiz()" class="w-full mt-6 text-gray-400 font-bold uppercase text-[9px] tracking-widest">Close Manager</button>
+            <button onclick="closeQuiz()" class="w-full mt-6 text-gray-400 font-bold uppercase text-[9px]">Close Manager</button>
         </div>
     </div>
 
@@ -105,169 +76,62 @@
         const firebaseConfig = { apiKey: "AIzaSyApQOM_mtFZ16RiNJEaIUhb4iYFBIBRK58", authDomain: "mneet-spark.firebaseapp.com", projectId: "mneet-spark", databaseURL: "https://mneet-spark-default-rtdb.firebaseio.com/", appId: "1:252201633700:web:1a1e7a2cff1f0b168ea331" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-
         const params = new URLSearchParams(window.location.search);
         const batchId = localStorage.getItem('selectedBatchId') || "B001";
         const chapterId = params.get('id');
-
-        let audio = new Audio();
-        let mapData = [];
-        let pdfDoc = null;
+        let audio = new Audio(); let mapData = [];
 
         async function init() {
-            if(!chapterId) {
-                document.getElementById('statusText').innerText = "Chapter ID Missing!";
-                return;
-            }
-            
+            if(!chapterId) return;
             database.ref(`courses/${batchId}/ncert/${chapterId}`).once('value', async snap => {
                 const data = snap.val();
                 if(data) {
                     document.getElementById('chapterTitle').innerText = data.name;
-                    audio.src = data.audio;
-                    mapData = data.map || [];
-                    
-                    if(data.pdf) {
-                        await renderPDF(data.pdf);
-                        renderPYQTags();
-                    } else {
-                        document.getElementById('statusText').innerText = "PDF Link Not Found";
-                    }
+                    audio.src = data.audio; mapData = data.map || [];
+                    if(data.pdf) { await renderPDF(data.pdf); renderPYQTags(); }
                 }
             });
         }
-
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
         async function renderPDF(url) {
-            try {
-                const pdf = await pdfjsLib.getDocument(url).promise;
-                const page = await pdf.getPage(1);
-                const viewport = page.getViewport({ scale: 1.5 });
-                const canvas = document.getElementById('pdf-canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-                await page.render({ canvasContext: context, viewport }).promise;
-            } catch (error) {
-                console.error("PDF Render Error:", error);
-                document.getElementById('statusText').innerText = "CORS / PDF Loading Error";
-            }
+            const pdf = await pdfjsLib.getDocument(url).promise;
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.getElementById('pdf-canvas');
+            canvas.height = viewport.height; canvas.width = viewport.width;
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
         }
-
         audio.ontimeupdate = () => {
-            const time = audio.currentTime;
-            const duration = audio.duration || 0;
-            
-            if (duration > 0) {
-                document.getElementById('progressBar').style.width = (time / duration * 100) + "%";
-            }
+            const time = audio.currentTime; const duration = audio.duration || 0;
+            if(duration > 0) document.getElementById('progressBar').style.width = (time / duration * 100) + "%";
             document.getElementById('timerText').innerText = formatTime(time) + " / " + formatTime(duration);
-
-            // Audio-Sync Highlight Logic
             const activePoint = mapData.filter(p => p.time <= time).pop();
-            if(activePoint) {
-                syncUI(activePoint.x, activePoint.y);
-                document.getElementById('statusText').innerText = "Sync Active: Audio Playing";
-            }
+            if(activePoint) syncUI(activePoint.x, activePoint.y);
         };
-
-        audio.onended = () => {
-            document.getElementById('playBtn').innerHTML = '<i class="fa-solid fa-play"></i>';
-            document.getElementById('statusText').innerText = "Reading Finished";
-        };
-
         function syncUI(x, y) {
-            const box = document.getElementById('highlight-box');
-            box.style.display = 'block';
-            box.style.left = (x - 60) + 'px';
-            box.style.top = (y - 12) + 'px';
-            box.style.width = '120px';
-            box.style.height = '24px';
-
-            // Auto Smooth Scrolling
-            document.getElementById('readerViewport').scrollTo({
-                top: y - 200,
-                behavior: 'smooth'
-            });
+            const box = document.getElementById('highlight-box'); box.style.display = 'block';
+            box.style.left = (x - 60) + 'px'; box.style.top = (y - 12) + 'px'; box.style.width = '120px'; box.style.height = '24px';
+            document.getElementById('readerViewport').scrollTo({ top: y - 200, behavior: 'smooth' });
         }
-
         function renderPYQTags() {
-            const layer = document.getElementById('tag-layer');
-            layer.innerHTML = ""; // Clear existing tags
+            const layer = document.getElementById('tag-layer'); layer.innerHTML = "";
             mapData.forEach(p => {
                 if(p.quiz) {
-                    const bubble = document.createElement('div');
-                    bubble.className = 'pyq-bubble';
-                    bubble.style.left = p.x + 'px';
-                    bubble.style.top = p.y + 'px';
-                    bubble.style.pointerEvents = 'auto'; // Re-enable click event
-                    bubble.innerHTML = 'Q';
-                    bubble.onclick = (e) => {
-                        e.stopPropagation();
-                        showQuiz(p.quiz);
-                    };
+                    const bubble = document.createElement('div'); bubble.className = 'pyq-bubble';
+                    bubble.style.left = p.x + 'px'; bubble.style.top = p.y + 'px'; bubble.style.pointerEvents = 'auto';
+                    bubble.innerHTML = 'Q'; bubble.onclick = (e) => { e.stopPropagation(); showQuiz(p.quiz); };
                     layer.appendChild(bubble);
                 }
             });
         }
-
-        function handlePlay() {
-            if(!audio.src) return;
-            if(audio.paused) { 
-                audio.play(); 
-                document.getElementById('playBtn').innerHTML = '<i class="fa-solid fa-pause"></i>'; 
-                document.getElementById('statusText').innerText = "Sync Active: Audio Playing";
-            } else { 
-                audio.pause(); 
-                document.getElementById('playBtn').innerHTML = '<i class="fa-solid fa-play"></i>'; 
-                document.getElementById('statusText').innerText = "Audio Paused";
-            }
-        }
-
-        function seekAudio(event) {
-            if (!audio.duration) return;
-            const container = document.getElementById('progressContainer');
-            const rect = container.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            const width = rect.width;
-            const percentage = clickX / width;
-            audio.currentTime = percentage * audio.duration;
-        }
-
-        function toggleFullscreen() {
-            const elem = document.getElementById('mainBody');
-            if (!document.fullscreenElement) {
-                elem.requestFullscreen().catch(err => {
-                    alert(`Error attempting to enable full-screen mode: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        function showQuiz(q) {
-            audio.pause();
-            document.getElementById('playBtn').innerHTML = '<i class="fa-solid fa-play"></i>';
-            document.getElementById('statusText').innerText = "Quiz Active";
-            document.getElementById('quizQuestion').innerText = q;
-            document.getElementById('quizModal').style.display = 'flex';
-        }
-
-        function handleQuiz(isCorrect) {
-            if(isCorrect) alert("Correct! You've mastered this line.");
-            closeQuiz();
-        }
-
-        function closeQuiz() { 
-            document.getElementById('quizModal').style.display = 'none'; 
-            if(audio.paused) {
-                document.getElementById('statusText').innerText = "Audio Paused";
-            }
-        }
-        
+        function handlePlay() { if(audio.paused) { audio.play(); document.getElementById('playBtn').innerHTML = '<i class="fa-solid fa-pause"></i>'; } else { audio.pause(); document.getElementById('playBtn').innerHTML = '<i class="fa-solid fa-play"></i>'; } }
+        function seekAudio(event) { const rect = document.getElementById('progressContainer').getBoundingClientRect(); audio.currentTime = ((event.clientX - rect.left) / rect.width) * audio.duration; }
+        function toggleFullscreen() { if (!document.fullscreenElement) document.getElementById('mainBody').requestFullscreen(); else document.exitFullscreen(); }
+        function showQuiz(q) { audio.pause(); document.getElementById('playBtn').innerHTML = '<i class="fa-solid fa-play"></i>'; document.getElementById('quizQuestion').innerText = q; document.getElementById('quizModal').style.display = 'flex'; }
+        function handleQuiz(isCorrect) { if(isCorrect) alert("Correct!"); closeQuiz(); }
+        function closeQuiz() { document.getElementById('quizModal').style.display = 'none'; }
         function setPlaybackSpeed(v) { audio.playbackRate = parseFloat(v); }
         function formatTime(s) { return new Date(s * 1000).toISOString().substr(14, 5); }
-
         init();
     </script>
 </body>
